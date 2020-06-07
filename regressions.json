@@ -1,1 +1,1 @@
-{"regressions": []}
+{"regressions": [["cluster.KMeansBenchmark.time_fit('dense', 'full')", "graphs/arch-x86_64/branch-benchmark-bot/cpu-Intel Core Processor (Haswell, no TSX)/cython/joblib/machine-sklearn-benchmark/num_cpu-8/numpy/os-Linux 4.15.0-20-generic/python-3.8/ram-16424684/scipy/cluster.KMeansBenchmark.time_fit.json", {}, 0, 1.8112645600000405, 1.5333509375000176, [[null, 28316, 1.5333509375000176, 1.8112645600000405]]]]}
