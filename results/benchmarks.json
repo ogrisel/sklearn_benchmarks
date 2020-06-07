@@ -152,6 +152,52 @@
         "version": "087623a7f854681dc5f1ba62a17a47995e1835697041a5f59cb3f87878220d56",
         "warmup_time": 1
     },
+    "cluster.KMeansBenchmark.track_same_prediction": {
+        "code": "class Predictor:\n    def track_same_prediction(self, *args):\n        file_path = get_estimator_path(self, Benchmark.base_commit,\n                                       args, True)\n        with open(file_path, 'rb') as f:\n            estimator_base = pickle.load(f)\n    \n        y_val_pred_base = estimator_base.predict(self.X_val)\n        y_val_pred = self.estimator.predict(self.X_val)\n    \n        return np.allclose(y_val_pred_base, y_val_pred)\n\nclass Estimator:\n    def setup(self, *params):\n        \"\"\"Run for each param combination\n    \n        Load the pickled dataset and fitted estimator and run the benchmark.\n        \"\"\"\n        if hasattr(self, 'setup_'):\n            self.setup_(params)\n    \n        data_path = get_data_path(self, params)\n        with open(data_path, 'rb') as f:\n            self.X, self.X_val, self.y, self.y_val = pickle.load(f)\n    \n        est_path = get_estimator_path(self, Benchmark.save_folder,\n                                      params, Benchmark.save_estimators)\n        with open(est_path, 'rb') as f:\n            self.estimator = pickle.load(f)\n    \n        self.make_scorers()\n\nclass KMeansBenchmark:\n    def setup_cache(self):\n        super().setup_cache()",
+        "name": "cluster.KMeansBenchmark.track_same_prediction",
+        "param_names": [
+            "representation",
+            "algorithm"
+        ],
+        "params": [
+            [
+                "'dense'",
+                "'sparse'"
+            ],
+            [
+                "'full'",
+                "'elkan'"
+            ]
+        ],
+        "setup_cache_key": "cluster:20",
+        "timeout": 500,
+        "type": "track",
+        "unit": "unit",
+        "version": "3eb36b2fba53499442bf393b9fc201461cf726a7ce65a2c92f8f0246b9bb9b1c"
+    },
+    "cluster.KMeansBenchmark.track_same_transform": {
+        "code": "class Transformer:\n    def track_same_transform(self, *args):\n        file_path = get_estimator_path(self, Benchmark.base_commit,\n                                       args, True)\n        with open(file_path, 'rb') as f:\n            estimator_base = pickle.load(f)\n    \n        X_val_t_base = estimator_base.transform(self.X_val)\n        X_val_t = self.estimator.transform(self.X_val)\n    \n        return np.allclose(X_val_t_base, X_val_t)\n\nclass Estimator:\n    def setup(self, *params):\n        \"\"\"Run for each param combination\n    \n        Load the pickled dataset and fitted estimator and run the benchmark.\n        \"\"\"\n        if hasattr(self, 'setup_'):\n            self.setup_(params)\n    \n        data_path = get_data_path(self, params)\n        with open(data_path, 'rb') as f:\n            self.X, self.X_val, self.y, self.y_val = pickle.load(f)\n    \n        est_path = get_estimator_path(self, Benchmark.save_folder,\n                                      params, Benchmark.save_estimators)\n        with open(est_path, 'rb') as f:\n            self.estimator = pickle.load(f)\n    \n        self.make_scorers()\n\nclass KMeansBenchmark:\n    def setup_cache(self):\n        super().setup_cache()",
+        "name": "cluster.KMeansBenchmark.track_same_transform",
+        "param_names": [
+            "representation",
+            "algorithm"
+        ],
+        "params": [
+            [
+                "'dense'",
+                "'sparse'"
+            ],
+            [
+                "'full'",
+                "'elkan'"
+            ]
+        ],
+        "setup_cache_key": "cluster:20",
+        "timeout": 500,
+        "type": "track",
+        "unit": "unit",
+        "version": "c0a9a9e405b50bc964dc2e60de669c9f7ff1e46dea8f296e024c5f0fd2832e81"
+    },
     "cluster.KMeansBenchmark.track_test_score": {
         "code": "class Estimator:\n    def track_test_score(self, *args):\n        if hasattr(self.estimator, 'predict'):\n            y_val_pred = self.estimator.predict(self.X_val)\n        else:\n            y_val_pred = None\n        return float(self.test_scorer(self.y_val, y_val_pred))\n\n    def setup(self, *params):\n        \"\"\"Run for each param combination\n    \n        Load the pickled dataset and fitted estimator and run the benchmark.\n        \"\"\"\n        if hasattr(self, 'setup_'):\n            self.setup_(params)\n    \n        data_path = get_data_path(self, params)\n        with open(data_path, 'rb') as f:\n            self.X, self.X_val, self.y, self.y_val = pickle.load(f)\n    \n        est_path = get_estimator_path(self, Benchmark.save_folder,\n                                      params, Benchmark.save_estimators)\n        with open(est_path, 'rb') as f:\n            self.estimator = pickle.load(f)\n    \n        self.make_scorers()\n\nclass KMeansBenchmark:\n    def setup_cache(self):\n        super().setup_cache()",
         "name": "cluster.KMeansBenchmark.track_test_score",
@@ -335,6 +381,28 @@
         "version": "f08d61c4f12548595cc019612a37faaa8f1341c4676722062b1274c4b4588b0c",
         "warmup_time": 1
     },
+    "decomposition.DictionaryLearningBenchmark.track_same_transform": {
+        "code": "class Transformer:\n    def track_same_transform(self, *args):\n        file_path = get_estimator_path(self, Benchmark.base_commit,\n                                       args, True)\n        with open(file_path, 'rb') as f:\n            estimator_base = pickle.load(f)\n    \n        X_val_t_base = estimator_base.transform(self.X_val)\n        X_val_t = self.estimator.transform(self.X_val)\n    \n        return np.allclose(X_val_t_base, X_val_t)\n\nclass Estimator:\n    def setup(self, *params):\n        \"\"\"Run for each param combination\n    \n        Load the pickled dataset and fitted estimator and run the benchmark.\n        \"\"\"\n        if hasattr(self, 'setup_'):\n            self.setup_(params)\n    \n        data_path = get_data_path(self, params)\n        with open(data_path, 'rb') as f:\n            self.X, self.X_val, self.y, self.y_val = pickle.load(f)\n    \n        est_path = get_estimator_path(self, Benchmark.save_folder,\n                                      params, Benchmark.save_estimators)\n        with open(est_path, 'rb') as f:\n            self.estimator = pickle.load(f)\n    \n        self.make_scorers()\n\nclass DictionaryLearningBenchmark:\n    def setup_cache(self):\n        super().setup_cache()",
+        "name": "decomposition.DictionaryLearningBenchmark.track_same_transform",
+        "param_names": [
+            "fit_algorithm",
+            "n_jobs"
+        ],
+        "params": [
+            [
+                "'lars'",
+                "'cd'"
+            ],
+            [
+                "1"
+            ]
+        ],
+        "setup_cache_key": "decomposition:43",
+        "timeout": 500,
+        "type": "track",
+        "unit": "unit",
+        "version": "c5aeaa33c5a8fa403ebfdb141169af210f6be62a8e3c92b1314d5db46ab65984"
+    },
     "decomposition.DictionaryLearningBenchmark.track_test_score": {
         "code": "class Estimator:\n    def track_test_score(self, *args):\n        if hasattr(self.estimator, 'predict'):\n            y_val_pred = self.estimator.predict(self.X_val)\n        else:\n            y_val_pred = None\n        return float(self.test_scorer(self.y_val, y_val_pred))\n\n    def setup(self, *params):\n        \"\"\"Run for each param combination\n    \n        Load the pickled dataset and fitted estimator and run the benchmark.\n        \"\"\"\n        if hasattr(self, 'setup_'):\n            self.setup_(params)\n    \n        data_path = get_data_path(self, params)\n        with open(data_path, 'rb') as f:\n            self.X, self.X_val, self.y, self.y_val = pickle.load(f)\n    \n        est_path = get_estimator_path(self, Benchmark.save_folder,\n                                      params, Benchmark.save_estimators)\n        with open(est_path, 'rb') as f:\n            self.estimator = pickle.load(f)\n    \n        self.make_scorers()\n\nclass DictionaryLearningBenchmark:\n    def setup_cache(self):\n        super().setup_cache()",
         "name": "decomposition.DictionaryLearningBenchmark.track_test_score",
@@ -477,6 +545,28 @@
         "version": "460b5be478c073d13a9d16c9e33d2d4a07094aed46df4f9f705cf9ebd87281ff",
         "warmup_time": 1
     },
+    "decomposition.MiniBatchDictionaryLearningBenchmark.track_same_transform": {
+        "code": "class Transformer:\n    def track_same_transform(self, *args):\n        file_path = get_estimator_path(self, Benchmark.base_commit,\n                                       args, True)\n        with open(file_path, 'rb') as f:\n            estimator_base = pickle.load(f)\n    \n        X_val_t_base = estimator_base.transform(self.X_val)\n        X_val_t = self.estimator.transform(self.X_val)\n    \n        return np.allclose(X_val_t_base, X_val_t)\n\nclass Estimator:\n    def setup(self, *params):\n        \"\"\"Run for each param combination\n    \n        Load the pickled dataset and fitted estimator and run the benchmark.\n        \"\"\"\n        if hasattr(self, 'setup_'):\n            self.setup_(params)\n    \n        data_path = get_data_path(self, params)\n        with open(data_path, 'rb') as f:\n            self.X, self.X_val, self.y, self.y_val = pickle.load(f)\n    \n        est_path = get_estimator_path(self, Benchmark.save_folder,\n                                      params, Benchmark.save_estimators)\n        with open(est_path, 'rb') as f:\n            self.estimator = pickle.load(f)\n    \n        self.make_scorers()\n\nclass MiniBatchDictionaryLearningBenchmark:\n    def setup_cache(self):\n        super().setup_cache()",
+        "name": "decomposition.MiniBatchDictionaryLearningBenchmark.track_same_transform",
+        "param_names": [
+            "fit_algorithm",
+            "n_jobs"
+        ],
+        "params": [
+            [
+                "'lars'",
+                "'cd'"
+            ],
+            [
+                "1"
+            ]
+        ],
+        "setup_cache_key": "decomposition:73",
+        "timeout": 500,
+        "type": "track",
+        "unit": "unit",
+        "version": "b31c0313c722d8502984de55e25b174c571da30c80a6ca668eca68865f80ea64"
+    },
     "decomposition.MiniBatchDictionaryLearningBenchmark.track_test_score": {
         "code": "class Estimator:\n    def track_test_score(self, *args):\n        if hasattr(self.estimator, 'predict'):\n            y_val_pred = self.estimator.predict(self.X_val)\n        else:\n            y_val_pred = None\n        return float(self.test_scorer(self.y_val, y_val_pred))\n\n    def setup(self, *params):\n        \"\"\"Run for each param combination\n    \n        Load the pickled dataset and fitted estimator and run the benchmark.\n        \"\"\"\n        if hasattr(self, 'setup_'):\n            self.setup_(params)\n    \n        data_path = get_data_path(self, params)\n        with open(data_path, 'rb') as f:\n            self.X, self.X_val, self.y, self.y_val = pickle.load(f)\n    \n        est_path = get_estimator_path(self, Benchmark.save_folder,\n                                      params, Benchmark.save_estimators)\n        with open(est_path, 'rb') as f:\n            self.estimator = pickle.load(f)\n    \n        self.make_scorers()\n\nclass MiniBatchDictionaryLearningBenchmark:\n    def setup_cache(self):\n        super().setup_cache()",
         "name": "decomposition.MiniBatchDictionaryLearningBenchmark.track_test_score",
@@ -607,6 +697,25 @@
         "version": "33e74dcc420628f68e1d097c4ea9a09bbd46668eb4ca5953a202d370dafa3e05",
         "warmup_time": 1
     },
+    "decomposition.PCABenchmark.track_same_transform": {
+        "code": "class Transformer:\n    def track_same_transform(self, *args):\n        file_path = get_estimator_path(self, Benchmark.base_commit,\n                                       args, True)\n        with open(file_path, 'rb') as f:\n            estimator_base = pickle.load(f)\n    \n        X_val_t_base = estimator_base.transform(self.X_val)\n        X_val_t = self.estimator.transform(self.X_val)\n    \n        return np.allclose(X_val_t_base, X_val_t)\n\nclass Estimator:\n    def setup(self, *params):\n        \"\"\"Run for each param combination\n    \n        Load the pickled dataset and fitted estimator and run the benchmark.\n        \"\"\"\n        if hasattr(self, 'setup_'):\n            self.setup_(params)\n    \n        data_path = get_data_path(self, params)\n        with open(data_path, 'rb') as f:\n            self.X, self.X_val, self.y, self.y_val = pickle.load(f)\n    \n        est_path = get_estimator_path(self, Benchmark.save_folder,\n                                      params, Benchmark.save_estimators)\n        with open(est_path, 'rb') as f:\n            self.estimator = pickle.load(f)\n    \n        self.make_scorers()\n\nclass PCABenchmark:\n    def setup_cache(self):\n        super().setup_cache()",
+        "name": "decomposition.PCABenchmark.track_same_transform",
+        "param_names": [
+            "svd_solver"
+        ],
+        "params": [
+            [
+                "'full'",
+                "'arpack'",
+                "'randomized'"
+            ]
+        ],
+        "setup_cache_key": "decomposition:17",
+        "timeout": 500,
+        "type": "track",
+        "unit": "unit",
+        "version": "9546a68b3b8a8ff038dd10721a63d1088c89428770c231bb81b09522ccb970f8"
+    },
     "decomposition.PCABenchmark.track_test_score": {
         "code": "class Estimator:\n    def track_test_score(self, *args):\n        if hasattr(self.estimator, 'predict'):\n            y_val_pred = self.estimator.predict(self.X_val)\n        else:\n            y_val_pred = None\n        return float(self.test_scorer(self.y_val, y_val_pred))\n\n    def setup(self, *params):\n        \"\"\"Run for each param combination\n    \n        Load the pickled dataset and fitted estimator and run the benchmark.\n        \"\"\"\n        if hasattr(self, 'setup_'):\n            self.setup_(params)\n    \n        data_path = get_data_path(self, params)\n        with open(data_path, 'rb') as f:\n            self.X, self.X_val, self.y, self.y_val = pickle.load(f)\n    \n        est_path = get_estimator_path(self, Benchmark.save_folder,\n                                      params, Benchmark.save_estimators)\n        with open(est_path, 'rb') as f:\n            self.estimator = pickle.load(f)\n    \n        self.make_scorers()\n\nclass PCABenchmark:\n    def setup_cache(self):\n        super().setup_cache()",
         "name": "decomposition.PCABenchmark.track_test_score",
@@ -726,6 +835,24 @@
         "unit": "seconds",
         "version": "4660de9436777bf07a9d529bad637e20e93cb111bde96775a1708c984e438776",
         "warmup_time": 1
+    },
+    "ensemble.GradientBoostingClassifierBenchmark.track_same_prediction": {
+        "code": "class Predictor:\n    def track_same_prediction(self, *args):\n        file_path = get_estimator_path(self, Benchmark.base_commit,\n                                       args, True)\n        with open(file_path, 'rb') as f:\n            estimator_base = pickle.load(f)\n    \n        y_val_pred_base = estimator_base.predict(self.X_val)\n        y_val_pred = self.estimator.predict(self.X_val)\n    \n        return np.allclose(y_val_pred_base, y_val_pred)\n\nclass Estimator:\n    def setup(self, *params):\n        \"\"\"Run for each param combination\n    \n        Load the pickled dataset and fitted estimator and run the benchmark.\n        \"\"\"\n        if hasattr(self, 'setup_'):\n            self.setup_(params)\n    \n        data_path = get_data_path(self, params)\n        with open(data_path, 'rb') as f:\n            self.X, self.X_val, self.y, self.y_val = pickle.load(f)\n    \n        est_path = get_estimator_path(self, Benchmark.save_folder,\n                                      params, Benchmark.save_estimators)\n        with open(est_path, 'rb') as f:\n            self.estimator = pickle.load(f)\n    \n        self.make_scorers()\n\nclass GradientBoostingClassifierBenchmark:\n    def setup_cache(self):\n        super().setup_cache()",
+        "name": "ensemble.GradientBoostingClassifierBenchmark.track_same_prediction",
+        "param_names": [
+            "representation"
+        ],
+        "params": [
+            [
+                "'dense'",
+                "'sparse'"
+            ]
+        ],
+        "setup_cache_key": "ensemble:50",
+        "timeout": 500,
+        "type": "track",
+        "unit": "unit",
+        "version": "a71e5f2c115f9c5ef7520c79c48782ca7f629b863d55339dc88b3e56e8c26066"
     },
     "ensemble.GradientBoostingClassifierBenchmark.track_test_score": {
         "code": "class Estimator:\n    def track_test_score(self, *args):\n        if hasattr(self.estimator, 'predict'):\n            y_val_pred = self.estimator.predict(self.X_val)\n        else:\n            y_val_pred = None\n        return float(self.test_scorer(self.y_val, y_val_pred))\n\n    def setup(self, *params):\n        \"\"\"Run for each param combination\n    \n        Load the pickled dataset and fitted estimator and run the benchmark.\n        \"\"\"\n        if hasattr(self, 'setup_'):\n            self.setup_(params)\n    \n        data_path = get_data_path(self, params)\n        with open(data_path, 'rb') as f:\n            self.X, self.X_val, self.y, self.y_val = pickle.load(f)\n    \n        est_path = get_estimator_path(self, Benchmark.save_folder,\n                                      params, Benchmark.save_estimators)\n        with open(est_path, 'rb') as f:\n            self.estimator = pickle.load(f)\n    \n        self.make_scorers()\n\nclass GradientBoostingClassifierBenchmark:\n    def setup_cache(self):\n        super().setup_cache()",
@@ -860,6 +987,28 @@
         "unit": "seconds",
         "version": "6dc2637a26579005f4b8160a7f64729ccb752503b99af42edf5c34ffe2056ea3",
         "warmup_time": 1
+    },
+    "ensemble.RandomForestClassifierBenchmark.track_same_prediction": {
+        "code": "class Predictor:\n    def track_same_prediction(self, *args):\n        file_path = get_estimator_path(self, Benchmark.base_commit,\n                                       args, True)\n        with open(file_path, 'rb') as f:\n            estimator_base = pickle.load(f)\n    \n        y_val_pred_base = estimator_base.predict(self.X_val)\n        y_val_pred = self.estimator.predict(self.X_val)\n    \n        return np.allclose(y_val_pred_base, y_val_pred)\n\nclass Estimator:\n    def setup(self, *params):\n        \"\"\"Run for each param combination\n    \n        Load the pickled dataset and fitted estimator and run the benchmark.\n        \"\"\"\n        if hasattr(self, 'setup_'):\n            self.setup_(params)\n    \n        data_path = get_data_path(self, params)\n        with open(data_path, 'rb') as f:\n            self.X, self.X_val, self.y, self.y_val = pickle.load(f)\n    \n        est_path = get_estimator_path(self, Benchmark.save_folder,\n                                      params, Benchmark.save_estimators)\n        with open(est_path, 'rb') as f:\n            self.estimator = pickle.load(f)\n    \n        self.make_scorers()\n\nclass RandomForestClassifierBenchmark:\n    def setup_cache(self):\n        super().setup_cache()",
+        "name": "ensemble.RandomForestClassifierBenchmark.track_same_prediction",
+        "param_names": [
+            "representation",
+            "n_jobs"
+        ],
+        "params": [
+            [
+                "'dense'",
+                "'sparse'"
+            ],
+            [
+                "1"
+            ]
+        ],
+        "setup_cache_key": "ensemble:17",
+        "timeout": 500,
+        "type": "track",
+        "unit": "unit",
+        "version": "23260b13b1f699fb879c6277ccc6f044f8abacdaf07976598f9946a765a69942"
     },
     "ensemble.RandomForestClassifierBenchmark.track_test_score": {
         "code": "class Estimator:\n    def track_test_score(self, *args):\n        if hasattr(self.estimator, 'predict'):\n            y_val_pred = self.estimator.predict(self.X_val)\n        else:\n            y_val_pred = None\n        return float(self.test_scorer(self.y_val, y_val_pred))\n\n    def setup(self, *params):\n        \"\"\"Run for each param combination\n    \n        Load the pickled dataset and fitted estimator and run the benchmark.\n        \"\"\"\n        if hasattr(self, 'setup_'):\n            self.setup_(params)\n    \n        data_path = get_data_path(self, params)\n        with open(data_path, 'rb') as f:\n            self.X, self.X_val, self.y, self.y_val = pickle.load(f)\n    \n        est_path = get_estimator_path(self, Benchmark.save_folder,\n                                      params, Benchmark.save_estimators)\n        with open(est_path, 'rb') as f:\n            self.estimator = pickle.load(f)\n    \n        self.make_scorers()\n\nclass RandomForestClassifierBenchmark:\n    def setup_cache(self):\n        super().setup_cache()",
@@ -1006,6 +1155,29 @@
         "unit": "seconds",
         "version": "26373422331b4f7f5cbee6b902dcc56b060fb68717db8e8094b767681074f19f",
         "warmup_time": 1
+    },
+    "linear_model.ElasticNetBenchmark.track_same_prediction": {
+        "code": "class Predictor:\n    def track_same_prediction(self, *args):\n        file_path = get_estimator_path(self, Benchmark.base_commit,\n                                       args, True)\n        with open(file_path, 'rb') as f:\n            estimator_base = pickle.load(f)\n    \n        y_val_pred_base = estimator_base.predict(self.X_val)\n        y_val_pred = self.estimator.predict(self.X_val)\n    \n        return np.allclose(y_val_pred_base, y_val_pred)\n\nclass Estimator:\n    def setup(self, *params):\n        \"\"\"Run for each param combination\n    \n        Load the pickled dataset and fitted estimator and run the benchmark.\n        \"\"\"\n        if hasattr(self, 'setup_'):\n            self.setup_(params)\n    \n        data_path = get_data_path(self, params)\n        with open(data_path, 'rb') as f:\n            self.X, self.X_val, self.y, self.y_val = pickle.load(f)\n    \n        est_path = get_estimator_path(self, Benchmark.save_folder,\n                                      params, Benchmark.save_estimators)\n        with open(est_path, 'rb') as f:\n            self.estimator = pickle.load(f)\n    \n        self.make_scorers()\n\nclass ElasticNetBenchmark:\n    def setup_cache(self):\n        super().setup_cache()",
+        "name": "linear_model.ElasticNetBenchmark.track_same_prediction",
+        "param_names": [
+            "representation",
+            "precompute"
+        ],
+        "params": [
+            [
+                "'dense'",
+                "'sparse'"
+            ],
+            [
+                "True",
+                "False"
+            ]
+        ],
+        "setup_cache_key": "linear_model:161",
+        "timeout": 500,
+        "type": "track",
+        "unit": "unit",
+        "version": "bd5c8088b0c417aa2ff05c124fd222c554653c0a8cabb63aacf83b0ee4c0bf79"
     },
     "linear_model.ElasticNetBenchmark.track_test_score": {
         "code": "class Estimator:\n    def track_test_score(self, *args):\n        if hasattr(self.estimator, 'predict'):\n            y_val_pred = self.estimator.predict(self.X_val)\n        else:\n            y_val_pred = None\n        return float(self.test_scorer(self.y_val, y_val_pred))\n\n    def setup(self, *params):\n        \"\"\"Run for each param combination\n    \n        Load the pickled dataset and fitted estimator and run the benchmark.\n        \"\"\"\n        if hasattr(self, 'setup_'):\n            self.setup_(params)\n    \n        data_path = get_data_path(self, params)\n        with open(data_path, 'rb') as f:\n            self.X, self.X_val, self.y, self.y_val = pickle.load(f)\n    \n        est_path = get_estimator_path(self, Benchmark.save_folder,\n                                      params, Benchmark.save_estimators)\n        with open(est_path, 'rb') as f:\n            self.estimator = pickle.load(f)\n    \n        self.make_scorers()\n\nclass ElasticNetBenchmark:\n    def setup_cache(self):\n        super().setup_cache()",
@@ -1155,6 +1327,29 @@
         "version": "f8b3b4d3cee30af00c896ee907296b56e66936a9fa26f72b88eeff1395ee3144",
         "warmup_time": 1
     },
+    "linear_model.LassoBenchmark.track_same_prediction": {
+        "code": "class Predictor:\n    def track_same_prediction(self, *args):\n        file_path = get_estimator_path(self, Benchmark.base_commit,\n                                       args, True)\n        with open(file_path, 'rb') as f:\n            estimator_base = pickle.load(f)\n    \n        y_val_pred_base = estimator_base.predict(self.X_val)\n        y_val_pred = self.estimator.predict(self.X_val)\n    \n        return np.allclose(y_val_pred_base, y_val_pred)\n\nclass Estimator:\n    def setup(self, *params):\n        \"\"\"Run for each param combination\n    \n        Load the pickled dataset and fitted estimator and run the benchmark.\n        \"\"\"\n        if hasattr(self, 'setup_'):\n            self.setup_(params)\n    \n        data_path = get_data_path(self, params)\n        with open(data_path, 'rb') as f:\n            self.X, self.X_val, self.y, self.y_val = pickle.load(f)\n    \n        est_path = get_estimator_path(self, Benchmark.save_folder,\n                                      params, Benchmark.save_estimators)\n        with open(est_path, 'rb') as f:\n            self.estimator = pickle.load(f)\n    \n        self.make_scorers()\n\nclass LassoBenchmark:\n    def setup_cache(self):\n        super().setup_cache()",
+        "name": "linear_model.LassoBenchmark.track_same_prediction",
+        "param_names": [
+            "representation",
+            "precompute"
+        ],
+        "params": [
+            [
+                "'dense'",
+                "'sparse'"
+            ],
+            [
+                "True",
+                "False"
+            ]
+        ],
+        "setup_cache_key": "linear_model:201",
+        "timeout": 500,
+        "type": "track",
+        "unit": "unit",
+        "version": "b992ba35f039dc356d97ed405f6137f6cef09a681226a7392d82b954c0e00416"
+    },
     "linear_model.LassoBenchmark.track_test_score": {
         "code": "class Estimator:\n    def track_test_score(self, *args):\n        if hasattr(self.estimator, 'predict'):\n            y_val_pred = self.estimator.predict(self.X_val)\n        else:\n            y_val_pred = None\n        return float(self.test_scorer(self.y_val, y_val_pred))\n\n    def setup(self, *params):\n        \"\"\"Run for each param combination\n    \n        Load the pickled dataset and fitted estimator and run the benchmark.\n        \"\"\"\n        if hasattr(self, 'setup_'):\n            self.setup_(params)\n    \n        data_path = get_data_path(self, params)\n        with open(data_path, 'rb') as f:\n            self.X, self.X_val, self.y, self.y_val = pickle.load(f)\n    \n        est_path = get_estimator_path(self, Benchmark.save_folder,\n                                      params, Benchmark.save_estimators)\n        with open(est_path, 'rb') as f:\n            self.estimator = pickle.load(f)\n    \n        self.make_scorers()\n\nclass LassoBenchmark:\n    def setup_cache(self):\n        super().setup_cache()",
         "name": "linear_model.LassoBenchmark.track_test_score",
@@ -1282,6 +1477,24 @@
         "unit": "seconds",
         "version": "4b376c64055c2bb598c500c530d6f3d9fee2d9b64be9eb0959ffe99daeff3746",
         "warmup_time": 1
+    },
+    "linear_model.LinearRegressionBenchmark.track_same_prediction": {
+        "code": "class Predictor:\n    def track_same_prediction(self, *args):\n        file_path = get_estimator_path(self, Benchmark.base_commit,\n                                       args, True)\n        with open(file_path, 'rb') as f:\n            estimator_base = pickle.load(f)\n    \n        y_val_pred_base = estimator_base.predict(self.X_val)\n        y_val_pred = self.estimator.predict(self.X_val)\n    \n        return np.allclose(y_val_pred_base, y_val_pred)\n\nclass Estimator:\n    def setup(self, *params):\n        \"\"\"Run for each param combination\n    \n        Load the pickled dataset and fitted estimator and run the benchmark.\n        \"\"\"\n        if hasattr(self, 'setup_'):\n            self.setup_(params)\n    \n        data_path = get_data_path(self, params)\n        with open(data_path, 'rb') as f:\n            self.X, self.X_val, self.y, self.y_val = pickle.load(f)\n    \n        est_path = get_estimator_path(self, Benchmark.save_folder,\n                                      params, Benchmark.save_estimators)\n        with open(est_path, 'rb') as f:\n            self.estimator = pickle.load(f)\n    \n        self.make_scorers()\n\nclass LinearRegressionBenchmark:\n    def setup_cache(self):\n        super().setup_cache()",
+        "name": "linear_model.LinearRegressionBenchmark.track_same_prediction",
+        "param_names": [
+            "representation"
+        ],
+        "params": [
+            [
+                "'dense'",
+                "'sparse'"
+            ]
+        ],
+        "setup_cache_key": "linear_model:101",
+        "timeout": 500,
+        "type": "track",
+        "unit": "unit",
+        "version": "42ff7214dd224f85f5278f2d13da99ffb023c2bb3d1f20f5c1479077d95722f4"
     },
     "linear_model.LinearRegressionBenchmark.track_test_score": {
         "code": "class Estimator:\n    def track_test_score(self, *args):\n        if hasattr(self.estimator, 'predict'):\n            y_val_pred = self.estimator.predict(self.X_val)\n        else:\n            y_val_pred = None\n        return float(self.test_scorer(self.y_val, y_val_pred))\n\n    def setup(self, *params):\n        \"\"\"Run for each param combination\n    \n        Load the pickled dataset and fitted estimator and run the benchmark.\n        \"\"\"\n        if hasattr(self, 'setup_'):\n            self.setup_(params)\n    \n        data_path = get_data_path(self, params)\n        with open(data_path, 'rb') as f:\n            self.X, self.X_val, self.y, self.y_val = pickle.load(f)\n    \n        est_path = get_estimator_path(self, Benchmark.save_folder,\n                                      params, Benchmark.save_estimators)\n        with open(est_path, 'rb') as f:\n            self.estimator = pickle.load(f)\n    \n        self.make_scorers()\n\nclass LinearRegressionBenchmark:\n    def setup_cache(self):\n        super().setup_cache()",
@@ -1436,6 +1649,33 @@
         "unit": "seconds",
         "version": "0260c1e21c7ff2501269d1da194331a84613d7a5dc9980622e33284300cc56e7",
         "warmup_time": 1
+    },
+    "linear_model.LogisticRegressionBenchmark.track_same_prediction": {
+        "code": "class Predictor:\n    def track_same_prediction(self, *args):\n        file_path = get_estimator_path(self, Benchmark.base_commit,\n                                       args, True)\n        with open(file_path, 'rb') as f:\n            estimator_base = pickle.load(f)\n    \n        y_val_pred_base = estimator_base.predict(self.X_val)\n        y_val_pred = self.estimator.predict(self.X_val)\n    \n        return np.allclose(y_val_pred_base, y_val_pred)\n\nclass Estimator:\n    def setup(self, *params):\n        \"\"\"Run for each param combination\n    \n        Load the pickled dataset and fitted estimator and run the benchmark.\n        \"\"\"\n        if hasattr(self, 'setup_'):\n            self.setup_(params)\n    \n        data_path = get_data_path(self, params)\n        with open(data_path, 'rb') as f:\n            self.X, self.X_val, self.y, self.y_val = pickle.load(f)\n    \n        est_path = get_estimator_path(self, Benchmark.save_folder,\n                                      params, Benchmark.save_estimators)\n        with open(est_path, 'rb') as f:\n            self.estimator = pickle.load(f)\n    \n        self.make_scorers()\n\nclass LogisticRegressionBenchmark:\n    def setup_cache(self):\n        super().setup_cache()",
+        "name": "linear_model.LogisticRegressionBenchmark.track_same_prediction",
+        "param_names": [
+            "representation",
+            "solver",
+            "n_jobs"
+        ],
+        "params": [
+            [
+                "'dense'",
+                "'sparse'"
+            ],
+            [
+                "'lbfgs'",
+                "'saga'"
+            ],
+            [
+                "1"
+            ]
+        ],
+        "setup_cache_key": "linear_model:20",
+        "timeout": 500,
+        "type": "track",
+        "unit": "unit",
+        "version": "09e07e1ff7ce38dfa1ccd8c9ba1425c11586044dabd1c646d6c9eed17b27c787"
     },
     "linear_model.LogisticRegressionBenchmark.track_test_score": {
         "code": "class Estimator:\n    def track_test_score(self, *args):\n        if hasattr(self.estimator, 'predict'):\n            y_val_pred = self.estimator.predict(self.X_val)\n        else:\n            y_val_pred = None\n        return float(self.test_scorer(self.y_val, y_val_pred))\n\n    def setup(self, *params):\n        \"\"\"Run for each param combination\n    \n        Load the pickled dataset and fitted estimator and run the benchmark.\n        \"\"\"\n        if hasattr(self, 'setup_'):\n            self.setup_(params)\n    \n        data_path = get_data_path(self, params)\n        with open(data_path, 'rb') as f:\n            self.X, self.X_val, self.y, self.y_val = pickle.load(f)\n    \n        est_path = get_estimator_path(self, Benchmark.save_folder,\n                                      params, Benchmark.save_estimators)\n        with open(est_path, 'rb') as f:\n            self.estimator = pickle.load(f)\n    \n        self.make_scorers()\n\nclass LogisticRegressionBenchmark:\n    def setup_cache(self):\n        super().setup_cache()",
@@ -1613,6 +1853,34 @@
         "version": "3da574ebdebc93cfbd9a2ba25c7b3a0a1aca043d89f61bc92862a39304ef4791",
         "warmup_time": 1
     },
+    "linear_model.RidgeBenchmark.track_same_prediction": {
+        "code": "class Predictor:\n    def track_same_prediction(self, *args):\n        file_path = get_estimator_path(self, Benchmark.base_commit,\n                                       args, True)\n        with open(file_path, 'rb') as f:\n            estimator_base = pickle.load(f)\n    \n        y_val_pred_base = estimator_base.predict(self.X_val)\n        y_val_pred = self.estimator.predict(self.X_val)\n    \n        return np.allclose(y_val_pred_base, y_val_pred)\n\nclass Estimator:\n    def setup(self, *params):\n        \"\"\"Run for each param combination\n    \n        Load the pickled dataset and fitted estimator and run the benchmark.\n        \"\"\"\n        if hasattr(self, 'setup_'):\n            self.setup_(params)\n    \n        data_path = get_data_path(self, params)\n        with open(data_path, 'rb') as f:\n            self.X, self.X_val, self.y, self.y_val = pickle.load(f)\n    \n        est_path = get_estimator_path(self, Benchmark.save_folder,\n                                      params, Benchmark.save_estimators)\n        with open(est_path, 'rb') as f:\n            self.estimator = pickle.load(f)\n    \n        self.make_scorers()\n\nclass RidgeBenchmark:\n    def setup_cache(self):\n        super().setup_cache()",
+        "name": "linear_model.RidgeBenchmark.track_same_prediction",
+        "param_names": [
+            "representation",
+            "solver"
+        ],
+        "params": [
+            [
+                "'dense'",
+                "'sparse'"
+            ],
+            [
+                "'auto'",
+                "'svd'",
+                "'cholesky'",
+                "'lsqr'",
+                "'sparse_cg'",
+                "'sag'",
+                "'saga'"
+            ]
+        ],
+        "setup_cache_key": "linear_model:61",
+        "timeout": 500,
+        "type": "track",
+        "unit": "unit",
+        "version": "bb6b1d133320f3105a2c27c0d3a078805758473729d6fdc0c7cf51444599fe4a"
+    },
     "linear_model.RidgeBenchmark.track_test_score": {
         "code": "class Estimator:\n    def track_test_score(self, *args):\n        if hasattr(self.estimator, 'predict'):\n            y_val_pred = self.estimator.predict(self.X_val)\n        else:\n            y_val_pred = None\n        return float(self.test_scorer(self.y_val, y_val_pred))\n\n    def setup(self, *params):\n        \"\"\"Run for each param combination\n    \n        Load the pickled dataset and fitted estimator and run the benchmark.\n        \"\"\"\n        if hasattr(self, 'setup_'):\n            self.setup_(params)\n    \n        data_path = get_data_path(self, params)\n        with open(data_path, 'rb') as f:\n            self.X, self.X_val, self.y, self.y_val = pickle.load(f)\n    \n        est_path = get_estimator_path(self, Benchmark.save_folder,\n                                      params, Benchmark.save_estimators)\n        with open(est_path, 'rb') as f:\n            self.estimator = pickle.load(f)\n    \n        self.make_scorers()\n\nclass RidgeBenchmark:\n    def setup_cache(self):\n        super().setup_cache()",
         "name": "linear_model.RidgeBenchmark.track_test_score",
@@ -1750,6 +2018,24 @@
         "unit": "seconds",
         "version": "342a63ee3c7792b52f8c9f17b39ba39e9cd13d04439d11db35f9ebab979a4062",
         "warmup_time": 1
+    },
+    "linear_model.SGDRegressorBenchmark.track_same_prediction": {
+        "code": "class Predictor:\n    def track_same_prediction(self, *args):\n        file_path = get_estimator_path(self, Benchmark.base_commit,\n                                       args, True)\n        with open(file_path, 'rb') as f:\n            estimator_base = pickle.load(f)\n    \n        y_val_pred_base = estimator_base.predict(self.X_val)\n        y_val_pred = self.estimator.predict(self.X_val)\n    \n        return np.allclose(y_val_pred_base, y_val_pred)\n\nclass Estimator:\n    def setup(self, *params):\n        \"\"\"Run for each param combination\n    \n        Load the pickled dataset and fitted estimator and run the benchmark.\n        \"\"\"\n        if hasattr(self, 'setup_'):\n            self.setup_(params)\n    \n        data_path = get_data_path(self, params)\n        with open(data_path, 'rb') as f:\n            self.X, self.X_val, self.y, self.y_val = pickle.load(f)\n    \n        est_path = get_estimator_path(self, Benchmark.save_folder,\n                                      params, Benchmark.save_estimators)\n        with open(est_path, 'rb') as f:\n            self.estimator = pickle.load(f)\n    \n        self.make_scorers()\n\nclass SGDRegressorBenchmark:\n    def setup_cache(self):\n        super().setup_cache()",
+        "name": "linear_model.SGDRegressorBenchmark.track_same_prediction",
+        "param_names": [
+            "representation"
+        ],
+        "params": [
+            [
+                "'dense'",
+                "'sparse'"
+            ]
+        ],
+        "setup_cache_key": "linear_model:130",
+        "timeout": 500,
+        "type": "track",
+        "unit": "unit",
+        "version": "c0a35ee6bd5fd5574bd75ab4eb2121d63adf60a8a99069f9b4f09e9f3e22085c"
     },
     "linear_model.SGDRegressorBenchmark.track_test_score": {
         "code": "class Estimator:\n    def track_test_score(self, *args):\n        if hasattr(self.estimator, 'predict'):\n            y_val_pred = self.estimator.predict(self.X_val)\n        else:\n            y_val_pred = None\n        return float(self.test_scorer(self.y_val, y_val_pred))\n\n    def setup(self, *params):\n        \"\"\"Run for each param combination\n    \n        Load the pickled dataset and fitted estimator and run the benchmark.\n        \"\"\"\n        if hasattr(self, 'setup_'):\n            self.setup_(params)\n    \n        data_path = get_data_path(self, params)\n        with open(data_path, 'rb') as f:\n            self.X, self.X_val, self.y, self.y_val = pickle.load(f)\n    \n        est_path = get_estimator_path(self, Benchmark.save_folder,\n                                      params, Benchmark.save_estimators)\n        with open(est_path, 'rb') as f:\n            self.estimator = pickle.load(f)\n    \n        self.make_scorers()\n\nclass SGDRegressorBenchmark:\n    def setup_cache(self):\n        super().setup_cache()",
@@ -2056,6 +2342,23 @@
         "version": "0718097b79e8d198c9171d5054e3c093fd12f4d8202ba3b7cb9bbaccc3277958",
         "warmup_time": 1
     },
+    "model_selection.GridSearchBenchmark.track_same_prediction": {
+        "code": "class Predictor:\n    def track_same_prediction(self, *args):\n        file_path = get_estimator_path(self, Benchmark.base_commit,\n                                       args, True)\n        with open(file_path, 'rb') as f:\n            estimator_base = pickle.load(f)\n    \n        y_val_pred_base = estimator_base.predict(self.X_val)\n        y_val_pred = self.estimator.predict(self.X_val)\n    \n        return np.allclose(y_val_pred_base, y_val_pred)\n\nclass Estimator:\n    def setup(self, *params):\n        \"\"\"Run for each param combination\n    \n        Load the pickled dataset and fitted estimator and run the benchmark.\n        \"\"\"\n        if hasattr(self, 'setup_'):\n            self.setup_(params)\n    \n        data_path = get_data_path(self, params)\n        with open(data_path, 'rb') as f:\n            self.X, self.X_val, self.y, self.y_val = pickle.load(f)\n    \n        est_path = get_estimator_path(self, Benchmark.save_folder,\n                                      params, Benchmark.save_estimators)\n        with open(est_path, 'rb') as f:\n            self.estimator = pickle.load(f)\n    \n        self.make_scorers()\n\nclass GridSearchBenchmark:\n    def setup_cache(self):\n        super().setup_cache()",
+        "name": "model_selection.GridSearchBenchmark.track_same_prediction",
+        "param_names": [
+            "n_jobs"
+        ],
+        "params": [
+            [
+                "1"
+            ]
+        ],
+        "setup_cache_key": "model_selection:55",
+        "timeout": 20000,
+        "type": "track",
+        "unit": "unit",
+        "version": "e47c4aa3a58d3eb4d0bd9889b3d6ce190d7aa43bbf67245117c6bcd03b25dd3d"
+    },
     "model_selection.GridSearchBenchmark.track_test_score": {
         "code": "class Estimator:\n    def track_test_score(self, *args):\n        if hasattr(self.estimator, 'predict'):\n            y_val_pred = self.estimator.predict(self.X_val)\n        else:\n            y_val_pred = None\n        return float(self.test_scorer(self.y_val, y_val_pred))\n\n    def setup(self, *params):\n        \"\"\"Run for each param combination\n    \n        Load the pickled dataset and fitted estimator and run the benchmark.\n        \"\"\"\n        if hasattr(self, 'setup_'):\n            self.setup_(params)\n    \n        data_path = get_data_path(self, params)\n        with open(data_path, 'rb') as f:\n            self.X, self.X_val, self.y, self.y_val = pickle.load(f)\n    \n        est_path = get_estimator_path(self, Benchmark.save_folder,\n                                      params, Benchmark.save_estimators)\n        with open(est_path, 'rb') as f:\n            self.estimator = pickle.load(f)\n    \n        self.make_scorers()\n\nclass GridSearchBenchmark:\n    def setup_cache(self):\n        super().setup_cache()",
         "name": "model_selection.GridSearchBenchmark.track_test_score",
@@ -2212,6 +2515,34 @@
         "version": "c68d6f874cd8004cdd32cdf5ad661ca028463c67b44dddfa259ec08b31381a21",
         "warmup_time": 1
     },
+    "neighbors.KNeighborsClassifierBenchmark.track_same_prediction": {
+        "code": "class Predictor:\n    def track_same_prediction(self, *args):\n        file_path = get_estimator_path(self, Benchmark.base_commit,\n                                       args, True)\n        with open(file_path, 'rb') as f:\n            estimator_base = pickle.load(f)\n    \n        y_val_pred_base = estimator_base.predict(self.X_val)\n        y_val_pred = self.estimator.predict(self.X_val)\n    \n        return np.allclose(y_val_pred_base, y_val_pred)\n\nclass Estimator:\n    def setup(self, *params):\n        \"\"\"Run for each param combination\n    \n        Load the pickled dataset and fitted estimator and run the benchmark.\n        \"\"\"\n        if hasattr(self, 'setup_'):\n            self.setup_(params)\n    \n        data_path = get_data_path(self, params)\n        with open(data_path, 'rb') as f:\n            self.X, self.X_val, self.y, self.y_val = pickle.load(f)\n    \n        est_path = get_estimator_path(self, Benchmark.save_folder,\n                                      params, Benchmark.save_estimators)\n        with open(est_path, 'rb') as f:\n            self.estimator = pickle.load(f)\n    \n        self.make_scorers()\n\nclass KNeighborsClassifierBenchmark:\n    def setup_cache(self):\n        super().setup_cache()",
+        "name": "neighbors.KNeighborsClassifierBenchmark.track_same_prediction",
+        "param_names": [
+            "algorithm",
+            "dimension",
+            "n_jobs"
+        ],
+        "params": [
+            [
+                "'brute'",
+                "'kd_tree'",
+                "'ball_tree'"
+            ],
+            [
+                "'low'",
+                "'high'"
+            ],
+            [
+                "1"
+            ]
+        ],
+        "setup_cache_key": "neighbors:18",
+        "timeout": 500,
+        "type": "track",
+        "unit": "unit",
+        "version": "52e1895c0db00ddfa60b83540e99b43a6712f1bba1a4c325d3573b97b7f7f94b"
+    },
     "neighbors.KNeighborsClassifierBenchmark.track_test_score": {
         "code": "class Estimator:\n    def track_test_score(self, *args):\n        if hasattr(self.estimator, 'predict'):\n            y_val_pred = self.estimator.predict(self.X_val)\n        else:\n            y_val_pred = None\n        return float(self.test_scorer(self.y_val, y_val_pred))\n\n    def setup(self, *params):\n        \"\"\"Run for each param combination\n    \n        Load the pickled dataset and fitted estimator and run the benchmark.\n        \"\"\"\n        if hasattr(self, 'setup_'):\n            self.setup_(params)\n    \n        data_path = get_data_path(self, params)\n        with open(data_path, 'rb') as f:\n            self.X, self.X_val, self.y, self.y_val = pickle.load(f)\n    \n        est_path = get_estimator_path(self, Benchmark.save_folder,\n                                      params, Benchmark.save_estimators)\n        with open(est_path, 'rb') as f:\n            self.estimator = pickle.load(f)\n    \n        self.make_scorers()\n\nclass KNeighborsClassifierBenchmark:\n    def setup_cache(self):\n        super().setup_cache()",
         "name": "neighbors.KNeighborsClassifierBenchmark.track_test_score",
@@ -2357,6 +2688,26 @@
         "unit": "seconds",
         "version": "16ca4065c69a0dc0eddf9f6068af61f5bfd244faa3a177054de53a0a68dbab0b",
         "warmup_time": 1
+    },
+    "svm.SVCBenchmark.track_same_prediction": {
+        "code": "class Predictor:\n    def track_same_prediction(self, *args):\n        file_path = get_estimator_path(self, Benchmark.base_commit,\n                                       args, True)\n        with open(file_path, 'rb') as f:\n            estimator_base = pickle.load(f)\n    \n        y_val_pred_base = estimator_base.predict(self.X_val)\n        y_val_pred = self.estimator.predict(self.X_val)\n    \n        return np.allclose(y_val_pred_base, y_val_pred)\n\nclass Estimator:\n    def setup(self, *params):\n        \"\"\"Run for each param combination\n    \n        Load the pickled dataset and fitted estimator and run the benchmark.\n        \"\"\"\n        if hasattr(self, 'setup_'):\n            self.setup_(params)\n    \n        data_path = get_data_path(self, params)\n        with open(data_path, 'rb') as f:\n            self.X, self.X_val, self.y, self.y_val = pickle.load(f)\n    \n        est_path = get_estimator_path(self, Benchmark.save_folder,\n                                      params, Benchmark.save_estimators)\n        with open(est_path, 'rb') as f:\n            self.estimator = pickle.load(f)\n    \n        self.make_scorers()\n\nclass SVCBenchmark:\n    def setup_cache(self):\n        super().setup_cache()",
+        "name": "svm.SVCBenchmark.track_same_prediction",
+        "param_names": [
+            "kernel"
+        ],
+        "params": [
+            [
+                "'linear'",
+                "'poly'",
+                "'rbf'",
+                "'sigmoid'"
+            ]
+        ],
+        "setup_cache_key": "svm:14",
+        "timeout": 500,
+        "type": "track",
+        "unit": "unit",
+        "version": "1217ebbbf8fca7e01ab90409bd8a087a682eb154cf082d6341d813242160c87b"
     },
     "svm.SVCBenchmark.track_test_score": {
         "code": "class Estimator:\n    def track_test_score(self, *args):\n        if hasattr(self.estimator, 'predict'):\n            y_val_pred = self.estimator.predict(self.X_val)\n        else:\n            y_val_pred = None\n        return float(self.test_scorer(self.y_val, y_val_pred))\n\n    def setup(self, *params):\n        \"\"\"Run for each param combination\n    \n        Load the pickled dataset and fitted estimator and run the benchmark.\n        \"\"\"\n        if hasattr(self, 'setup_'):\n            self.setup_(params)\n    \n        data_path = get_data_path(self, params)\n        with open(data_path, 'rb') as f:\n            self.X, self.X_val, self.y, self.y_val = pickle.load(f)\n    \n        est_path = get_estimator_path(self, Benchmark.save_folder,\n                                      params, Benchmark.save_estimators)\n        with open(est_path, 'rb') as f:\n            self.estimator = pickle.load(f)\n    \n        self.make_scorers()\n\nclass SVCBenchmark:\n    def setup_cache(self):\n        super().setup_cache()",
