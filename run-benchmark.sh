@@ -51,7 +51,7 @@ pip install git+https://github.com/airspeed-velocity/asv
 asv machine --yes
 
 # Run the benchmarks
-asv run $COMMIT_TO_BENCH^!
+asv run -e $COMMIT_TO_BENCH^!
 
 # Generate html
 asv publish
