@@ -1,2 +1,3 @@
 # sklearn-benchmark
-Results of scikit-learn asv benchmarks
+
+Comparative benchmarks for scikit-learn
