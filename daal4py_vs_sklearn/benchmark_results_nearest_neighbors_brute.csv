@@ -1,0 +1,9 @@
+,skl_time,d4p_time,speedup,n_samples,n_features,n_neighbors,n_jobs,algorithm,algo,dataset_name,input_type
+0,6.972959518432617,0.06374716758728027,109.38461711079944,16384,32,5,-1,brute,KNeighborsClassifier,classification,numpy
+1,7.413802623748779,0.2874753475189209,25.78935093994737,16384,256,5,-1,brute,KNeighborsClassifier,classification,numpy
+2,115.43261671066284,0.7226717472076416,159.7303577408239,65536,32,5,-1,brute,KNeighborsClassifier,classification,numpy
+3,120.5898506641388,4.061447858810425,29.69134526805396,65536,256,5,-1,brute,KNeighborsClassifier,classification,numpy
+4,9.124974727630615,19.64952540397644,0.4643865202863378,16384,32,1024,-1,brute,KNeighborsClassifier,classification,numpy
+5,9.407708883285522,18.52166724205017,0.5079299158299844,16384,256,1024,-1,brute,KNeighborsClassifier,classification,numpy
+6,124.1671051979065,82.1962354183197,1.510617908058505,65536,32,1024,-1,brute,KNeighborsClassifier,classification,numpy
+7,129.95973896980286,82.99757671356201,1.5658257037830734,65536,256,1024,-1,brute,KNeighborsClassifier,classification,numpy
