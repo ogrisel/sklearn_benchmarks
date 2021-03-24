@@ -1,0 +1,118 @@
+- name: NearestNeighbors
+  module: sklearn.neighbors
+  class: NearestNeighbors
+  args:
+    n_neighbors: 1024
+    algorithm: brute
+    n_jobs: -1,
+  accepts_labels: False
+  bench_func: fit_kneighbors
+
+# algorithms = [
+#     Algorithm(
+#         algo_module="sklearn.cluster",
+#         algo_class="KMeans",
+#         args=dict(init="k-means++", n_clusters=8, max_iter=30, n_init=1, tol=1e-16),
+#         name="KMeans-random",
+#         accepts_labels=False,
+#     ),
+#     Algorithm(
+#         algo_module="sklearn.cluster",
+#         algo_class="KMeans",
+#         args=dict(init="random", n_clusters=8, max_iter=30, n_init=1, tol=1e-16),
+#         name="KMeans-kmeans++",
+#         accepts_labels=False,
+#     ),
+#     Algorithm(
+#         algo_module="sklearn.decomposition",
+#         algo_class="PCA",
+#         args=dict(n_components=10),
+#         name="PCA",
+#         accepts_labels=False,
+#     ),
+#     Algorithm(
+#         algo_module="sklearn.neighbors",
+#         algo_class="NearestNeighbors",
+#         args=dict(n_neighbors=1024, algorithm="brute", n_jobs=-1),
+#         name="NearestNeighbors",
+#         accepts_labels=False,
+#         bench_func=fit_kneighbors,
+#     ),
+#     Algorithm(
+#         algo_module="sklearn.cluster",
+#         algo_class="DBSCAN",
+#         args=dict(eps=3, min_samples=2, algorithm="brute"),
+#         name="DBSCAN",
+#         accepts_labels=False,
+#     ),
+#     Algorithm(
+#         algo_module="sklearn.linear_model",
+#         algo_class="LinearRegression",
+#         args={},
+#         name="LinearRegression",
+#         accepts_labels=True,
+#     ),
+#     Algorithm(
+#         algo_module="sklearn.linear_model",
+#         algo_class="ElasticNet",
+#         args={"alpha": 0.1, "l1_ratio": 0.5},
+#         name="ElasticNet",
+#         accepts_labels=True,
+#     ),
+#     Algorithm(
+#         algo_module="sklearn.linear_model",
+#         algo_class="Lasso",
+#         args={},
+#         name="Lasso",
+#         accepts_labels=True,
+#     ),
+#     Algorithm(
+#         algo_module="sklearn.linear_model",
+#         algo_class="Ridge",
+#         args={},
+#         name="Ridge",
+#         accepts_labels=True,
+#     ),
+#     Algorithm(
+#         algo_module="sklearn.linear_model",
+#         algo_class="LogisticRegression",
+#         args=dict(),
+#         name="LogisticRegression",
+#         accepts_labels=True,
+#     ),
+#     Algorithm(
+#         algo_module="sklearn.ensemble",
+#         algo_class="RandomForestClassifier",
+#         args={"max_features": 1.0, "n_estimators": 10},
+#         name="RandomForestClassifier",
+#         accepts_labels=True,
+#     ),
+#     Algorithm(
+#         algo_module="sklearn.ensemble",
+#         algo_class="RandomForestRegressor",
+#         args={"max_features": 1.0, "n_estimators": 10},
+#         name="RandomForestRegressor",
+#         accepts_labels=True,
+#     ),
+#     Algorithm(
+#         algo_module="sklearn.manifold",
+#         algo_class="TSNE",
+#         args=dict(),
+#         name="TSNE",
+#         accepts_labels=False,
+#     ),
+#     Algorithm(
+#         algo_module="sklearn.svm",
+#         algo_class="SVC",
+#         args={"kernel": "rbf"},
+#         name="SVC-RBF",
+#         accepts_labels=True,
+#     ),
+#     Algorithm(
+#         algo_module="sklearn.svm",
+#         algo_class="SVC",
+#         args={"kernel": "linear"},
+#         name="SVC-Linear",
+#         accepts_labels=True,
+#     )
+# ]
