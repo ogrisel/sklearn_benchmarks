@@ -1,0 +1,24 @@
+algorithms:
+  - name: NearestNeighbors
+    algo_module: sklearn.neighbors
+    algo_class: NearestNeighbors
+    args:
+      n_neighbors: 1024
+      algorithm: brute
+      n_jobs: -1
+    accepts_labels: False
+    bench_func: fit_kneighbors
+
+datasets:
+  NearestNeighbors:
+    dataset_name: classification
+    bench_rows:
+      - 1e4
+      # - 1e4
+      # - 1e5
+      # - 1e6
+    bench_dims:
+      - 1e2
+      # - 1e3
+      # - 1e2
+      # - 1e2

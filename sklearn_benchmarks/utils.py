@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.datasets import make_regression, make_blobs, make_classification
+from sklearn.model_selection import train_test_split
 from joblib import Memory
 
 ### PLOTTING ###
@@ -66,6 +67,8 @@ def _gen_data_blobs(n_samples=1000, n_features=10, random_state=42, centers=None
 
 
 def _gen_data_classification(n_samples=1000, n_features=10, random_state=42, n_classes=2):
+  n_samples, n_features = int(float(n_samples)), int(float(n_features))
+
   """Wrapper for sklearn make_blobs"""
   X, y = make_classification(n_samples=n_samples,
                               n_features=n_features,
@@ -79,7 +82,7 @@ _data_generators = {
   'regression': _gen_data_regression,
 }
 
-@memory.cache
+# @memory.cache
 def gen_data(dataset_name, n_samples=1000, n_features=10, random_state=42, **kwargs):
   """Returns a tuple of data from the specified generator."""
   data = _data_generators[dataset_name](
@@ -93,8 +96,9 @@ def _fit(estimator, X, y=None):
   estimator.fit(X, y)
 
 def _fit_kneighbors(estimator, X, y=None):
-  estimator.fit(X, y)
-  estimator.kneighbors(X)
+  X_train, X_test, y_train, _ = train_test_split(X, y, test_size=0.33, random_state=42)
+  estimator.fit(X_train, y_train)
+  estimator.kneighbors(X_test)
 
 def _predict():
   pass

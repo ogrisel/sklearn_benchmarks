@@ -4,18 +4,6 @@ import numpy as np
 import daal4py.sklearn as d4p
 
 from sklearn_benchmarks.utils import get_bench_func, gen_data
-
-class AlgorithmLoader:
-  """
-    Adapter to load patched sklearn estimators from libraries
-  """
-  def __init__(self, lib_name, algo_name):
-    self.lib_name = lib_name
-    self.algo_name = algo_name
-  
-  def load(self):
-    return self
-
 class BenchmarkTimer:
   """
     Provides a context manager that runs a code block `reps` times
@@ -50,19 +38,25 @@ class Algorithm:
     self.args = args
     self.bench_func = get_bench_func(bench_func)
 
+  def reload(self):
+    self.algo_module_ = importlib.import_module(self.algo_module)
+    self.algo_class_ = getattr(self.algo_module_, self.algo_class)
+
   def run(self, data, **override_args): # use algo loader here?
     all_args = {**self.args, **override_args}
-
     estimator = self.algo_class_(**all_args)
+
     if self.accepts_labels:
       self.bench_func(estimator, data[0], data[1])
     else:
       self.bench_func(estimator, data[0])
+
     return estimator
 
 class BenchmarkRunner:
   """
-    Wrapper to run an algorithm with multiple dataset sizes and compute speedup of cuml relative to sklearn baseline
+    Wrapper to run an algorithm with multiple dataset sizes and compute speedup of third party library
+    relative to sklearn baseline
   """
 
   def __init__(self, bench_rows, bench_dims, dataset_name, n_reps=1):
@@ -72,17 +66,18 @@ class BenchmarkRunner:
     self.n_reps = n_reps
 
   def _run_one_size(self, algo, n_samples, n_features, param_overrides={}, dataset_param_overrides={}):
-
     data = gen_data(self.dataset_name, n_samples, n_features, **dataset_param_overrides)
 
     # sklearn
+    algo.reload()
     skl_timer = BenchmarkTimer(self.n_reps)
     for rep in skl_timer.benchmark_runs():
       algo.run(data, **param_overrides)
     skl_elapsed = np.min(skl_timer.timings)
 
-    # patched sklearn
+    # third party library
     d4p.patch_sklearn()
+    algo.reload()
     d4p_timer = BenchmarkTimer(self.n_reps)
     for rep in d4p_timer.benchmark_runs():
       algo.run(data, **param_overrides)
@@ -105,9 +100,9 @@ class BenchmarkRunner:
     )
 
   def run(self, algo, param_overrides={}, dataset_param_overrides={}):
-    all_results = []
+    results = []
     for ns in self.bench_rows:
       for nf in self.bench_dims:
-        all_results.append(
-          self._run_one_size(algo, ns, nf, param_overrides, dataset_param_overrides))
-    return all_results
+        results.append(self._run_one_size(algo, ns, nf, param_overrides, dataset_param_overrides))
+    return results
+
