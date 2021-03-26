@@ -88,8 +88,10 @@ class BenchmarkRunner:
 
     print(f"{algo.name} (n_samples={n_samples}, n_features={n_features})"
           f" [skl={skl_elapsed}, d4p={d4p_elapsed} speedup={speedup}]")
-
+    print('\n')
+    
     return dict(
+      algo=algo.name,
       skl_time=skl_elapsed,
       d4p_time=d4p_elapsed,
       speedup=speedup,
