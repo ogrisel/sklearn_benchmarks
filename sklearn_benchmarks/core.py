@@ -30,9 +30,9 @@ class BenchmarkTimer:
             self.timings.append(t1 - t0)
 
 
-class Algorithm:
+class Estimator:
     """
-    Wrapper for an algorithm to benchmark
+    Wrapper for an estimator to benchmark
     """
 
     def __init__(
@@ -69,7 +69,7 @@ class Algorithm:
 
 class BenchmarkRunner:
     """
-    Wrapper to run an algorithm with multiple dataset sizes and compute speedup of third party library
+    Wrapper to run an estimator with multiple dataset sizes and compute speedup of third party library
     relative to sklearn baseline
     """
 

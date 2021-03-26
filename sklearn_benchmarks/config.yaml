@@ -1,6 +1,6 @@
-algorithms:
+estimators:
   - name: KNeighborsClassifier
-    class: sklearn.neighbors.KNeighborsClassifier
+    source_path: sklearn.neighbors.KNeighborsClassifier
     hyperparameters:
       n_neighbors:
         - 1
@@ -8,27 +8,27 @@ algorithms:
         - 10
         - 50
         - 1e2
-      algorithm: brute
+      algorithm:
+        - brute
       n_jobs:
         - -1
         - 1
     accepts_labels: True
     metrics:
-      - accuracy
+      - accuracy_score
       - roc_auc
     datasets:
-      - generator: sklearn.datasets.make_classification
+      - generator: classification
         n_features: 1e2
-        train:
-          n_samples: 1e6
-        test:
-          n_samples:
-            - 1
-            - 10
-            - 1e2
-            - 1e3
-            - 1e4
+        n_samples_train:
+          - 1e6
+        n_samples_test:
+          - 1
+          - 10
+          - 1e2
+          - 1e3
+          - 1e4
 
   - name: daal4py_KNeighborsClassifier
-    class: daal4py.sklearn.neighbors.KNeighborsClassifier
+    source_path: daal4py.sklearn.neighbors.KNeighborsClassifier
     inherit: KNeighborsClassifier

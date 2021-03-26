@@ -59,7 +59,6 @@ memory = Memory(_cachedir, verbose=0)
 
 def _gen_data_regression(n_samples=1000, n_features=10, random_state=42):
     """Wrapper for sklearn make_regression"""
-    n_samples, n_features = int(float(n_samples)), int(float(n_features))
     X, y = make_regression(
         n_samples=n_samples, n_features=n_features, random_state=random_state
     )
@@ -80,8 +79,6 @@ def _gen_data_blobs(n_samples=1000, n_features=10, random_state=42, centers=None
 def _gen_data_classification(
     n_samples=1000, n_features=10, random_state=42, n_classes=2
 ):
-    n_samples, n_features = int(float(n_samples)), int(float(n_features))
-
     """Wrapper for sklearn make_blobs"""
     X, y = make_classification(
         n_samples=n_samples,
@@ -102,6 +99,7 @@ _data_generators = {
 @memory.cache
 def gen_data(dataset_name, n_samples=1000, n_features=10, random_state=42, **kwargs):
     """Returns a tuple of data from the specified generator."""
+    n_samples, n_features = int(float(n_samples)), int(float(n_features))
     data = _data_generators[dataset_name](n_samples, n_features, random_state, **kwargs)
 
     return data
