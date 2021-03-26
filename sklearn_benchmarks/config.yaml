@@ -6,19 +6,140 @@ algorithms:
       n_neighbors: 1024
       algorithm: brute
       n_jobs: -1
-    accepts_labels: False
+    accepts_labels: True
     bench_func: fit_kneighbors
+  
+  - name: KMeans-random
+    algo_module: sklearn.cluster
+    algo_class: KMeans
+    args:
+      init: k-means++
+      n_clusters: 8
+      max_iter: 30
+      n_init: 1
+      tol: 1e-16
+    accepts_labels: False
+
+  - name: KMeans-kmeans++
+    algo_module: sklearn.cluster
+    algo_class: KMeans
+    args:
+      init: random
+      n_clusters: 8
+      max_iter: 30
+      n_init: 1
+      tol: 1e-16
+    accepts_labels: False
+  
+  - name: PCA
+    algo_module: sklearn.decomposition
+    algo_class: PCA
+    args:
+      n_components: 10
+    accepts_labels: False
+
+  - name: DBSCAN
+    algo_module: sklearn.cluster
+    algo_class: DBSCAN
+    args:
+      eps: 3
+      min_samples: 2
+      algorithm: brute
+    accepts_labels: False
+
+  - name: LinearRegression
+    algo_module: sklearn.linear_model
+    algo_class: LinearRegression
+    accepts_labels: True
+
+  - name: ElasticNet
+    algo_module: sklearn.linear_model
+    algo_class: ElasticNet
+    args:
+      alpha: 0.1
+      l1_ratio: 0.5
+    accepts_labels: True
+
+  - name: Lasso
+    algo_module: sklearn.linear_model
+    algo_class: Lasso
+    accepts_labels: True
+
+  - name: Ridge
+    algo_module: sklearn.linear_model
+    algo_class: Ridge
+    accepts_labels: True
+
+  - name: LogisticRegression
+    algo_module: sklearn.linear_model
+    algo_class: LogisticRegression
+    accepts_labels: True
+
+  - name: RandomForestClassifier
+    algo_module: sklearn.ensemble
+    algo_class: RandomForestClassifier
+    args:
+      max_features: 1.0
+      n_estimators: 10
+    accepts_labels: True
+
+  - name: RandomForestRegressor
+    algo_module: sklearn.ensemble
+    algo_class: RandomForestRegressor
+    args:
+      max_features: 1.0
+      n_estimators: 10
+    accepts_labels: True
+
+  - name: TSNE
+    algo_module: sklearn.manifold
+    algo_class: TSNE
+    accepts_labels: False
+
+  - name: SVC-RBF
+    algo_module: sklearn.svm
+    algo_class: SVC
+    args:
+      kernel: rbf
+    accepts_labels: True
+
+  - name: SVC-Linear
+    algo_module: sklearn.svm
+    algo_class: SVC
+    args:
+      kernel: linear
+    accepts_labels: True
 
 datasets:
   NearestNeighbors:
     dataset_name: classification
     bench_rows:
       - 1e4
-      # - 1e4
+      - 1e4
       # - 1e5
       # - 1e6
     bench_dims:
       - 1e2
+      - 1e3
+      # - 1e2
+      # - 1e2
+  LogisticRegression:
+    dataset_name: classification
+    bench_rows:
+      - 1e6
+      - 1e3
       # - 1e3
-      # - 1e2
-      # - 1e2
+    bench_dims:
+      - 1e2
+      - 1e3
+      # - 1e5
+  Ridge:
+    dataset_name: regression
+    bench_rows:
+      - 1e4
+      - 1e5
+      # - 1e6
+    bench_dims:
+      - 1e2
+      - 1e3
+      # - 1e4
