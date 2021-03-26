@@ -43,6 +43,7 @@ def plot(benchmark_result, split=None):
         ax[i, j].set_title(f"{estimators[i]}")
 
   fig.tight_layout()
+  plt.show()
 
 ### DATA GENERATION ###
 
@@ -51,6 +52,7 @@ memory = Memory(_cachedir, verbose=0)
 
 def _gen_data_regression(n_samples=1000, n_features=10, random_state=42):
   """Wrapper for sklearn make_regression"""
+  n_samples, n_features = int(float(n_samples)), int(float(n_features))
   X, y = make_regression(n_samples=n_samples,
                           n_features=n_features,
                           random_state=random_state)
@@ -82,7 +84,7 @@ _data_generators = {
   'regression': _gen_data_regression,
 }
 
-# @memory.cache
+@memory.cache
 def gen_data(dataset_name, n_samples=1000, n_features=10, random_state=42, **kwargs):
   """Returns a tuple of data from the specified generator."""
   data = _data_generators[dataset_name](
