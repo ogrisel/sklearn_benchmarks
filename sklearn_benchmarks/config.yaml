@@ -7,7 +7,7 @@ estimators:
         - 5
         - 10
         - 50
-        - 1e2
+        - 100
       algorithm:
         - brute
       n_jobs:
@@ -16,18 +16,18 @@ estimators:
     accepts_labels: True
     metrics:
       - accuracy_score
-      - roc_auc
+      - roc_auc_score
     datasets:
       - generator: classification
-        n_features: 1e2
+        n_features: 100
         n_samples_train:
           - 1e6
         n_samples_test:
           - 1
           - 10
-          - 1e2
-          - 1e3
-          - 1e4
+          - 100
+          # - 1000
+          # - 10000
 
   - name: daal4py_KNeighborsClassifier
     source_path: daal4py.sklearn.neighbors.KNeighborsClassifier

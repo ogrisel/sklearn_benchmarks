@@ -1,5 +1,7 @@
 import yaml
+import time
 import importlib
+import pandas as pd
 from sklearn.model_selection import ParameterGrid
 from sklearn_benchmarks.utils import gen_data
 from sklearn.model_selection import train_test_split
@@ -13,7 +15,7 @@ class BenchmarkEstimator:
         name,
         source_path,
         inherit=False,
-        metrics="accuracy",
+        metrics=["accuracy"],
         accepts_labels=True,
         hyperparameters={},
         datasets=[],
@@ -47,8 +49,8 @@ class BenchmarkEstimator:
             raise ValueError("source_path should be a string")
         if not (isinstance(self.inherit, bool) or isinstance(self.inherit, str)):
             raise ValueError("inherit should be a either True, False or a string")
-        if not (isinstance(self.metrics, str) or isinstance(self.metrics, list)):
-            raise ValueError("metrics should be a string or a list")
+        if not isinstance(self.metrics, list):
+            raise ValueError("metrics should be a list")
         if not isinstance(self.accepts_labels, bool):
             raise ValueError("accepts_labels should be a either True or False")
         if not isinstance(self.datasets, list):
@@ -60,6 +62,7 @@ class BenchmarkEstimator:
         self._validate_params()
         self._load_estimator_class()
         self._init_params_grid()
+        self.results_ = []
         # for each dataset
         for dataset in self.datasets:
             print("start dataset: ", dataset["generator"])
@@ -86,7 +89,18 @@ class BenchmarkEstimator:
                 for params in self.params_grid_:
                     print("start params: ", params)
                     estimator = self.estimator_class_(**params)
+                    t0 = time.perf_counter()
                     estimator.fit(X_train, y_train)
+                    t1 = time.perf_counter()
+                    row = dict(
+                        estimator=self.name,
+                        function="fit",
+                        time_elapsed=t1 - t0,
+                        n_samples=ns_train,
+                        n_features=n_features,
+                        **params
+                    )
+                    self.results_.append(row)
                     # for each n_samples_test
                     for ns_test in sorted(
                         map(
@@ -98,16 +112,28 @@ class BenchmarkEstimator:
                         # slice X_test and y_test
                         X_test_, y_test_ = X_test[:ns_test], y_test[:ns_test]
                         # predict test data (record time)
+                        t0 = time.perf_counter()
                         y_pred = estimator.predict(X_test_)
+                        t1 = time.perf_counter()
                         print("end ns_test: ", ns_test)
-                    # load metrics function from sklearn.metrics
-                    # for biggest test set, compute metrics
-                    for metric in dataset["metrics"]:
+                        # load metrics function from sklearn.metrics
+                        # for biggest test set, compute metrics
+                        row = dict(
+                            estimator=self.name,
+                            function="predict",
+                            time_elapsed=t1 - t0,
+                            n_samples=ns_test,
+                            n_features=n_features,
+                            **params
+                        )
+                        self.results_.append(row)
+                    for metric in self.metrics:
                         print("start metric: ", metric)
                         metric_func = getattr(
                             importlib.import_module("sklearn.metrics"), metric
                         )
-                        metric_func(y_test_, y_pred)
+                        score = metric_func(y_test_, y_pred)
+                        # self.results_[metric] = score
                         print("end metric: ", metric)
                     print("end params: ", params)
                 print("end ns_train: ", ns_train)
@@ -123,7 +149,10 @@ def main():
         BenchmarkEstimator(**params) for params in config["estimators"]
     ]
     for benchmark_estimator in benchmark_estimators:
+        print("start benchmark_estimator: ", benchmark_estimator.name)
         benchmark_estimator.run()
+        print(pd.DataFrame(benchmark_estimator.results_))
+        print("end benchmark_estimator: ", benchmark_estimator.name)
 
 
 if __name__ == "__main__":
