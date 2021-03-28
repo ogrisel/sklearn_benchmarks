@@ -11,10 +11,10 @@ estimators:
         - 100
       algorithm:
         - brute
+        # - kd_tree
       n_jobs:
         - -1
         - 1
-    accepts_labels: True
     metrics:
       - accuracy_score
       - roc_auc_score
@@ -30,6 +30,35 @@ estimators:
           # - 1000
           # - 10000
   daal4py_KNeighborsClassifier:
-    name: daal4py_KNeighborsClassifier
-    source_path: daal4py.sklearn.neighbors.KNeighborsClassifier
     inherit: KNeighborsClassifier
+    source_path: daal4py.sklearn.neighbors.KNeighborsClassifier
+  KMeans:
+    name: KMeans
+    source_path: sklearn.cluster.KMeans
+    hyperparameters:
+      init:
+        - k-means++
+        - random
+      n_clusters:
+        - 3
+        - 8
+      max_iter:
+        - 30
+      n_init:
+        - 1
+      # tol:
+      #   - 1e-16
+    metrics:
+      - adjusted_rand_score
+    datasets:
+      - generator: blobs
+        n_features: 100
+        n_samples_train:
+          - 1e6
+        n_samples_test:
+          - 1
+          - 10
+          - 100
+  daal4py_KMeans:
+    inherit: KMeans
+    source_path: daal4py.sklearn.cluster.KMeans
