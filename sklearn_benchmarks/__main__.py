@@ -6,6 +6,17 @@ import pandas as pd
 from sklearn.model_selection import ParameterGrid
 from sklearn_benchmarks.utils import gen_data
 from sklearn.model_selection import train_test_split
+from sklearn.base import BaseEstimator
+
+
+def predict_or_transform(self, X):
+    if hasattr(self, "predict"):
+        return self.predict(X)
+    else:
+        return self.transform(X)
+
+
+BaseEstimator.predict_or_transform = predict_or_transform
 
 
 class BenchmarkEstimator:
@@ -23,7 +34,6 @@ class BenchmarkEstimator:
         self.source_path = source_path
         self.inherit = inherit
         self.metrics = metrics
-        self.accepts_labels = accepts_labels
         self.hyperparameters = hyperparameters
         self.datasets = datasets
 
@@ -53,8 +63,6 @@ class BenchmarkEstimator:
             raise ValueError("inherit should be a either True, False or a string")
         if not isinstance(self.metrics, list):
             raise ValueError("metrics should be a list")
-        if not isinstance(self.accepts_labels, bool):
-            raise ValueError("accepts_labels should be a either True or False")
         if not isinstance(self.datasets, list):
             raise ValueError("datasets should be a list")
         if not isinstance(self.hyperparameters, object):
@@ -96,6 +104,7 @@ class BenchmarkEstimator:
                     t1 = time.perf_counter()
                     row = dict(
                         estimator=self.name,
+                        lib=self._lib_name(),
                         function="fit",
                         time_elapsed=t1 - t0,
                         n_samples=ns_train,
@@ -104,6 +113,7 @@ class BenchmarkEstimator:
                     )
                     self.results_.append(row)
                     # for each n_samples_test
+                    test_results = []
                     for ns_test in sorted(
                         map(
                             lambda ns_test: int(float(ns_test)),
@@ -115,28 +125,32 @@ class BenchmarkEstimator:
                         X_test_, y_test_ = X_test[:ns_test], y_test[:ns_test]
                         # predict test data (record time)
                         t0 = time.perf_counter()
-                        y_pred = estimator.predict(X_test_)
+                        y_pred = estimator.predict_or_transform(X_test_)
                         t1 = time.perf_counter()
                         print("end ns_test: ", ns_test)
                         # load metrics function from sklearn.metrics
                         # for biggest test set, compute metrics
                         row = dict(
                             estimator=self.name,
+                            lib=self._lib_name(),
                             function="predict",
                             time_elapsed=t1 - t0,
                             n_samples=ns_test,
                             n_features=n_features,
                             **params,
                         )
-                        self.results_.append(row)
+                        test_results.append(row)
                     for metric in self.metrics:
                         print("start metric: ", metric)
                         metric_func = getattr(
                             importlib.import_module("sklearn.metrics"), metric
                         )
                         score = metric_func(y_test_, y_pred)
-                        # self.results_[metric] = score
+                        for el in test_results:
+                            el[metric] = score
                         print("end metric: ", metric)
+                    for el in test_results:
+                        self.results_.append(el)
                     print("end params: ", params)
                 print("end ns_train: ", ns_train)
             print("end dataset: ", dataset["generator"])
@@ -144,7 +158,9 @@ class BenchmarkEstimator:
 
     def to_csv(self):
         pd.DataFrame(self.results_).to_csv(
-            f"sklearn_benchmarks/results/{self._lib_name()}/{self.name}.csv", mode="w+"
+            f"sklearn_benchmarks/results/{self._lib_name()}/{self.name}.csv",
+            mode="w+",
+            index=False,
         )
 
 
@@ -163,6 +179,7 @@ def main():
         benchmark_estimator = BenchmarkEstimator(**params)
         benchmark_estimator.run()
         benchmark_estimator.to_csv()
+        print("--------------------------")
 
 
 if __name__ == "__main__":
