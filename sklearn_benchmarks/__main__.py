@@ -1,3 +1,4 @@
+from pathlib import Path
 import yaml
 import time
 import importlib
@@ -5,8 +6,6 @@ import pandas as pd
 from sklearn.model_selection import ParameterGrid
 from sklearn_benchmarks.utils import gen_data
 from sklearn.model_selection import train_test_split
-
-CONFIG_FILE_PATH = "sklearn_benchmarks/config.yaml"
 
 
 class BenchmarkEstimator:
@@ -27,6 +26,9 @@ class BenchmarkEstimator:
         self.accepts_labels = accepts_labels
         self.hyperparameters = hyperparameters
         self.datasets = datasets
+
+    def _lib_name(self):
+        return self.source_path.split(".")[0]
 
     def _load_estimator_class(self):
         components = self.source_path.split(".")
@@ -98,7 +100,7 @@ class BenchmarkEstimator:
                         time_elapsed=t1 - t0,
                         n_samples=ns_train,
                         n_features=n_features,
-                        **params
+                        **params,
                     )
                     self.results_.append(row)
                     # for each n_samples_test
@@ -124,7 +126,7 @@ class BenchmarkEstimator:
                             time_elapsed=t1 - t0,
                             n_samples=ns_test,
                             n_features=n_features,
-                            **params
+                            **params,
                         )
                         self.results_.append(row)
                     for metric in self.metrics:
@@ -140,19 +142,27 @@ class BenchmarkEstimator:
             print("end dataset: ", dataset["generator"])
         return self
 
+    def to_csv(self):
+        pd.DataFrame(self.results_).to_csv(
+            f"sklearn_benchmarks/results/{self._lib_name()}/{self.name}.csv", mode="w+"
+        )
+
 
 def main():
-    with open(CONFIG_FILE_PATH, "r") as file:
-        config = yaml.full_load(file)
+    current_path = Path(__file__).resolve().parent
+    config_path = current_path / "config.yaml"
+    with open(config_path, "r") as config_file:
+        config = yaml.full_load(config_file)
 
-    benchmark_estimators = [
-        BenchmarkEstimator(**params) for params in config["estimators"]
-    ]
-    for benchmark_estimator in benchmark_estimators:
-        print("start benchmark_estimator: ", benchmark_estimator.name)
+    estimators = config["estimators"]
+
+    for name, params in estimators.items():
+        print(name)
+        if "inherit" in params:
+            params = estimators[params["inherit"]] | params
+        benchmark_estimator = BenchmarkEstimator(**params)
         benchmark_estimator.run()
-        print(pd.DataFrame(benchmark_estimator.results_))
-        print("end benchmark_estimator: ", benchmark_estimator.name)
+        benchmark_estimator.to_csv()
 
 
 if __name__ == "__main__":

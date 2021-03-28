@@ -1,5 +1,6 @@
 estimators:
-  - name: KNeighborsClassifier
+  KNeighborsClassifier:
+    name: KNeighborsClassifier
     source_path: sklearn.neighbors.KNeighborsClassifier
     hyperparameters:
       n_neighbors:
@@ -28,7 +29,7 @@ estimators:
           - 100
           # - 1000
           # - 10000
-
-  - name: daal4py_KNeighborsClassifier
+  daal4py_KNeighborsClassifier:
+    name: daal4py_KNeighborsClassifier
     source_path: daal4py.sklearn.neighbors.KNeighborsClassifier
     inherit: KNeighborsClassifier
