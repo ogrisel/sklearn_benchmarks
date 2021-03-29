@@ -2,21 +2,12 @@ from pathlib import Path
 import yaml
 import time
 import importlib
+import re
 import pandas as pd
 from sklearn.model_selection import ParameterGrid
 from sklearn_benchmarks.utils import gen_data
 from sklearn.model_selection import train_test_split
 from sklearn.base import BaseEstimator
-
-
-def predict_or_transform(self, X):
-    if hasattr(self, "predict"):
-        return self.predict(X)
-    else:
-        return self.transform(X)
-
-
-BaseEstimator.predict_or_transform = predict_or_transform
 
 
 class BenchmarkEstimator:
@@ -26,7 +17,6 @@ class BenchmarkEstimator:
         source_path,
         inherit=False,
         metrics=["accuracy"],
-        accepts_labels=True,
         hyperparameters={},
         datasets=[],
     ):
@@ -125,7 +115,12 @@ class BenchmarkEstimator:
                         X_test_, y_test_ = X_test[:ns_test], y_test[:ns_test]
                         # predict test data (record time)
                         t0 = time.perf_counter()
-                        y_pred = estimator.predict_or_transform(X_test_)
+                        bench_func = (
+                            estimator.predict
+                            if hasattr(estimator, "predict")
+                            else estimator.transform
+                        )
+                        y_pred = bench_func(X_test_)
                         t1 = time.perf_counter()
                         print("end ns_test: ", ns_test)
                         # load metrics function from sklearn.metrics
@@ -173,6 +168,18 @@ def main():
     estimators = config["estimators"]
 
     for name, params in estimators.items():
+        if "hyperparameters" in params:
+            hyperparameters = params["hyperparameters"]
+            for key, value in hyperparameters.items():
+                if not isinstance(value, list):
+                    continue
+                for i, el in enumerate(value):
+                    if isinstance(el, str) and bool(re.match(r"1[eE](\-)*\d{1,}", el)):
+                        if "-" in el:
+                            hyperparameters[key][i] = float(el)
+                        else:
+                            hyperparameters[key][i] = int(float(el))
+            params["hyperparameters"] = hyperparameters
         print(name)
         if "inherit" in params:
             params = estimators[params["inherit"]] | params
