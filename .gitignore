@@ -141,6 +141,4 @@ cython_debug/
 
 tmp
 
-*.ipynb
-
 .vscode
