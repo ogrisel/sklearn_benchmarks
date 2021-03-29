@@ -1,4 +1,5 @@
 import numpy as np
+import re
 import matplotlib.pyplot as plt
 from sklearn.datasets import make_regression, make_blobs, make_classification
 from joblib import Memory
@@ -102,3 +103,7 @@ def gen_data(dataset_name, n_samples=1000, n_features=10, random_state=42, **kwa
     data = _data_generators[dataset_name](n_samples, n_features, random_state, **kwargs)
 
     return data
+
+
+def is_scientific_notation(string):
+    return isinstance(string, str) and bool(re.match(r"1[eE](\-)*\d{1,}", string))

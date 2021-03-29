@@ -2,11 +2,10 @@ from pathlib import Path
 import yaml
 import time
 import importlib
-import re
 import time
 import pandas as pd
 from sklearn.model_selection import ParameterGrid
-from sklearn_benchmarks.utils import gen_data
+from sklearn_benchmarks.utils import gen_data, is_scientific_notation
 from sklearn.model_selection import train_test_split
 
 
@@ -14,9 +13,9 @@ class Timer:
     @staticmethod
     def run(func, *args):
         start = time.perf_counter()
-        res = func(*args)
+        result = func(*args)
         end = time.perf_counter()
-        return (res, end - start)
+        return (result, end - start)
 
 
 class Benchmark:
@@ -79,12 +78,14 @@ class Benchmark:
     def run(self):
         self._validate_params()
         estimator_class = self._load_estimator_class()
-        parameters_grid = self._init_parameters_grid()
         metrics_functions = self._load_metrics_functions()
+        parameters_grid = self._init_parameters_grid()
         self.results_ = []
         for dataset in self.datasets:
             n_features = dataset["n_features"]
-            for ns_train in dataset["n_samples_train"]:
+            n_samples_train = dataset["n_samples_train"]
+            n_samples_test = reversed(sorted(dataset["n_samples_test"]))
+            for ns_train in n_samples_train:
                 X, y = gen_data(
                     dataset["generator"],
                     n_samples=ns_train + max(dataset["n_samples_test"]),
@@ -94,7 +95,7 @@ class Benchmark:
                     X, y, train_size=ns_train
                 )
                 for params in parameters_grid:
-                    estimator = estimator_class(params)
+                    estimator = estimator_class(**params)
                     _, time_elapsed = Timer.run(estimator.fit, X_train, y_train)
                     row = dict(
                         estimator=self.name,
@@ -108,16 +109,15 @@ class Benchmark:
                     print(row)
                     print("---")
                     self.results_.append(row)
-                    n_samples_test = reversed(sorted(dataset["n_samples_test"]))
-                    scores = dict()
                     for i, ns_test in enumerate(n_samples_test):
                         X_test_, y_test_ = X_test[:ns_test], y_test[:ns_test]
                         bench_func = self._predict_or_transform(estimator)
                         y_pred, time_elapsed = Timer.run(bench_func, X_test_)
                         if i == 0:
-                            for metric_func in metrics_functions:
-                                score = metric_func(y_test_, y_pred)
-                                scores[metric_func.__name__] = score
+                            scores = {
+                                func.__name__: func(y_test_, y_pred)
+                                for func in metrics_functions
+                            }
                         row = dict(
                             estimator=self.name,
                             lib=self._lib_name(),
@@ -142,6 +142,27 @@ class Benchmark:
         )
 
 
+def _prepare_params(params):
+    for key, value in params["hyperparameters"].items():
+        if not isinstance(value, list):
+            continue
+        for i, el in enumerate(value):
+            if is_scientific_notation(el):
+                if "-" in el:
+                    params["hyperparameters"][key][i] = float(el)
+                else:
+                    params["hyperparameters"][key][i] = int(float(el))
+
+    for dataset in params["datasets"]:
+        dataset["n_features"] = int(float(dataset["n_features"]))
+        for i, ns_train in enumerate(dataset["n_samples_train"]):
+            dataset["n_samples_train"][i] = int(float(ns_train))
+        for i, ns_test in enumerate(dataset["n_samples_test"]):
+            dataset["n_samples_test"][i] = int(float(ns_test))
+
+    return params
+
+
 def main():
     current_path = Path(__file__).resolve().parent
     config_path = current_path / "config.yaml"
@@ -150,26 +171,13 @@ def main():
 
     estimators = config["estimators"]
 
-    for _, params in estimators.items():
+    for params in estimators.values():
         if "inherit" in params:
-            params = estimators[params["inherit"]] | params
+            name_inherits_from = params["inherit"]
+            # Merge params with estimator from which inherits
+            params = estimators[name_inherits_from] | params
 
-        for key, value in params["hyperparameters"].items():
-            if not isinstance(value, list):
-                continue
-            for i, el in enumerate(value):
-                if isinstance(el, str) and bool(re.match(r"1[eE](\-)*\d{1,}", el)):
-                    if "-" in el:
-                        params["hyperparameters"][key][i] = float(el)
-                    else:
-                        params["hyperparameters"][key][i] = int(float(el))
-
-        for dataset in params["datasets"]:
-            dataset["n_features"] = int(float(dataset["n_features"]))
-            for i, ns_train in enumerate(dataset["n_samples_train"]):
-                dataset["n_samples_train"][i] = int(float(ns_train))
-            for i, ns_test in enumerate(dataset["n_samples_test"]):
-                dataset["n_samples_test"][i] = int(float(ns_test))
+        params = _prepare_params(params)
 
         benchmark_estimator = Benchmark(**params)
         benchmark_estimator.run()
