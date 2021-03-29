@@ -44,13 +44,10 @@ class Benchmark:
     def _load_estimator_class(self):
         splitted_path = self.source_path.split(".")
         module, class_name = ".".join(splitted_path[:-1]), splitted_path[-1]
-        try:
-            self.estimator_class_ = getattr(importlib.import_module(module), class_name)
-        except Exception:
-            raise ValueError("Source class provided in not valid")
+        return getattr(importlib.import_module(module), class_name)
 
-    def _init_params_grid(self):
-        self.params_grid_ = ParameterGrid(self.hyperparameters)
+    def _init_parameters_grid(self):
+        return ParameterGrid(self.hyperparameters)
 
     def _validate_params(self):
         if not isinstance(self.name, str):
@@ -68,13 +65,22 @@ class Benchmark:
         if not isinstance(self.hyperparameters, object):
             raise ValueError("hyperparameters should be an object")
 
-    def _init_estimator(self, params):
-        return self.estimator_class_(**params)
+    def _load_metrics_functions(self):
+        module = importlib.import_module("sklearn.metrics")
+        return [getattr(module, m) for m in self.metrics]
+
+    def _predict_or_transform(self, estimator):
+        if hasattr(estimator, "predict"):
+            bench_func = estimator.predict
+        else:
+            bench_func = estimator.transform
+        return bench_func
 
     def run(self):
         self._validate_params()
-        self._load_estimator_class()
-        self._init_params_grid()
+        estimator_class = self._load_estimator_class()
+        parameters_grid = self._init_parameters_grid()
+        metrics_functions = self._load_metrics_functions()
         self.results_ = []
         for dataset in self.datasets:
             n_features = dataset["n_features"]
@@ -87,8 +93,8 @@ class Benchmark:
                 X_train, X_test, y_train, y_test = train_test_split(
                     X, y, train_size=ns_train
                 )
-                for params in self.params_grid_:
-                    estimator = self._init_estimator(params)
+                for params in parameters_grid:
+                    estimator = estimator_class(params)
                     _, time_elapsed = Timer.run(estimator.fit, X_train, y_train)
                     row = dict(
                         estimator=self.name,
@@ -106,18 +112,12 @@ class Benchmark:
                     scores = dict()
                     for i, ns_test in enumerate(n_samples_test):
                         X_test_, y_test_ = X_test[:ns_test], y_test[:ns_test]
-                        if hasattr(estimator, "predict"):
-                            bench_func = estimator.predict
-                        else:
-                            bench_func = estimator.transform
+                        bench_func = self._predict_or_transform(estimator)
                         y_pred, time_elapsed = Timer.run(bench_func, X_test_)
                         if i == 0:
-                            for metric in self.metrics:
-                                metric_func = getattr(
-                                    importlib.import_module("sklearn.metrics"), metric
-                                )
+                            for metric_func in metrics_functions:
                                 score = metric_func(y_test_, y_pred)
-                                scores[metric] = score
+                                scores[metric_func.__name__] = score
                         row = dict(
                             estimator=self.name,
                             lib=self._lib_name(),
