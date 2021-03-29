@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.datasets import make_regression, make_blobs, make_classification
-from sklearn.model_selection import train_test_split
 from joblib import Memory
 
 ### PLOTTING ###
@@ -103,30 +102,3 @@ def gen_data(dataset_name, n_samples=1000, n_features=10, random_state=42, **kwa
     data = _data_generators[dataset_name](n_samples, n_features, random_state, **kwargs)
 
     return data
-
-
-### BENCHMARK FUNCTIONS ####
-
-
-def _fit(estimator, X, y=None):
-    estimator.fit(X, y)
-
-
-def _fit_kneighbors(estimator, X, y=None):
-    X_train, X_test, y_train, _ = train_test_split(
-        X, y, test_size=0.33, random_state=42
-    )
-    estimator.fit(X_train, y_train)
-    estimator.kneighbors(X_test)
-
-
-def _predict():
-    pass
-
-
-_bench_funcs = {"fit": _fit, "fit_kneighbors": _fit_kneighbors, "predict": _predict}
-
-
-def get_bench_func(name):
-    func = _bench_funcs[name]
-    return func

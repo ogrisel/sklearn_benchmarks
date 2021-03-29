@@ -11,7 +11,7 @@ estimators:
         - 1e2
       algorithm:
         - brute
-        - kd_tree
+        # - kd_tree
       n_jobs:
         - -1
         - 1
