@@ -18,16 +18,12 @@ class BenchmarkTimer:
       print(np.min(timer.timings))
     """
 
-    def __init__(self, reps=1):
-        self.reps = reps
-        self.timings = []
-
-    def benchmark_runs(self):
-        for r in range(self.reps):
-            t0 = time.time()
-            yield r
-            t1 = time.time()
-            self.timings.append(t1 - t0)
+    @staticmethod
+    def run(func, *args):
+        start = time.perf_counter()
+        res = func(*args)
+        end = time.perf_counter()
+        return (res, end - start)
 
 
 class Estimator:
