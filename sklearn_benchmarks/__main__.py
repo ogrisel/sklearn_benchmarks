@@ -89,9 +89,6 @@ class Benchmark:
                 )
                 for params in self.params_grid_:
                     estimator = self._init_estimator(params)
-                    print(
-                        f"fit {self.name} - Params: {[f'{k}: {v}' for k, v in params.items()]} - (n_samples={ns_train}, n_features={n_features})"
-                    )
                     _, time_elapsed = Timer.run(estimator.fit, X_train, y_train)
                     row = dict(
                         estimator=self.name,
@@ -102,17 +99,25 @@ class Benchmark:
                         n_features=n_features,
                         **params,
                     )
+                    print(row)
+                    print("---")
                     self.results_.append(row)
-                    for i, ns_test in enumerate(sorted(dataset["n_samples_test"])):
+                    n_samples_test = reversed(sorted(dataset["n_samples_test"]))
+                    scores = dict()
+                    for i, ns_test in enumerate(n_samples_test):
                         X_test_, y_test_ = X_test[:ns_test], y_test[:ns_test]
                         if hasattr(estimator, "predict"):
                             bench_func = estimator.predict
                         else:
                             bench_func = estimator.transform
-                        print(
-                            f"{bench_func.__name__} {self.name} - Params: {[f'{k}: {v}' for k, v in params.items()]} - (n_samples={ns_test}, n_features={n_features})"
-                        )
                         y_pred, time_elapsed = Timer.run(bench_func, X_test_)
+                        if i == 0:
+                            for metric in self.metrics:
+                                metric_func = getattr(
+                                    importlib.import_module("sklearn.metrics"), metric
+                                )
+                                score = metric_func(y_test_, y_pred)
+                                scores[metric] = score
                         row = dict(
                             estimator=self.name,
                             lib=self._lib_name(),
@@ -120,16 +125,11 @@ class Benchmark:
                             time_elapsed=time_elapsed,
                             n_samples=ns_test,
                             n_features=n_features,
+                            **scores,
                             **params,
                         )
-                        # biggest test set only, compute scores
-                        if i == len(dataset["n_samples_test"]) - 1:
-                            for metric in self.metrics:
-                                metric_func = getattr(
-                                    importlib.import_module("sklearn.metrics"), metric
-                                )
-                                score = metric_func(y_test_, y_pred)
-                                row[metric] = score
+                        print(row)
+                        print("---")
                         self.results_.append(row)
         return self
 
