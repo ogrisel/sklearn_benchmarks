@@ -7,10 +7,12 @@ import pandas as pd
 from sklearn.model_selection import ParameterGrid
 from sklearn_benchmarks.utils import gen_data
 from sklearn.model_selection import train_test_split
-from sklearn.base import BaseEstimator
+from sklearn_benchmarks.core import BenchmarkTimer
 
 
-class BenchmarkEstimator:
+class Benchmark:
+    """Runs benchmarks on one estimator for one library, accross potentially multiple datasets"""
+
     def __init__(
         self,
         name,
@@ -31,9 +33,8 @@ class BenchmarkEstimator:
         return self.source_path.split(".")[0]
 
     def _load_estimator_class(self):
-        components = self.source_path.split(".")
-        module = ".".join(components[:-1])
-        class_name = components[-1]
+        splitted_path = self.source_path.split(".")
+        module, class_name = ".".join(splitted_path[:-1]), splitted_path[-1]
         try:
             self.estimator_class_ = getattr(importlib.import_module(module), class_name)
         except Exception:
@@ -58,101 +59,74 @@ class BenchmarkEstimator:
         if not isinstance(self.hyperparameters, object):
             raise ValueError("hyperparameters should be an object")
 
+    def _init_estimator(self, params):
+        return self.estimator_class_(**params)
+
     def run(self):
         self._validate_params()
         self._load_estimator_class()
         self._init_params_grid()
         self.results_ = []
-        # for each dataset
         for dataset in self.datasets:
-            print("start dataset: ", dataset["generator"])
-            # for each n_samples in dataset
+            n_features = dataset["n_features"]
             for ns_train in dataset["n_samples_train"]:
-                print("start ns_train: ", ns_train)
-                ns_train = int(float(ns_train))
-                max_n_samples_test = max(
-                    map(lambda ns_test: int(float(ns_test)), dataset["n_samples_test"])
-                )
-                n_features = int(float(dataset["n_features"]))
-                # generate a dataset with generator:
-                # X, y = make_classification(n_samples = n_samples_train + max(n_samples_test) ...)
                 X, y = gen_data(
                     dataset["generator"],
-                    n_samples=ns_train + max_n_samples_test,
+                    n_samples=ns_train + max(dataset["n_samples_test"]),
                     n_features=n_features,
                 )
-                # X_train, y_train, X_test, y_test = train_test_split(X, y, train_size=n_samples_train, random_state=0)
                 X_train, X_test, y_train, y_test = train_test_split(
                     X, y, train_size=ns_train
                 )
-                # fit the estimator with train data (record time)
                 for params in self.params_grid_:
-                    print("start params: ", params)
-                    estimator = self.estimator_class_(**params)
-                    t0 = time.perf_counter()
-                    estimator.fit(X_train, y_train)
-                    t1 = time.perf_counter()
+                    estimator = self._init_estimator(params)
+                    print(
+                        f"fit {self.name} - Params: {[f'{k}: {v}' for k, v in params.items()]} - (n_samples={ns_train}, n_features={n_features})"
+                    )
+                    time_elapsed = BenchmarkTimer.run(estimator.fit, X_train, y_train)
                     row = dict(
                         estimator=self.name,
                         lib=self._lib_name(),
                         function="fit",
-                        time_elapsed=t1 - t0,
+                        time_elapsed=time_elapsed,
                         n_samples=ns_train,
                         n_features=n_features,
                         **params,
                     )
                     self.results_.append(row)
-                    # for each n_samples_test
-                    test_results = []
-                    for ns_test in sorted(
-                        map(
-                            lambda ns_test: int(float(ns_test)),
-                            dataset["n_samples_test"],
-                        )
-                    ):
-                        print("start ns_test: ", ns_test)
-                        # slice X_test and y_test
+                    for i, ns_test in enumerate(sorted(dataset["n_samples_test"])):
                         X_test_, y_test_ = X_test[:ns_test], y_test[:ns_test]
-                        # predict test data (record time)
-                        t0 = time.perf_counter()
-                        bench_func = (
-                            estimator.predict
-                            if hasattr(estimator, "predict")
-                            else estimator.transform
+                        if hasattr(estimator, "predict"):
+                            bench_func = estimator.predict
+                        else:
+                            bench_func = estimator.transform
+                        print(
+                            f"{bench_func.__name__} {self.name} - Params: {[f'{k}: {v}' for k, v in params.items()]} - (n_samples={ns_test}, n_features={n_features})"
                         )
-                        y_pred = bench_func(X_test_)
-                        t1 = time.perf_counter()
-                        print("end ns_test: ", ns_test)
-                        # load metrics function from sklearn.metrics
-                        # for biggest test set, compute metrics
+                        y_pred, time_elapsed = BenchmarkTimer.run(bench_func, X_test_)
                         row = dict(
                             estimator=self.name,
                             lib=self._lib_name(),
                             function="predict",
-                            time_elapsed=t1 - t0,
+                            time_elapsed=time_elapsed,
                             n_samples=ns_test,
                             n_features=n_features,
                             **params,
                         )
-                        test_results.append(row)
-                    for metric in self.metrics:
-                        print("start metric: ", metric)
-                        metric_func = getattr(
-                            importlib.import_module("sklearn.metrics"), metric
-                        )
-                        score = metric_func(y_test_, y_pred)
-                        for el in test_results:
-                            el[metric] = score
-                        print("end metric: ", metric)
-                    for el in test_results:
-                        self.results_.append(el)
-                    print("end params: ", params)
-                print("end ns_train: ", ns_train)
-            print("end dataset: ", dataset["generator"])
+                        # biggest test set only, compute scores
+                        if i == len(dataset["n_samples_test"]) - 1:
+                            for metric in self.metrics:
+                                metric_func = getattr(
+                                    importlib.import_module("sklearn.metrics"), metric
+                                )
+                                score = metric_func(y_test_, y_pred)
+                                row[metric] = score
+                        self.results_.append(row)
         return self
 
     def to_csv(self):
-        pd.DataFrame(self.results_).to_csv(
+        results = pd.DataFrame(self.results_)
+        results.to_csv(
             f"sklearn_benchmarks/results/{self._lib_name()}/{self.name}.csv",
             mode="w+",
             index=False,
@@ -180,10 +154,17 @@ def main():
                         else:
                             hyperparameters[key][i] = int(float(el))
             params["hyperparameters"] = hyperparameters
+        for dataset in params["datasets"]:
+            dataset["n_features"] = int(float(dataset["n_features"]))
+            for i, ns_train in enumerate(dataset["n_samples_train"]):
+                dataset["n_samples_train"][i] = int(float(ns_train))
+            for i, ns_test in enumerate(dataset["n_samples_test"]):
+                dataset["n_samples_test"][i] = int(float(ns_test))
+
         print(name)
         if "inherit" in params:
             params = estimators[params["inherit"]] | params
-        benchmark_estimator = BenchmarkEstimator(**params)
+        benchmark_estimator = Benchmark(**params)
         benchmark_estimator.run()
         benchmark_estimator.to_csv()
         print("--------------------------")
