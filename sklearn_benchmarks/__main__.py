@@ -3,11 +3,20 @@ import yaml
 import time
 import importlib
 import re
+import time
 import pandas as pd
 from sklearn.model_selection import ParameterGrid
 from sklearn_benchmarks.utils import gen_data
 from sklearn.model_selection import train_test_split
-from sklearn_benchmarks.core import BenchmarkTimer
+
+
+class Timer:
+    @staticmethod
+    def run(func, *args):
+        start = time.perf_counter()
+        res = func(*args)
+        end = time.perf_counter()
+        return (res, end - start)
 
 
 class Benchmark:
@@ -83,7 +92,7 @@ class Benchmark:
                     print(
                         f"fit {self.name} - Params: {[f'{k}: {v}' for k, v in params.items()]} - (n_samples={ns_train}, n_features={n_features})"
                     )
-                    time_elapsed = BenchmarkTimer.run(estimator.fit, X_train, y_train)
+                    _, time_elapsed = Timer.run(estimator.fit, X_train, y_train)
                     row = dict(
                         estimator=self.name,
                         lib=self._lib_name(),
@@ -103,7 +112,7 @@ class Benchmark:
                         print(
                             f"{bench_func.__name__} {self.name} - Params: {[f'{k}: {v}' for k, v in params.items()]} - (n_samples={ns_test}, n_features={n_features})"
                         )
-                        y_pred, time_elapsed = BenchmarkTimer.run(bench_func, X_test_)
+                        y_pred, time_elapsed = Timer.run(bench_func, X_test_)
                         row = dict(
                             estimator=self.name,
                             lib=self._lib_name(),
@@ -141,19 +150,20 @@ def main():
 
     estimators = config["estimators"]
 
-    for name, params in estimators.items():
-        if "hyperparameters" in params:
-            hyperparameters = params["hyperparameters"]
-            for key, value in hyperparameters.items():
-                if not isinstance(value, list):
-                    continue
-                for i, el in enumerate(value):
-                    if isinstance(el, str) and bool(re.match(r"1[eE](\-)*\d{1,}", el)):
-                        if "-" in el:
-                            hyperparameters[key][i] = float(el)
-                        else:
-                            hyperparameters[key][i] = int(float(el))
-            params["hyperparameters"] = hyperparameters
+    for _, params in estimators.items():
+        if "inherit" in params:
+            params = estimators[params["inherit"]] | params
+
+        for key, value in params["hyperparameters"].items():
+            if not isinstance(value, list):
+                continue
+            for i, el in enumerate(value):
+                if isinstance(el, str) and bool(re.match(r"1[eE](\-)*\d{1,}", el)):
+                    if "-" in el:
+                        params["hyperparameters"][key][i] = float(el)
+                    else:
+                        params["hyperparameters"][key][i] = int(float(el))
+
         for dataset in params["datasets"]:
             dataset["n_features"] = int(float(dataset["n_features"]))
             for i, ns_train in enumerate(dataset["n_samples_train"]):
@@ -161,13 +171,9 @@ def main():
             for i, ns_test in enumerate(dataset["n_samples_test"]):
                 dataset["n_samples_test"][i] = int(float(ns_test))
 
-        print(name)
-        if "inherit" in params:
-            params = estimators[params["inherit"]] | params
         benchmark_estimator = Benchmark(**params)
         benchmark_estimator.run()
         benchmark_estimator.to_csv()
-        print("--------------------------")
 
 
 if __name__ == "__main__":
