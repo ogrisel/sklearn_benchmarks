@@ -5,7 +5,11 @@ import importlib
 import time
 import pandas as pd
 from sklearn.model_selection import ParameterGrid
-from sklearn_benchmarks.utils import gen_data, is_scientific_notation
+from sklearn_benchmarks.utils import (
+    gen_data,
+    is_scientific_notation,
+    predict_or_transform,
+)
 from sklearn.model_selection import train_test_split
 
 
@@ -68,13 +72,6 @@ class Benchmark:
         module = importlib.import_module("sklearn.metrics")
         return [getattr(module, m) for m in self.metrics]
 
-    def _predict_or_transform(self, estimator):
-        if hasattr(estimator, "predict"):
-            bench_func = estimator.predict
-        else:
-            bench_func = estimator.transform
-        return bench_func
-
     def run(self):
         self._validate_params()
         estimator_class = self._load_estimator_class()
@@ -84,7 +81,7 @@ class Benchmark:
         for dataset in self.datasets:
             n_features = dataset["n_features"]
             n_samples_train = dataset["n_samples_train"]
-            n_samples_test = reversed(sorted(dataset["n_samples_test"]))
+            n_samples_test = list(reversed(sorted(dataset["n_samples_test"])))
             for ns_train in n_samples_train:
                 X, y = gen_data(
                     dataset["generator"],
@@ -109,9 +106,10 @@ class Benchmark:
                     print(row)
                     print("---")
                     self.results_.append(row)
-                    for i, ns_test in enumerate(n_samples_test):
+                    for i in range(len(n_samples_test)):
+                        ns_test = n_samples_test[i]
                         X_test_, y_test_ = X_test[:ns_test], y_test[:ns_test]
-                        bench_func = self._predict_or_transform(estimator)
+                        bench_func = predict_or_transform(estimator)
                         y_pred, time_elapsed = Timer.run(bench_func, X_test_)
                         if i == 0:
                             scores = {
