@@ -11,7 +11,6 @@ estimators:
         - 1e2
       algorithm:
         - brute
-        # - kd_tree
       n_jobs:
         - -1
         - 1
@@ -25,10 +24,14 @@ estimators:
           - 1e6
         n_samples_test:
           - 1
-          - 10
-          - 1e2
-          # - 1e3
-          # - 1e4
+          - 1e3
+      - generator: classification
+        n_features: 2
+        n_samples_train:
+          - 1e6
+        n_samples_test:
+          - 1
+          - 1e3
   daal4py_KNeighborsClassifier:
     inherit: KNeighborsClassifier
     source_path: daal4py.sklearn.neighbors.KNeighborsClassifier
@@ -40,7 +43,6 @@ estimators:
         - k-means++
         - random
       n_clusters:
-        - 3
         - 8
       max_iter:
         - 30
@@ -54,38 +56,30 @@ estimators:
       - generator: blobs
         n_features: 2
         n_samples_train:
-          - 1e3
+          - 1e4
         n_samples_test:
           - 1
-          - 10
-          - 1e2
           - 1e3
       - generator: blobs
         n_features: 1e2
         n_samples_train:
-          - 1e3
+          - 1e4
         n_samples_test:
           - 1
-          - 10
-          - 1e2
           - 1e3
       - generator: blobs
         n_features: 2
         n_samples_train:
-          - 1e5
+          - 1e6
         n_samples_test:
           - 1
-          - 10
-          - 1e2
           - 1e3
       - generator: blobs
         n_features: 1e2
         n_samples_train:
-          - 1e5
+          - 1e6
         n_samples_test:
           - 1
-          - 10
-          - 1e2
           - 1e3
   daal4py_KMeans:
     inherit: KMeans
