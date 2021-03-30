@@ -18,14 +18,14 @@ estimators:
       - accuracy_score
       - roc_auc_score
     datasets:
-      - generator: classification
+      - generator: sklearn.datasets.make_classification
         n_features: 1e2
         n_samples_train:
           - 1e6
         n_samples_test:
           - 1
           - 1e3
-      - generator: classification
+      - generator: sklearn.datasets.make_classification
         n_features: 2
         n_samples_train:
           - 1e6
@@ -43,7 +43,9 @@ estimators:
         - k-means++
         - random
       n_clusters:
+        - 3
         - 8
+        - 10
       max_iter:
         - 30
       n_init:
@@ -53,28 +55,28 @@ estimators:
     metrics:
       - adjusted_rand_score
     datasets:
-      - generator: blobs
+      - generator: sklearn.datasets.make_blobs
         n_features: 2
         n_samples_train:
           - 1e4
         n_samples_test:
           - 1
           - 1e3
-      - generator: blobs
+      - generator: sklearn.datasets.make_blobs
         n_features: 1e2
         n_samples_train:
           - 1e4
         n_samples_test:
           - 1
           - 1e3
-      - generator: blobs
+      - generator: sklearn.datasets.make_blobs
         n_features: 2
         n_samples_train:
           - 1e6
         n_samples_test:
           - 1
           - 1e3
-      - generator: blobs
+      - generator: sklearn.datasets.make_blobs
         n_features: 1e2
         n_samples_train:
           - 1e6
