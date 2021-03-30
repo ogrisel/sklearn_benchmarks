@@ -103,6 +103,8 @@ class Benchmark:
                         n_features=n_features,
                         **params,
                     )
+                    if hasattr(estimator, "n_iter_"):
+                        row["n_iter"] = estimator.n_iter_
                     print(row)
                     print("---")
                     self.results_.append(row)
