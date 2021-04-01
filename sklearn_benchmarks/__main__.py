@@ -1,9 +1,13 @@
 from pathlib import Path
 import yaml
+import json
 import time
 import importlib
 import time
 import pandas as pd
+import os
+import glob
+import numpy as np
 from sklearn.model_selection import ParameterGrid
 from sklearn_benchmarks.utils import (
     gen_data,
@@ -16,10 +20,18 @@ from sklearn.model_selection import train_test_split
 class Timer:
     @staticmethod
     def run(func, *args):
+        times = []
         start = time.perf_counter()
-        result = func(*args)
-        end = time.perf_counter()
-        return (result, end - start)
+        for _ in range(10):
+            start_ = time.perf_counter()
+            result = func(*args)
+            end_ = time.perf_counter()
+            times.append(end_ - start_)
+            curr = time.perf_counter()
+            if curr - start > 3:
+                break
+        mean_time, std_time = np.mean(times), np.std(times)
+        return (result, mean_time, std_time)
 
 
 class Benchmark:
@@ -94,26 +106,32 @@ class Benchmark:
                 )
                 for params in parameters_grid:
                     estimator = estimator_class(**params)
-                    _, time_elapsed = Timer.run(estimator.fit, X_train, y_train)
+                    _, mean_time_elapsed, std_time_elapsed = Timer.run(
+                        estimator.fit, X_train, y_train
+                    )
                     row = dict(
                         estimator=self.name,
                         lib=self._lib_name(),
                         function="fit",
-                        time_elapsed=time_elapsed,
+                        mean_time_elapsed=mean_time_elapsed,
+                        std_time_elapsed=std_time_elapsed,
+                        n_reps=10,
                         n_samples=ns_train,
                         n_features=n_features,
                         **params,
                     )
                     if hasattr(estimator, "n_iter_"):
                         row["n_iter"] = estimator.n_iter_
-                    print(row)
+                    print(json.dumps(row, indent=4, ensure_ascii=False))
                     print("---")
                     self.results_.append(row)
                     for i in range(len(n_samples_test)):
                         ns_test = n_samples_test[i]
                         X_test_, y_test_ = X_test[:ns_test], y_test[:ns_test]
                         bench_func = predict_or_transform(estimator)
-                        y_pred, time_elapsed = Timer.run(bench_func, X_test_)
+                        y_pred, mean_time_elapsed, std_time_elapsed = Timer.run(
+                            bench_func, X_test_
+                        )
                         if i == 0:
                             scores = {
                                 func.__name__: func(y_test_, y_pred)
@@ -123,13 +141,14 @@ class Benchmark:
                             estimator=self.name,
                             lib=self._lib_name(),
                             function="predict",
-                            time_elapsed=time_elapsed,
+                            mean_time_elapsed=mean_time_elapsed,
+                            std_time_elapsed=std_time_elapsed,
                             n_samples=ns_test,
                             n_features=n_features,
                             **scores,
                             **params,
                         )
-                        print(row)
+                        print(json.dumps(row, indent=4, ensure_ascii=False))
                         print("---")
                         self.results_.append(row)
         return self
@@ -164,7 +183,19 @@ def _prepare_params(params):
     return params
 
 
+def clean_results():
+    files = glob.glob("sklearn_benchmarks/results/**/*.csv", recursive=True)
+
+    for f in files:
+        try:
+            os.remove(f)
+        except OSError as e:
+            print("Error: %s : %s" % (f, e.strerror))
+
+
 def main():
+    clean_results()
+
     current_path = Path(__file__).resolve().parent
     config_path = current_path / "config.yaml"
     with open(config_path, "r") as config_file:
@@ -172,23 +203,28 @@ def main():
 
     estimators = config["estimators"]
 
-    t0, t1 = time.perf_counter(), None
+    time_report = {}
+    t0 = time.perf_counter()
     for name, params in estimators.items():
         if "inherit" in params:
-            name_inherits_from = params["inherit"]
-            # Merge params with estimator from which inherits
-            params = estimators[name_inherits_from] | params
+            curr_source = params["source"]
+            params = estimators[params["inherit"]]
+            params["source"] = curr_source
 
         params = _prepare_params(params)
 
         benchmark_estimator = Benchmark(**params)
         print(f"start benchmark {name}")
         print("---")
+        t0_ = time.perf_counter()
         benchmark_estimator.run()
-        t1 = time.perf_counter()
-        print(f"{name} time spent: {t1 - t0}s")
+        t1_ = time.perf_counter()
+        time_report[name] = "%ss" % round(t1_ - t0_, 2)
         benchmark_estimator.to_csv()
-    print(f"total time: {t1 - t0}s")
+
+    t1 = time.perf_counter()
+    time_report["total"] = "%ss" % round(t1 - t0, 2)
+    print(yaml.dump(time_report))
 
 
 if __name__ == "__main__":
