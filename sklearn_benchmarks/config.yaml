@@ -8,7 +8,7 @@ estimators:
         - 5
         - 10
         - 50
-        # - 1e2
+        - 1e2
       algorithm:
         - brute
       n_jobs:
@@ -26,7 +26,7 @@ estimators:
           - 1e6
         n_samples_test:
           - 1
-          # - 1e3
+          - 1e3
       - sample_generator: sklearn.datasets.make_classification
         params:
           n_classes: 2
@@ -37,7 +37,7 @@ estimators:
           - 1e6
         n_samples_test:
           - 1
-          # - 1e3
+          - 1e3
 
   daal4py_KNeighborsClassifier:
     inherit: KNeighborsClassifier
