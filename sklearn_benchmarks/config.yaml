@@ -1,7 +1,7 @@
 estimators:
   KNeighborsClassifier:
     name: KNeighborsClassifier
-    source_path: sklearn.neighbors.KNeighborsClassifier
+    source: sklearn.neighbors.KNeighborsClassifier
     hyperparameters:
       n_neighbors:
         - 1
@@ -18,15 +18,21 @@ estimators:
       - accuracy_score
       - roc_auc_score
     datasets:
-      - generator: sklearn.datasets.make_classification
+      - sample_generator: sklearn.datasets.make_classification
+        params:
+          random_state: 42
         n_features: 1e2
         n_samples_train:
           - 1e6
         n_samples_test:
           - 1
           - 1e3
-      - generator: sklearn.datasets.make_classification
-        n_features: 2
+      - sample_generator: sklearn.datasets.make_classification
+        params:
+          n_classes: 2
+          n_redundant: 0
+          random_state: 42
+        n_features: 3
         n_samples_train:
           - 1e6
         n_samples_test:
@@ -34,10 +40,10 @@ estimators:
           - 1e3
   daal4py_KNeighborsClassifier:
     inherit: KNeighborsClassifier
-    source_path: daal4py.sklearn.neighbors.KNeighborsClassifier
+    source: daal4py.sklearn.neighbors.KNeighborsClassifier
   KMeans:
     name: KMeans
-    source_path: sklearn.cluster.KMeans
+    source: sklearn.cluster.KMeans
     hyperparameters:
       init:
         - k-means++
@@ -55,28 +61,36 @@ estimators:
     metrics:
       - adjusted_rand_score
     datasets:
-      - generator: sklearn.datasets.make_blobs
+      - sample_generator: sklearn.datasets.make_blobs
+        params:
+          random_state: 42
         n_features: 2
         n_samples_train:
           - 1e4
         n_samples_test:
           - 1
           - 1e3
-      - generator: sklearn.datasets.make_blobs
+      - sample_generator: sklearn.datasets.make_blobs
+        params:
+          random_state: 42
         n_features: 1e2
         n_samples_train:
           - 1e4
         n_samples_test:
           - 1
           - 1e3
-      - generator: sklearn.datasets.make_blobs
+      - sample_generator: sklearn.datasets.make_blobs
+        params:
+          random_state: 42
         n_features: 2
         n_samples_train:
           - 1e6
         n_samples_test:
           - 1
           - 1e3
-      - generator: sklearn.datasets.make_blobs
+      - sample_generator: sklearn.datasets.make_blobs
+        params:
+          random_state: 42
         n_features: 1e2
         n_samples_train:
           - 1e6
@@ -85,4 +99,4 @@ estimators:
           - 1e3
   daal4py_KMeans:
     inherit: KMeans
-    source_path: daal4py.sklearn.cluster.KMeans
+    source: daal4py.sklearn.cluster.KMeans

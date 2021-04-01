@@ -28,24 +28,24 @@ class Benchmark:
     def __init__(
         self,
         name,
-        source_path,
+        source,
         inherit=False,
         metrics=["accuracy"],
         hyperparameters={},
         datasets=[],
     ):
         self.name = name
-        self.source_path = source_path
+        self.source = source
         self.inherit = inherit
         self.metrics = metrics
         self.hyperparameters = hyperparameters
         self.datasets = datasets
 
     def _lib_name(self):
-        return self.source_path.split(".")[0]
+        return self.source.split(".")[0]
 
     def _load_estimator_class(self):
-        splitted_path = self.source_path.split(".")
+        splitted_path = self.source.split(".")
         module, class_name = ".".join(splitted_path[:-1]), splitted_path[-1]
         return getattr(importlib.import_module(module), class_name)
 
@@ -57,8 +57,8 @@ class Benchmark:
             raise ValueError("name should be a string")
         if not self.name:
             raise ValueError("name should not be an empty string")
-        if not isinstance(self.source_path, str):
-            raise ValueError("source_path should be a string")
+        if not isinstance(self.source, str):
+            raise ValueError("source should be a string")
         if not (isinstance(self.inherit, bool) or isinstance(self.inherit, str)):
             raise ValueError("inherit should be a either True, False or a string")
         if not isinstance(self.metrics, list):
@@ -84,9 +84,10 @@ class Benchmark:
             n_samples_test = list(reversed(sorted(dataset["n_samples_test"])))
             for ns_train in n_samples_train:
                 X, y = gen_data(
-                    dataset["generator"],
-                    n_samples=ns_train + max(dataset["n_samples_test"]),
+                    dataset["sample_generator"],
+                    n_samples=ns_train + max(n_samples_test),
                     n_features=n_features,
+                    **dataset["params"],
                 )
                 X_train, X_test, y_train, y_test = train_test_split(
                     X, y, train_size=ns_train
@@ -171,7 +172,8 @@ def main():
 
     estimators = config["estimators"]
 
-    for params in estimators.values():
+    t0, t1 = time.perf_counter(), None
+    for name, params in estimators.items():
         if "inherit" in params:
             name_inherits_from = params["inherit"]
             # Merge params with estimator from which inherits
@@ -180,8 +182,13 @@ def main():
         params = _prepare_params(params)
 
         benchmark_estimator = Benchmark(**params)
+        print(f"start benchmark {name}")
+        print("---")
         benchmark_estimator.run()
+        t1 = time.perf_counter()
+        print(f"{name} time spent: {t1 - t0}s")
         benchmark_estimator.to_csv()
+    print(f"total time: {t1 - t0}s")
 
 
 if __name__ == "__main__":
