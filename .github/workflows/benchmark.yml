@@ -20,9 +20,27 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+      - name: checkout repo content
+        uses: actions/checkout@v2
+      - name: setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8 # install the python needed
+      - name: install dependencies
+        uses: |
+          python3 -m pip install --upgrade pip
+          pip3 install pyyaml
+          pip3 install pandas
+          pip3 install sklearn
+          pip3 install numpy
+          pip3 install matplotlib
+          pip3 install seaborn
+          wget https://registrationcenter-download.intel.com/akdlm/irc_nas/17766/l_AIKit_p_2021.2.0.1101.sh
+          sudo bash l_AIKit_p_2021.2.0.1101.sh
+          pip3 install daal4py
+          
+          
 
       # Runs a single command using the runners shell
-      - name: Run the suite of benchmarks
+      - name: Execute benchmark script
         run: python3 -m sklearn_benchmarks
