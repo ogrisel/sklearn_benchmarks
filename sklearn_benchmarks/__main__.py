@@ -156,9 +156,11 @@ class Benchmark:
     def to_csv(self):
         results = pd.DataFrame(self.results_)
         current_path = Path(__file__).resolve().parent
+        print(current_path)
         csv_path = current_path / f"results/{self._lib_name()}/{self.name}.csv"
+        print(csv_path)
         results.to_csv(
-            str(csv_path),
+            str("dede.csv"),
             mode="w+",
             index=False,
         )

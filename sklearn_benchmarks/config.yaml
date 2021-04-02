@@ -5,72 +5,28 @@ estimators:
     hyperparameters:
       n_neighbors:
         - 1
-        - 5
-        - 10
+        # - 5
+        # - 10
         # - 50
         # - 1e2
       algorithm:
         - brute
       n_jobs:
         - -1
-        - 1
+        # - 1
     metrics:
       - accuracy_score
       # - roc_auc_score
     datasets:
-      - sample_generator: sklearn.datasets.make_classification
-        params:
-          random_state: 42
-        n_features: 1e2
-        n_samples_train:
-          - 1e6
-        n_samples_test:
-          - 1
-          # - 1e3
       # - sample_generator: sklearn.datasets.make_classification
       #   params:
-      #     n_classes: 2
-      #     n_redundant: 0
       #     random_state: 42
-      #   n_features: 2
+      #   n_features: 1e2
       #   n_samples_train:
       #     - 1e6
       #   n_samples_test:
       #     - 1
-      #     - 1e3
-
-  daal4py_KNeighborsClassifier:
-    inherit: KNeighborsClassifier
-    source: daal4py.sklearn.neighbors.KNeighborsClassifier
-
-  KNeighborsClassifier_kd_tree:
-    name: KNeighborsClassifier_kd_tree
-    source: sklearn.neighbors.KNeighborsClassifier
-    hyperparameters:
-      n_neighbors:
-        - 1
-        - 5
-        - 10
-        # - 50
-        # - 1e2
-      algorithm:
-        - kd_tree
-      n_jobs:
-        - -1
-        - 1
-    metrics:
-      - accuracy_score
-      - roc_auc_score
-    datasets:
-      # - sample_generator: sklearn.datasets.make_classification
-      #   params:
-      #     random_state: 42
-      #   n_features: 10
-      #   n_samples_train:
-      #     - 1e6
-      #   n_samples_test:
-      #     - 1
-      #     - 1e3
+      #     # - 1e3
       - sample_generator: sklearn.datasets.make_classification
         params:
           n_classes: 2
@@ -81,11 +37,55 @@ estimators:
           - 1e6
         n_samples_test:
           - 1
-          - 1e3
+          # - 1e3
 
-  daal4py_KNeighborsClassifier_kd_tree:
-    inherit: KNeighborsClassifier_kd_tree
+  daal4py_KNeighborsClassifier:
+    inherit: KNeighborsClassifier
     source: daal4py.sklearn.neighbors.KNeighborsClassifier
+
+  # KNeighborsClassifier_kd_tree:
+  #   name: KNeighborsClassifier_kd_tree
+  #   source: sklearn.neighbors.KNeighborsClassifier
+  #   hyperparameters:
+  #     n_neighbors:
+  #       - 1
+  #       - 5
+  #       - 10
+  #       - 50
+  #       - 1e2
+  #     algorithm:
+  #       - kd_tree
+  #     n_jobs:
+  #       - -1
+  #       - 1
+  #   metrics:
+  #     - accuracy_score
+  #     - roc_auc_score
+  #   datasets:
+  #     - sample_generator: sklearn.datasets.make_classification
+  #       params:
+  #         random_state: 42
+  #       n_features: 10
+  #       n_samples_train:
+  #         - 1e6
+  #       n_samples_test:
+  #         - 1
+  #         - 1e3
+  #     - sample_generator: sklearn.datasets.make_classification
+  #       params:
+  #         n_classes: 2
+  #         n_redundant: 0
+  #         random_state: 42
+  #       n_features: 2
+  #       n_samples_train:
+  #         - 1e6
+  #       n_samples_test:
+  #         - 1
+  #         - 1e3
+
+  # daal4py_KNeighborsClassifier_kd_tree:
+  #   inherit: KNeighborsClassifier_kd_tree
+  #   source: daal4py.sklearn.neighbors.KNeighborsClassifier
 
   # KMeans:
   #   name: KMeans
