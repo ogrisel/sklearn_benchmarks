@@ -28,6 +28,10 @@ jobs:
           pip3 install seaborn
           pip3 install scikit-learn-intelex
           pip3 install plotly==4.14.3
+          pip3 install nbconvert
 
       - name: run benchmark suite
         run: python3 -m sklearn_benchmarks
+
+      - name: convert notebook to html
+        run: jupyter nbconvert --to html viz.ipynb
