@@ -193,6 +193,12 @@ def clean_results():
             print("Error: %s : %s" % (f, e.strerror))
 
 
+def convert(seconds):
+    min, sec = divmod(seconds, 60)
+    hour, min = divmod(min, 60)
+    return hour, min, sec
+
+
 def main():
     clean_results()
 
@@ -203,7 +209,7 @@ def main():
 
     estimators = config["estimators"]
 
-    time_report = {}
+    time_report = pd.DataFrame(columns=["algo", "hour", "min", "sec"])
     t0 = time.perf_counter()
     for name, params in estimators.items():
         if "inherit" in params:
@@ -219,12 +225,17 @@ def main():
         t0_ = time.perf_counter()
         benchmark_estimator.run()
         t1_ = time.perf_counter()
-        time_report[name] = "%ss" % round(t1_ - t0_, 2)
+        time_report.loc[len(time_report)] = [name, *convert(t1_ - t0_)]
         benchmark_estimator.to_csv()
 
     t1 = time.perf_counter()
-    time_report["total"] = "%ss" % round(t1 - t0, 2)
-    print(yaml.dump(time_report))
+    time_report.loc[len(time_report)] = ["total", *convert(t1 - t0)]
+    time_report = time_report.round(2)
+    time_report.to_csv(
+        f"sklearn_benchmarks/results/time_report.csv",
+        mode="w+",
+        index=False,
+    )
 
 
 if __name__ == "__main__":
