@@ -27,6 +27,7 @@ jobs:
           pip3 install matplotlib
           pip3 install seaborn
           pip3 install scikit-learn-intelex
+          pip3 install plotly==4.14.3
 
       - name: run benchmark suite
         run: python3 -m sklearn_benchmarks
