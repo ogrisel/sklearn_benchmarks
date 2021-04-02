@@ -15,23 +15,17 @@ jobs:
       - name: setup python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: 3.8
 
       - name: install dependencies
         run: |
-          python3 -m pip install --upgrade pip
-          pip3 install pyyaml
-          pip3 install pandas
-          pip3 install sklearn
-          pip3 install numpy
-          pip3 install matplotlib
-          pip3 install seaborn
-          pip3 install scikit-learn-intelex
-          pip3 install plotly==4.14.3
-          pip3 install nbconvert
+          python -m pip install --upgrade pip
+          pip install pyyaml pandas scikit-learn numpy \
+            matplotlib seaborn scikit-learn-intelex \
+            plotly==4.14.3 nbconvert
 
       - name: run benchmark suite
-        run: python3 -m sklearn_benchmarks
+        run: python -m sklearn_benchmarks
 
       - name: convert notebook to html
         run: jupyter nbconvert --to html viz.ipynb
