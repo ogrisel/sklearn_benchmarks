@@ -26,8 +26,6 @@ jobs:
           pip3 install numpy
           pip3 install matplotlib
           pip3 install seaborn
-          wget https://registrationcenter-download.intel.com/akdlm/irc_nas/17766/l_AIKit_p_2021.2.0.1101.sh
-          sudo bash l_AIKit_p_2021.2.0.1101.sh
           pip3 install scikit-learn-intelex
 
       - name: Execute benchmark script
