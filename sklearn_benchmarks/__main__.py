@@ -155,8 +155,10 @@ class Benchmark:
 
     def to_csv(self):
         results = pd.DataFrame(self.results_)
+        current_path = Path(__file__).resolve().parent
+        csv_path = current_path / f"results/{self._lib_name()}/{self.name}.csv"
         results.to_csv(
-            f"sklearn_benchmarks/results/{self._lib_name()}/{self.name}.csv",
+            str(csv_path),
             mode="w+",
             index=False,
         )
@@ -184,7 +186,9 @@ def _prepare_params(params):
 
 
 def clean_results():
-    files = glob.glob("sklearn_benchmarks/results/**/*.csv", recursive=True)
+    current_path = Path(__file__).resolve().parent
+    files_path = current_path / "results/**/*.csv"
+    files = glob.glob(str(files_path), recursive=True)
 
     for f in files:
         try:
@@ -231,8 +235,10 @@ def main():
     t1 = time.perf_counter()
     time_report.loc[len(time_report)] = ["total", *convert(t1 - t0)]
     time_report = time_report.round(2)
+    current_path = Path(__file__).resolve().parent
+    time_report_path = current_path / "results/time_report.csv"
     time_report.to_csv(
-        f"sklearn_benchmarks/results/time_report.csv",
+        str(time_report_path),
         mode="w+",
         index=False,
     )
