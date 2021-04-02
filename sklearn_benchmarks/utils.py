@@ -28,36 +28,3 @@ def predict_or_transform(estimator):
     else:
         bench_func = estimator.transform
     return bench_func
-
-def old_plot():
-    BAR_WIDTH = .25
-    merged_df_knn_grouped = merged_df_knn.groupby(['algorithm', 'n_neighbors', 'function'])
-    fig, axes = plt.subplots(4, 2, figsize=(10, 20))
-    axes = axes.flatten()
-    for (params, df), ax in zip(merged_df_knn_grouped, axes):
-        print(params)
-        print(df.shape)
-        df = df.loc[(df.n_samples + df.n_features).sort_values().index]
-        n_jobs_vals = df['n_jobs'].unique()
-        n_bars = len(n_jobs_vals)
-        for i, val in enumerate(df['n_jobs'].unique()):
-            for 
-            x = np.arange(n_bars)
-            n_bars = len(n_jobs_vals)
-            if i % 2 == 0:
-                x = x - (BAR_WIDTH / n_bars)
-            else:
-                x = x + (BAR_WIDTH / n_bars)
-            label="n_jobs = %s" % val
-            sns.barplot(x="n_samples", y="speedup", hue="n_jobs", data=df, ax=ax)
-            #ax.bar(x, height, width=BAR_WIDTH, label=label)
-        title = "algo: %s, k: %s, func: %s" % params
-        ax.set_title(title)
-        ax.set_xticks(x)
-        labels = ["%s (%s, %s)" % tuple(row) for row in df[['function', 'n_samples', 'n_features']].values]
-        labels = np.unique(labels)
-        ax.set_xticklabels(labels, rotation=30)
-        ax.set_ylabel('Speedup')
-        ax.legend()
-        print('---')
-    fig.tight_layout()
