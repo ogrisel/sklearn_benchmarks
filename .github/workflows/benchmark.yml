@@ -28,5 +28,5 @@ jobs:
           pip3 install seaborn
           pip3 install scikit-learn-intelex
 
-      - name: Execute benchmark script
+      - name: run benchmark suite
         run: python3 -m sklearn_benchmarks
