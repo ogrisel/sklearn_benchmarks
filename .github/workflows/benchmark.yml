@@ -1,10 +1,8 @@
-name: Sklearn Benchmark Suite
+name: sklearn benchmark suite
 
 on:
   push:
     branches: [master]
-
-  workflow_dispatch:
 
 jobs:
   build:
@@ -13,10 +11,12 @@ jobs:
     steps:
       - name: checkout repo content
         uses: actions/checkout@v2
+
       - name: setup python
         uses: actions/setup-python@v2
         with:
           python-version: 3.9
+
       - name: install dependencies
         run: |
           python3 -m pip install --upgrade pip
