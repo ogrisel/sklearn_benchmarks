@@ -5,33 +5,16 @@ import time
 import importlib
 import time
 import pandas as pd
-import os
-import glob
-import numpy as np
 from sklearn.model_selection import ParameterGrid
 from sklearn_benchmarks.utils import (
+    ExecutionTimer,
     gen_data,
     is_scientific_notation,
     predict_or_transform,
+    clean_results,
+    convert,
 )
 from sklearn.model_selection import train_test_split
-
-
-class Timer:
-    @staticmethod
-    def run(func, *args):
-        times = []
-        start = time.perf_counter()
-        for _ in range(10):
-            start_ = time.perf_counter()
-            result = func(*args)
-            end_ = time.perf_counter()
-            times.append(end_ - start_)
-            curr = time.perf_counter()
-            if curr - start > 3:
-                break
-        mean_time, std_time = np.mean(times), np.std(times)
-        return (result, mean_time, std_time)
 
 
 class Benchmark:
@@ -106,7 +89,7 @@ class Benchmark:
                 )
                 for params in parameters_grid:
                     estimator = estimator_class(**params)
-                    _, mean_time_elapsed, std_time_elapsed = Timer.run(
+                    _, mean_time_elapsed, std_time_elapsed = ExecutionTimer.run(
                         estimator.fit, X_train, y_train
                     )
                     row = dict(
@@ -115,7 +98,6 @@ class Benchmark:
                         function="fit",
                         mean_time_elapsed=mean_time_elapsed,
                         std_time_elapsed=std_time_elapsed,
-                        n_reps=10,
                         n_samples=ns_train,
                         n_features=n_features,
                         **params,
@@ -129,9 +111,11 @@ class Benchmark:
                         ns_test = n_samples_test[i]
                         X_test_, y_test_ = X_test[:ns_test], y_test[:ns_test]
                         bench_func = predict_or_transform(estimator)
-                        y_pred, mean_time_elapsed, std_time_elapsed = Timer.run(
-                            bench_func, X_test_
-                        )
+                        (
+                            y_pred,
+                            mean_time_elapsed,
+                            std_time_elapsed,
+                        ) = ExecutionTimer.run(bench_func, X_test_)
                         if i == 0:
                             scores = {
                                 func.__name__: func(y_test_, y_pred)
@@ -154,13 +138,11 @@ class Benchmark:
         return self
 
     def to_csv(self):
-        results = pd.DataFrame(self.results_)
         current_path = Path(__file__).resolve().parent
-        print(current_path)
         csv_path = current_path / f"results/{self._lib_name()}/{self.name}.csv"
-        print(csv_path)
+        results = pd.DataFrame(self.results_)
         results.to_csv(
-            str("dede.csv"),
+            str(csv_path),
             mode="w+",
             index=False,
         )
@@ -185,24 +167,6 @@ def _prepare_params(params):
             dataset["n_samples_test"][i] = int(float(ns_test))
 
     return params
-
-
-def clean_results():
-    current_path = Path(__file__).resolve().parent
-    files_path = current_path / "results/**/*.csv"
-    files = glob.glob(str(files_path), recursive=True)
-
-    for f in files:
-        try:
-            os.remove(f)
-        except OSError as e:
-            print("Error: %s : %s" % (f, e.strerror))
-
-
-def convert(seconds):
-    min, sec = divmod(seconds, 60)
-    hour, min = divmod(min, 60)
-    return hour, min, sec
 
 
 def main():

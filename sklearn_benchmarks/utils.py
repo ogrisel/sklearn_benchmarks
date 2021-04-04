@@ -1,4 +1,9 @@
 import numpy as np
+import os
+import glob
+from pathlib import Path
+import glob
+import time
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 import pandas as pd
@@ -6,6 +11,23 @@ import importlib
 import itertools
 import re
 from joblib import Memory
+
+
+class ExecutionTimer:
+    @staticmethod
+    def run(func, *args):
+        times = []
+        start = time.perf_counter()
+        for _ in range(10):
+            start_ = time.perf_counter()
+            result = func(*args)
+            end_ = time.perf_counter()
+            times.append(end_ - start_)
+            curr = time.perf_counter()
+            if curr - start > 3:
+                break
+        mean_time, std_time = np.mean(times), np.std(times)
+        return (result, mean_time, std_time)
 
 
 _cachedir = "tmp"
@@ -138,3 +160,21 @@ def plot_knn(algo="KNeighborsClassifier"):
 
     fig.update_layout(height=1500, barmode="group", showlegend=False)
     fig.show()
+
+
+def clean_results():
+    current_path = Path(__file__).resolve().parent
+    files_path = current_path / "results/**/*.csv"
+    files = glob.glob(str(files_path), recursive=True)
+
+    for f in files:
+        try:
+            os.remove(f)
+        except OSError as e:
+            print("Error: %s : %s" % (f, e.strerror))
+
+
+def convert(seconds):
+    min, sec = divmod(seconds, 60)
+    hour, min = divmod(min, 60)
+    return hour, min, sec
