@@ -88,6 +88,8 @@ def plot_knn(algo="KNeighborsClassifier"):
             "algorithm",
             "n_jobs",
             "n_neighbors",
+            "mean_time_elapsed_skl",
+            "mean_time_elapsed_d4p",
             "speedup",
         ]
     ]
@@ -97,7 +99,7 @@ def plot_knn(algo="KNeighborsClassifier"):
 
     n_rows = 5
     n_cols = 2
-    coordinates = [[j for j in range(n_cols)] for i in range(n_rows)]
+    coordinates = [[j for j in range(n_cols)] for _ in range(n_rows)]
     for i in range(len(coordinates)):
         for j in range(len(coordinates[0])):
             coordinates[i][j] = (i + 1, j + 1)
@@ -106,10 +108,15 @@ def plot_knn(algo="KNeighborsClassifier"):
     subplot_titles = [
         "algo: %s, k: %s, func: %s" % params for params, _ in merged_df_knn_grouped
     ]
-    fig = make_subplots(rows=5, cols=2, subplot_titles=subplot_titles)
+    fig = make_subplots(
+        rows=5, cols=2, subplot_titles=subplot_titles, y_title="Speedup"
+    )
 
     for (row, col), (_, df) in zip(coordinates, merged_df_knn_grouped):
-        df = df.round(2)
+        df["speedup"] = df["speedup"].round(2)
+        df[["mean_time_elapsed_skl", "mean_time_elapsed_d4p"]] = df[
+            ["mean_time_elapsed_skl", "mean_time_elapsed_d4p"]
+        ].round(4)
         x1 = df[["n_samples", "n_features"]][df["n_jobs"] == 1]
         x1 = [f"({ns}, {nf})" for ns, nf in x1.values]
         y1 = df["speedup"][df["n_jobs"] == 1]
@@ -125,7 +132,9 @@ def plot_knn(algo="KNeighborsClassifier"):
                 + "algo: <b>%{customdata[3]}</b><br>"
                 + "n_jobs: <b>%{customdata[4]}</b><br>"
                 + "n_neighbors: <b>%{customdata[5]}</b><br>"
-                + "speedup: <b>%{customdata[6]}</b><br>"
+                + "Time sklearn (s): <b>%{customdata[6]}</b><br>"
+                + "Time d4p (s): <b>%{customdata[7]}</b><br>"
+                + "speedup: <b>%{customdata[8]}</b><br>"
                 + "<extra></extra>",
                 customdata=df[df["n_jobs"] == 1].values,
                 showlegend=False,
@@ -149,7 +158,9 @@ def plot_knn(algo="KNeighborsClassifier"):
                 + "algo: <b>%{customdata[3]}</b><br>"
                 + "n_jobs: <b>%{customdata[4]}</b><br>"
                 + "n_neighbors: <b>%{customdata[5]}</b><br>"
-                + "speedup: <b>%{customdata[6]}</b><br>"
+                + "Time sklearn (s): <b>%{customdata[6]}</b><br>"
+                + "Time d4p (s): <b>%{customdata[7]}</b><br>"
+                + "speedup: <b>%{customdata[8]}</b><br>"
                 + "<extra></extra>",
                 customdata=df[df["n_jobs"] == -1].values,
                 showlegend=False,
@@ -159,6 +170,101 @@ def plot_knn(algo="KNeighborsClassifier"):
         )
 
     fig.update_layout(height=1500, barmode="group", showlegend=False)
+    fig.show()
+
+
+def plot_kmeans():
+    d4p_kmeans = pd.read_csv("sklearn_benchmarks/results/daal4py/KMeans.csv")
+    skl_kmeans = pd.read_csv("sklearn_benchmarks/results/sklearn/KMeans.csv")
+    merged_df_kmeans = skl_kmeans.merge(
+        d4p_kmeans,
+        on=[
+            "estimator",
+            "function",
+            "n_samples",
+            "n_features",
+            "init",
+            "max_iter",
+            "n_clusters",
+            "n_init",
+            "tol",
+        ],
+        suffixes=["_skl", "_d4p"],
+    )
+    merged_df_kmeans["speedup"] = (
+        merged_df_kmeans["mean_time_elapsed_skl"]
+        / merged_df_kmeans["mean_time_elapsed_d4p"]
+    )
+    merged_df_kmeans = merged_df_kmeans[
+        [
+            "function",
+            "n_samples",
+            "n_features",
+            "init",
+            "max_iter",
+            "n_clusters",
+            "n_init",
+            "tol",
+            "mean_time_elapsed_skl",
+            "mean_time_elapsed_d4p",
+            "speedup",
+        ]
+    ]
+    merged_df_kmeans_grouped = merged_df_kmeans.groupby(
+        ["init", "max_iter", "n_clusters", "n_init", "tol", "function"]
+    )
+
+    n_rows = 6
+    n_cols = 2
+    coordinates = [[j for j in range(n_cols)] for _ in range(n_rows)]
+    for i in range(len(coordinates)):
+        for j in range(len(coordinates[0])):
+            coordinates[i][j] = (i + 1, j + 1)
+    coordinates = list(itertools.chain(*coordinates))
+
+    subplot_titles = []
+    for params, _ in merged_df_kmeans_grouped:
+        subplot_titles.append("init: %s - function: %s" % (params[0], params[-1]))
+
+    fig = make_subplots(
+        rows=6,
+        cols=2,
+        subplot_titles=subplot_titles,
+        shared_yaxes=True,
+        y_title="Speedup",
+    )
+
+    for (row, col), (_, df) in zip(coordinates, merged_df_kmeans_grouped):
+        df["speedup"] = df["speedup"].round(2)
+        df[["mean_time_elapsed_skl", "mean_time_elapsed_d4p"]] = df[
+            ["mean_time_elapsed_skl", "mean_time_elapsed_d4p"]
+        ].round(6)
+        x = df[["n_samples", "n_features"]]
+        x = [f"({ns}, {nf})" for ns, nf in x.values]
+        y = df["speedup"]
+        fig.add_trace(
+            go.Bar(
+                x=x,
+                y=y,
+                hovertemplate="function: <b>%{customdata[0]}</b><br>"
+                + "n_samples: <b>%{customdata[1]}</b><br>"
+                + "n_features: <b>%{customdata[2]}</b><br>"
+                + "init: <b>%{customdata[3]}</b><br>"
+                + "max_iter: <b>%{customdata[4]}</b><br>"
+                + "n_clusters: <b>%{customdata[5]}</b><br>"
+                + "n_init: <b>%{customdata[6]}</b><br>"
+                + "tol: <b>%{customdata[7]}</b><br>"
+                + "Time sklearn (s): <b>%{customdata[8]}</b><br>"
+                + "Time d4p (s): <b>%{customdata[9]}</b><br>"
+                + "speedup: <b>%{customdata[10]}</b><br>"
+                + "<extra></extra>",
+                customdata=df.values,
+                showlegend=False,
+            ),
+            row=row,
+            col=col,
+        )
+    fig.update_layout(height=2000, barmode="group", showlegend=False)
     fig.show()
 
 
