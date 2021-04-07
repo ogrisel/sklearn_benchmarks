@@ -1,9 +1,9 @@
 estimator,lib,function,mean_time_elapsed,std_time_elapsed,n_samples,n_features,algorithm,n_jobs,n_neighbors,accuracy_score
-KNeighborsClassifier,sklearn,fit,0.058419913600000005,0.00648231450728978,1000000,2,brute,-1,1,
-KNeighborsClassifier,sklearn,predict,0.029719614800000026,0.013695827691057235,1,2,brute,-1,1,1.0
-KNeighborsClassifier,sklearn,fit,0.05812765519999992,0.0060540621775724305,1000000,2,brute,-1,5,
-KNeighborsClassifier,sklearn,predict,0.035028865399999984,0.007285938647734551,1,2,brute,-1,5,1.0
-KNeighborsClassifier,sklearn,fit,0.05699615910000011,0.004890706436319124,1000000,2,brute,1,1,
-KNeighborsClassifier,sklearn,predict,0.019235109699999954,0.0015105308854540488,1,2,brute,1,1,1.0
-KNeighborsClassifier,sklearn,fit,0.05369142619999998,0.0021012119743930137,1000000,2,brute,1,5,
-KNeighborsClassifier,sklearn,predict,0.029869792199999877,0.0023405027584055835,1,2,brute,1,5,1.0
+KNeighborsClassifier,sklearn,fit,0.06220168550000018,0.004781669198645721,1000000,2,brute,-1,1,
+KNeighborsClassifier,sklearn,predict,0.047169467600000556,0.05519343523788298,1,2,brute,-1,1,1.0
+KNeighborsClassifier,sklearn,fit,0.07038222559999881,0.012762905538568459,1000000,2,brute,-1,5,
+KNeighborsClassifier,sklearn,predict,0.046685719099998836,0.018448282937207773,1,2,brute,-1,5,1.0
+KNeighborsClassifier,sklearn,fit,0.07393778039999858,0.013295917022261046,1000000,2,brute,1,1,
+KNeighborsClassifier,sklearn,predict,0.028145882299998704,0.0027923947542677695,1,2,brute,1,1,1.0
+KNeighborsClassifier,sklearn,fit,0.06800812349999888,0.0066865890717453195,1000000,2,brute,1,5,
+KNeighborsClassifier,sklearn,predict,0.042782451300001155,0.005579888185664409,1,2,brute,1,5,1.0
