@@ -19,15 +19,23 @@ jobs:
 
       - name: Install dependencies
         run: |
+          echo "Download miniconda..."
           wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
           bash ~/miniconda.sh -b -p
           rm ~/miniconda.sh
+          echo "-------------------"
+          echo "Add conda channels..."
           conda config --add channels conda-forge
           conda config --add channels intel
+          echo "-------------------"
+          echo "Create conda env from environment.yml file..."
           conda env create -f environment.yml
+          echo "-------------------"
+          echo "Activate conda env..."
           conda init bash
           sudo reboot
           conda activate sklbench
+          echo "-------------------"
 
       # - name: install dependencies
       #   run: |
