@@ -30,7 +30,7 @@ jobs:
           activate-environment: sklbench
           environment-file: environment.yml
           channels: conda-forge,intel
-          channel-priority: flexible
+          channel-priority: strict
           use-only-tar-bz2: true
 
       - name: Run benchmark suite
