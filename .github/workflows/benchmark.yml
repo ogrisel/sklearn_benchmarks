@@ -37,7 +37,10 @@ jobs:
         run: python -m sklearn_benchmarks
 
       - name: Convert notebook to html
-        run: jupyter nbconvert --to html --execute sklearn_benchmarks/results/viz.ipynb
+        run: |
+          jupyter nbconvert --to html --execute sklearn_benchmarks/results/viz.ipynb
+          rm -rf docs/index.html
+          mv sklearn_benchmarks/results/viz.html docs/index.html
 
       - name: Upload benchmark results
         uses: actions/upload-artifact@v2
@@ -45,14 +48,11 @@ jobs:
           name: benchmark-results
           path: sklearn_benchmarks/results
 
-      - name: Clear docs folder
-        run: rm -rf docs/index.html
-
       - name: Download benchmark results
         uses: actions/download-artifact@v2
         with:
-          name: benchmark-results
-          path: docs/index.html
+          name: docs
+          path: docs
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@4.1.1
