@@ -70,27 +70,76 @@ def _gen_coordinates_grid(n_rows, n_cols):
     return coordinates
 
 
-def plot_knn(algo="KNeighborsClassifier"):
-    d4p_knn = pd.read_csv(f"daal4py/{algo}.csv")
-    skl_knn = pd.read_csv(f"sklearn/{algo}.csv")
-    merged_df_knn = skl_knn.merge(
-        d4p_knn,
-        on=[
-            "estimator",
-            "function",
-            "n_samples",
-            "n_features",
+def _make_suffix(lib):
+    return "_" + lib
+
+
+def _make_dataset(
+    algo,
+    lib,
+    speedup_col="mean_time_elapsed",
+    speedup_err_col="std_time_elapsed",
+    def_merge_cols=["estimator", "function", "n_samples", "n_features"],
+    add_merge_cols=[],
+):
+    merge_cols = def_merge_cols + add_merge_cols
+    # get df of lib in folder results
+    lib_df = pd.read_csv("%s/%s.csv" % (lib, algo))
+    # get df sklearn
+    skl_df = pd.read_csv("sklearn/%s.csv" % algo)
+    # merge both dfs on:
+    # estimator
+    # function
+    # n_samples
+    # n_features
+    # all estimator params (how to get them? -> pass as args)
+    # add suffixes using skl and lib arg
+    lib_suffix = _make_suffix(lib)
+    merged_df = skl_df.merge(lib_df, on=merge_cols, suffixes=["_sklearn", lib_suffix])
+
+    skl_col = speedup_col + "_sklearn"
+    lib_col = speedup_col + lib_suffix
+    # compute speedup + speedup err
+    merged_df["speedup"] = merged_df[skl_col] / merged_df[lib_col]
+
+    # compute speedup err
+    skl_col = speedup_err_col + "_sklearn"
+    lib_col = speedup_err_col + lib_suffix
+    merged_df["speedup_err"] = merged_df[skl_col] / merged_df[lib_col]
+
+    return merged_df
+
+
+def plot_knn(algo="KNeighborsClassifier", n_cols=2):
+    # d4p_knn = pd.read_csv(f"daal4py/{algo}.csv")
+    # skl_knn = pd.read_csv(f"sklearn/{algo}.csv")
+    # merged_df_knn = skl_knn.merge(
+    #     d4p_knn,
+    #     on=[
+    #         "estimator",
+    #         "function",
+    #         "n_samples",
+    #         "n_features",
+    # "algorithm",
+    # "n_jobs",
+    # "n_neighbors",
+    #     ],
+    #     suffixes=["_skl", "_d4p"],
+    # )
+    # merged_df_knn["speedup"] = (
+    #     merged_df_knn["mean_time_elapsed_skl"] / merged_df_knn["mean_time_elapsed_d4p"]
+    # )
+    # merged_df_knn["speedup_err"] = (
+    #     merged_df_knn["std_time_elapsed_skl"] / merged_df_knn["std_time_elapsed_d4p"]
+    # )
+    merged_df_knn = _make_dataset(
+        algo,
+        "daal4py",
+        add_merge_cols=[
             "algorithm",
             "n_jobs",
             "n_neighbors",
         ],
-        suffixes=["_skl", "_d4p"],
-    )
-    merged_df_knn["speedup"] = (
-        merged_df_knn["mean_time_elapsed_skl"] / merged_df_knn["mean_time_elapsed_d4p"]
-    )
-    merged_df_knn["speedup_err"] = (
-        merged_df_knn["std_time_elapsed_skl"] / merged_df_knn["std_time_elapsed_d4p"]
     )
     merged_df_knn = merged_df_knn[
         [
@@ -100,30 +149,33 @@ def plot_knn(algo="KNeighborsClassifier"):
             "algorithm",
             "n_jobs",
             "n_neighbors",
-            "mean_time_elapsed_skl",
-            "mean_time_elapsed_d4p",
+            "mean_time_elapsed_sklearn",
+            "mean_time_elapsed_daal4py",
             "speedup",
             "speedup_err",
         ]
     ]
+
     merged_df_knn_grouped = merged_df_knn.groupby(
         ["algorithm", "n_neighbors", "function"]
     )
 
-    coordinates = _gen_coordinates_grid(5, 2)
+    n_plots = len(merged_df_knn_grouped)
+    n_rows = n_plots // n_cols + n_plots % n_cols
+    coordinates = _gen_coordinates_grid(n_rows, n_cols)
 
     subplot_titles = [
         "algo: %s, k: %s, func: %s" % params for params, _ in merged_df_knn_grouped
     ]
     fig = make_subplots(
-        rows=5, cols=2, subplot_titles=subplot_titles, y_title="Speedup"
+        rows=n_rows, cols=n_cols, subplot_titles=subplot_titles, y_title="Speedup"
     )
 
     for (row, col), (_, df) in zip(coordinates, merged_df_knn_grouped):
         df["speedup"] = df["speedup"].round(2)
         df["speedup_err"] = df["speedup_err"].round(2)
-        df[["mean_time_elapsed_skl", "mean_time_elapsed_d4p"]] = df[
-            ["mean_time_elapsed_skl", "mean_time_elapsed_d4p"]
+        df[["mean_time_elapsed_sklearn", "mean_time_elapsed_daal4py"]] = df[
+            ["mean_time_elapsed_sklearn", "mean_time_elapsed_daal4py"]
         ].round(4)
 
         x1 = df[["n_samples", "n_features"]][df["n_jobs"] == 1]
@@ -187,26 +239,37 @@ def plot_knn(algo="KNeighborsClassifier"):
 
 
 def plot_kmeans():
-    d4p_kmeans = pd.read_csv("daal4py/KMeans.csv")
-    skl_kmeans = pd.read_csv("sklearn/KMeans.csv")
-    merged_df_kmeans = skl_kmeans.merge(
-        d4p_kmeans,
-        on=[
-            "estimator",
-            "function",
-            "n_samples",
-            "n_features",
+    # d4p_kmeans = pd.read_csv("daal4py/KMeans.csv")
+    # skl_kmeans = pd.read_csv("sklearn/KMeans.csv")
+    # merged_df_kmeans = skl_kmeans.merge(
+    #     d4p_kmeans,
+    #     on=[
+    #         "estimator",
+    #         "function",
+    #         "n_samples",
+    #         "n_features",
+    # "init",
+    # "max_iter",
+    # "n_clusters",
+    # "n_init",
+    # "tol",
+    #     ],
+    #     suffixes=["_skl", "_d4p"],
+    # )
+    # merged_df_kmeans["speedup"] = (
+    #     merged_df_kmeans["mean_time_elapsed_skl"]
+    #     / merged_df_kmeans["mean_time_elapsed_d4p"]
+    # )
+    merged_df_kmeans = _make_dataset(
+        "kmeans",
+        "daal4py",
+        add_merge_cols=[
             "init",
             "max_iter",
             "n_clusters",
             "n_init",
             "tol",
         ],
-        suffixes=["_skl", "_d4p"],
-    )
-    merged_df_kmeans["speedup"] = (
-        merged_df_kmeans["mean_time_elapsed_skl"]
-        / merged_df_kmeans["mean_time_elapsed_d4p"]
     )
     merged_df_kmeans = merged_df_kmeans[
         [
