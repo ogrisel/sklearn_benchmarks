@@ -61,6 +61,15 @@ def print_time_report():
     return df
 
 
+def _gen_coordinates_grid(n_rows, n_cols):
+    coordinates = [[j for j in range(n_cols)] for _ in range(n_rows)]
+    for i in range(len(coordinates)):
+        for j in range(len(coordinates[0])):
+            coordinates[i][j] = (i + 1, j + 1)
+    coordinates = list(itertools.chain(*coordinates))
+    return coordinates
+
+
 def plot_knn(algo="KNeighborsClassifier"):
     d4p_knn = pd.read_csv(f"daal4py/{algo}.csv")
     skl_knn = pd.read_csv(f"sklearn/{algo}.csv")
@@ -80,6 +89,9 @@ def plot_knn(algo="KNeighborsClassifier"):
     merged_df_knn["speedup"] = (
         merged_df_knn["mean_time_elapsed_skl"] / merged_df_knn["mean_time_elapsed_d4p"]
     )
+    merged_df_knn["speedup_err"] = (
+        merged_df_knn["std_time_elapsed_skl"] / merged_df_knn["std_time_elapsed_d4p"]
+    )
     merged_df_knn = merged_df_knn[
         [
             "function",
@@ -91,19 +103,14 @@ def plot_knn(algo="KNeighborsClassifier"):
             "mean_time_elapsed_skl",
             "mean_time_elapsed_d4p",
             "speedup",
+            "speedup_err",
         ]
     ]
     merged_df_knn_grouped = merged_df_knn.groupby(
         ["algorithm", "n_neighbors", "function"]
     )
 
-    n_rows = 5
-    n_cols = 2
-    coordinates = [[j for j in range(n_cols)] for _ in range(n_rows)]
-    for i in range(len(coordinates)):
-        for j in range(len(coordinates[0])):
-            coordinates[i][j] = (i + 1, j + 1)
-    coordinates = list(itertools.chain(*coordinates))
+    coordinates = _gen_coordinates_grid(5, 2)
 
     subplot_titles = [
         "algo: %s, k: %s, func: %s" % params for params, _ in merged_df_knn_grouped
@@ -114,9 +121,11 @@ def plot_knn(algo="KNeighborsClassifier"):
 
     for (row, col), (_, df) in zip(coordinates, merged_df_knn_grouped):
         df["speedup"] = df["speedup"].round(2)
+        df["speedup_err"] = df["speedup_err"].round(2)
         df[["mean_time_elapsed_skl", "mean_time_elapsed_d4p"]] = df[
             ["mean_time_elapsed_skl", "mean_time_elapsed_d4p"]
         ].round(4)
+
         x1 = df[["n_samples", "n_features"]][df["n_jobs"] == 1]
         x1 = [f"({ns}, {nf})" for ns, nf in x1.values]
         y1 = df["speedup"][df["n_jobs"] == 1]
@@ -124,6 +133,7 @@ def plot_knn(algo="KNeighborsClassifier"):
             go.Bar(
                 x=x1,
                 y=y1,
+                error_y=dict(type="data", array=df[df["n_jobs"] == 1]["speedup_err"]),
                 name="n_jobs: 1",
                 marker_color="indianred",
                 hovertemplate="function: <b>%{customdata[0]}</b><br>"
@@ -135,6 +145,7 @@ def plot_knn(algo="KNeighborsClassifier"):
                 + "Time sklearn (s): <b>%{customdata[6]}</b><br>"
                 + "Time d4p (s): <b>%{customdata[7]}</b><br>"
                 + "speedup: <b>%{customdata[8]}</b><br>"
+                + "speedup error: <b>%{customdata[9]}</b><br>"
                 + "<extra></extra>",
                 customdata=df[df["n_jobs"] == 1].values,
                 showlegend=False,
@@ -150,6 +161,7 @@ def plot_knn(algo="KNeighborsClassifier"):
             go.Bar(
                 x=x2,
                 y=y2,
+                error_y=dict(type="data", array=df[df["n_jobs"] == -1]["speedup_err"]),
                 name="n_jobs: -1",
                 marker_color="lightsalmon",
                 hovertemplate="function: <b>%{customdata[0]}</b><br>"
@@ -160,7 +172,8 @@ def plot_knn(algo="KNeighborsClassifier"):
                 + "n_neighbors: <b>%{customdata[5]}</b><br>"
                 + "Time sklearn (s): <b>%{customdata[6]}</b><br>"
                 + "Time d4p (s): <b>%{customdata[7]}</b><br>"
-                + "speedup: <b>%{customdata[8]}</b><br>"
+                + "speedup: <b>%{customdata[9]}</b><br>"
+                + "speedup error: <b>%{customdata[10]}</b><br>"
                 + "<extra></extra>",
                 customdata=df[df["n_jobs"] == -1].values,
                 showlegend=False,
@@ -214,13 +227,7 @@ def plot_kmeans():
         ["init", "max_iter", "n_clusters", "n_init", "tol", "function"]
     )
 
-    n_rows = 6
-    n_cols = 2
-    coordinates = [[j for j in range(n_cols)] for _ in range(n_rows)]
-    for i in range(len(coordinates)):
-        for j in range(len(coordinates[0])):
-            coordinates[i][j] = (i + 1, j + 1)
-    coordinates = list(itertools.chain(*coordinates))
+    coordinates = _gen_coordinates_grid(6, 2)
 
     subplot_titles = []
     for params, _ in merged_df_kmeans_grouped:
