@@ -26,12 +26,6 @@ jobs:
 
       - name: run benchmark suite
         run: python -m sklearn_benchmarks
-      - uses: actions/upload-artifact@v2
-        with:
-          path: sklearn_benchmarks/sklearn_benchmarks/results/
 
       - name: convert notebook to html
         run: jupyter nbconvert --to html viz.ipynb
-      - uses: actions/upload-artifact@v2
-        with:
-          path: viz.html
