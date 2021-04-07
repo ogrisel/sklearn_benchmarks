@@ -11,54 +11,27 @@ jobs:
       run:
         shell: bash -l {0}
     steps:
-      - uses: actions/checkout@v2
-      - uses: conda-incubator/setup-miniconda@v2
+      - name: Checkout repo content
+        uses: actions/checkout@v2
+
+      - name: Cache conda
+        uses: actions/cache@v2
+        env:
+          # Increase this value to reset cache if etc/example-environment.yml has not changed
+          CACHE_NUMBER: 0
+        with:
+          path: ~/conda_pkgs_dir
+          key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{
+            hashFiles('environment.yml') }}
+
+      - name: Setup miniconda
+        uses: conda-incubator/setup-miniconda@v2
         with:
           python-version: 3.8
           activate-environment: sklbench
           environment-file: environment.yml
           channels: conda-forge,intel
           channel-priority: flexible
-
-      # - name: Setup Python
-      #   uses: actions/setup-python@v2
-      #   with:
-      #     python-version: 3.8
-
-      # - name: Install dependencies
-      #   run: |
-      #     echo "Download miniconda..."
-      #     wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
-      #     bash ~/miniconda.sh -b -p
-      #     rm ~/miniconda.sh
-      #     echo "-------------------"
-      #     echo "Add conda channels..."
-      #     conda config --add channels conda-forge
-      #     conda config --add channels intel
-      #     echo "-------------------"
-      #     echo "Create conda env from environment.yml file..."
-      #     conda env create -f environment.yml
-      #     echo "-------------------"
-
-      # - name: Init conda shell
-      #   run: |
-      #     echo "Init conda shell..."
-      #     conda init bash
-      #     echo "-------------------"
-
-      # - name: Create conda env
-      #   shell: bash -l {0}
-      #   run: |
-      #     echo "Create conda env..."
-      #     conda activate sklbench
-      #     echo "-------------------"
-
-      # - name: install dependencies
-      #   run: |
-      #     python -m pip install --upgrade pip
-      #     pip install pyyaml pandas scikit-learn numpy \
-      #       matplotlib scikit-learn-intelex \
-      #       plotly==4.14.3 nbconvert
 
       - name: Run benchmark suite
         run: python -m sklearn_benchmarks
