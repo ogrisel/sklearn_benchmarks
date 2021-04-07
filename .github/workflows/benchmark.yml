@@ -1,4 +1,4 @@
-name: sklearn benchmark suite
+name: scikit-learn benchmark suite
 
 on:
   push:
@@ -9,15 +9,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: checkout repo content
+      - name: Checkout repo content
         uses: actions/checkout@v2
 
-      - name: setup python
+      - name: Setup Python
         uses: actions/setup-python@v2
         with:
           python-version: 3.8
 
-      - name: install dependencies
+      - name: Install dependencies
         run: |
           wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
           bash ~/miniconda.sh -b -p
@@ -26,6 +26,7 @@ jobs:
           conda config --add channels intel
           conda env create -f environment.yml
           conda init bash
+          sudo reboot
           conda activate sklbench
 
       # - name: install dependencies
@@ -35,13 +36,13 @@ jobs:
       #       matplotlib scikit-learn-intelex \
       #       plotly==4.14.3 nbconvert
 
-      - name: run benchmark suite
+      - name: Run benchmark suite
         run: python -m sklearn_benchmarks
 
-      - name: convert notebook to html
+      - name: Convert notebook to html
         run: jupyter nbconvert --to html --execute sklearn_benchmarks/results/viz.ipynb
 
-      - name: Upload a Build Artifact
+      - name: Upload benchmark results artifact
         uses: actions/upload-artifact@v2
         with:
           name: benchmark-results
