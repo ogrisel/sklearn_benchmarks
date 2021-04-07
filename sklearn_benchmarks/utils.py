@@ -57,13 +57,13 @@ def predict_or_transform(estimator):
 
 
 def print_time_report():
-    df = pd.read_csv("sklearn_benchmarks/results/time_report.csv", index_col="algo")
+    df = pd.read_csv("time_report.csv", index_col="algo")
     return df
 
 
 def plot_knn(algo="KNeighborsClassifier"):
-    d4p_knn = pd.read_csv(f"sklearn_benchmarks/results/daal4py/{algo}.csv")
-    skl_knn = pd.read_csv(f"sklearn_benchmarks/results/sklearn/{algo}.csv")
+    d4p_knn = pd.read_csv(f"daal4py/{algo}.csv")
+    skl_knn = pd.read_csv(f"sklearn/{algo}.csv")
     merged_df_knn = skl_knn.merge(
         d4p_knn,
         on=[
@@ -174,8 +174,8 @@ def plot_knn(algo="KNeighborsClassifier"):
 
 
 def plot_kmeans():
-    d4p_kmeans = pd.read_csv("sklearn_benchmarks/results/daal4py/KMeans.csv")
-    skl_kmeans = pd.read_csv("sklearn_benchmarks/results/sklearn/KMeans.csv")
+    d4p_kmeans = pd.read_csv("daal4py/KMeans.csv")
+    skl_kmeans = pd.read_csv("sklearn/KMeans.csv")
     merged_df_kmeans = skl_kmeans.merge(
         d4p_kmeans,
         on=[

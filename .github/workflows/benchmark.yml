@@ -28,7 +28,7 @@ jobs:
         run: python -m sklearn_benchmarks
 
       - name: convert notebook to html
-        run: jupyter nbconvert --to html results/viz.ipynb
+        run: jupyter nbconvert --to html --execute sklearn_benchmarks/results/viz.ipynb
 
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v2
