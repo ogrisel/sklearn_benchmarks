@@ -39,8 +39,20 @@ jobs:
       - name: Convert notebook to html
         run: jupyter nbconvert --to html --execute sklearn_benchmarks/results/viz.ipynb
 
-      - name: Upload benchmark results artifact
+      - name: Upload benchmark results
         uses: actions/upload-artifact@v2
         with:
           name: benchmark-results
           path: sklearn_benchmarks/results
+
+      - name: Download benchmark results
+        uses: actions/download-artifact@v2
+        with:
+          name: benchmark-results
+          path: docs/index.html
+
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@4.1.1
+        with:
+          branch: master
+          folder: docs
