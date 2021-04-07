@@ -1,9 +1,0 @@
-estimator,lib,function,mean_time_elapsed,std_time_elapsed,n_samples,n_features,algorithm,n_jobs,n_neighbors,accuracy_score
-KNeighborsClassifier,daal4py,fit,0.12628390440000317,0.002152315991533318,1000000,2,brute,-1,1,
-KNeighborsClassifier,daal4py,predict,0.006203283700000384,0.0017018910111656178,1,2,brute,-1,1,1.0
-KNeighborsClassifier,daal4py,fit,0.12990884660000573,0.002226821937365293,1000000,2,brute,-1,5,
-KNeighborsClassifier,daal4py,predict,0.006288558700003932,0.001084043351016895,1,2,brute,-1,5,1.0
-KNeighborsClassifier,daal4py,fit,0.10506434290001039,0.002450842259400773,1000000,2,brute,1,1,
-KNeighborsClassifier,daal4py,predict,0.005775789999995595,0.0012276903618248737,1,2,brute,1,1,1.0
-KNeighborsClassifier,daal4py,fit,0.12825323340000522,0.002658339047752737,1000000,2,brute,1,5,
-KNeighborsClassifier,daal4py,predict,0.006082948500005614,0.0011879491036837306,1,2,brute,1,5,1.0

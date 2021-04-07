@@ -1,9 +1,0 @@
-estimator,lib,function,mean_time_elapsed,std_time_elapsed,n_samples,n_features,algorithm,n_jobs,n_neighbors,accuracy_score
-KNeighborsClassifier,sklearn,fit,0.06954131720001441,0.0008796410460904705,1000000,2,brute,-1,1,
-KNeighborsClassifier,sklearn,predict,0.023742441899997857,0.010321856368839156,1,2,brute,-1,1,1.0
-KNeighborsClassifier,sklearn,fit,0.06864512480000826,0.0014197871480046682,1000000,2,brute,-1,5,
-KNeighborsClassifier,sklearn,predict,0.03403394539998317,0.0029288342207075,1,2,brute,-1,5,1.0
-KNeighborsClassifier,sklearn,fit,0.06840023050000923,0.0012549114345531763,1000000,2,brute,1,1,
-KNeighborsClassifier,sklearn,predict,0.014262416100007159,0.0009373413958346145,1,2,brute,1,1,1.0
-KNeighborsClassifier,sklearn,fit,0.07030350189999127,0.0020966337292400677,1000000,2,brute,1,5,
-KNeighborsClassifier,sklearn,predict,0.028402375299992854,0.0008806167689478385,1,2,brute,1,5,1.0
