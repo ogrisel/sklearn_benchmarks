@@ -1,9 +1,9 @@
 estimator,lib,function,mean_time_elapsed,std_time_elapsed,n_samples,n_features,algorithm,n_jobs,n_neighbors,accuracy_score
-KNeighborsClassifier,daal4py,fit,0.10128703129999791,0.009346660034762692,1000000,2,brute,-1,1,
-KNeighborsClassifier,daal4py,predict,0.004620291499999496,0.001791052108473755,1,2,brute,-1,1,1.0
-KNeighborsClassifier,daal4py,fit,0.09958904319999959,0.006884257120053088,1000000,2,brute,-1,5,
-KNeighborsClassifier,daal4py,predict,0.003456464100001,0.0006934269058287688,1,2,brute,-1,5,1.0
-KNeighborsClassifier,daal4py,fit,0.09549585099999902,0.007965000745206285,1000000,2,brute,1,1,
-KNeighborsClassifier,daal4py,predict,0.003491694400000256,0.0005155220469536833,1,2,brute,1,1,1.0
-KNeighborsClassifier,daal4py,fit,0.09850945069999924,0.0032167999477907675,1000000,2,brute,1,5,
-KNeighborsClassifier,daal4py,predict,0.004213295100001346,0.0018476747532018352,1,2,brute,1,5,1.0
+KNeighborsClassifier,daal4py,fit,0.1054359025999986,0.007552968708014479,1000000,2,brute,-1,1,
+KNeighborsClassifier,daal4py,predict,0.0044176679000003105,0.0025356262526585655,1,2,brute,-1,1,1.0
+KNeighborsClassifier,daal4py,fit,0.10855403129999956,0.005851994592975185,1000000,2,brute,-1,5,
+KNeighborsClassifier,daal4py,predict,0.0041003563000010955,0.0031552010779779217,1,2,brute,-1,5,1.0
+KNeighborsClassifier,daal4py,fit,0.10518273429999851,0.0028216696910839077,1000000,2,brute,1,1,
+KNeighborsClassifier,daal4py,predict,0.004253266799999977,0.0031105767044529928,1,2,brute,1,1,1.0
+KNeighborsClassifier,daal4py,fit,0.10590118839999932,0.003988585405785258,1000000,2,brute,1,5,
+KNeighborsClassifier,daal4py,predict,0.004424604000000443,0.0029484150932335054,1,2,brute,1,5,1.0

@@ -1,0 +1,11 @@
+name: sklbench
+channels:
+  - conda-forge
+  - intel
+dependencies:
+  - pandas
+  - pyyaml
+  - plotly
+  - scikit-learn
+  - scikit-learn-intelex
+  - jupyter

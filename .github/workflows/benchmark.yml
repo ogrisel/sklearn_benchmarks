@@ -24,7 +24,7 @@ jobs:
           rm ~/miniconda.sh
           conda config --add channels conda-forge
           conda config --add channels intel
-          conda create --name sklbench --file requirements.txt
+          conda env create -f environment.yml
           conda activate sklbench
 
       # - name: install dependencies
