@@ -42,13 +42,19 @@ jobs:
           rm -rf docs/index.html
           mv sklearn_benchmarks/results/viz.html docs/index.html
 
+      - name: Upload docs folder
+        uses: actions/upload-artifact@v2
+        with:
+          name: docs
+          path: docs
+
       - name: Upload benchmark results
         uses: actions/upload-artifact@v2
         with:
           name: benchmark-results
           path: sklearn_benchmarks/results
 
-      - name: Download benchmark results
+      - name: Download docs folder
         uses: actions/download-artifact@v2
         with:
           name: docs
