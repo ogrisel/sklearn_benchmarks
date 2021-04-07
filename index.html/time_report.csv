@@ -1,0 +1,4 @@
+algo,hour,min,sec
+KNeighborsClassifier,0.0,0.0,4.14
+daal4py_KNeighborsClassifier,0.0,0.0,5.42
+total,0.0,0.0,9.57
