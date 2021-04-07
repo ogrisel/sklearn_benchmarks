@@ -31,9 +31,10 @@ jobs:
           echo "Create conda env from environment.yml file..."
           conda env create -f environment.yml
           echo "-------------------"
-          echo "Activate conda env..."
+          echo "Init conda shell..."
           conda init bash
-          sudo reboot
+          echo "-------------------"
+          echo "Create conda env..."
           conda activate sklbench
           echo "-------------------"
 
