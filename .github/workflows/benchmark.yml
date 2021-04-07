@@ -28,7 +28,7 @@ jobs:
         with:
           python-version: 3.8
           activate-environment: sklbench
-          environment-file: environment.yml
+          environment-file: environment-caching.yml
           channels: conda-forge,intel
           channel-priority: flexible
           use-only-tar-bz2: true
