@@ -40,9 +40,10 @@ jobs:
 
       - name: Convert notebook to html
         run: |
-          jupyter nbconvert --to html --execute sklearn_benchmarks/results/viz.ipynb
-          rm -rf docs/index.html
-          mv sklearn_benchmarks/results/viz.html docs/index.html
+          jupyter nbconvert --to html --execute sklearn_benchmarks/results.ipynb
+          rm -rf docs
+          mkdir docs
+          mv sklearn_benchmarks/results.html docs/index.html
 
       - name: Upload docs folder
         uses: actions/upload-artifact@v2
