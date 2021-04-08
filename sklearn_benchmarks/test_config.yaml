@@ -1,0 +1,30 @@
+estimators:
+  KNeighborsClassifier:
+    name: KNeighborsClassifier
+    source: sklearn.neighbors.KNeighborsClassifier
+    hyperparameters:
+      n_neighbors:
+        - 1
+        - 5
+      algorithm:
+        - brute
+      n_jobs:
+        - -1
+        - 1
+    metrics:
+      - accuracy_score
+    datasets:
+      - sample_generator: sklearn.datasets.make_classification
+        params:
+          n_classes: 2
+          n_redundant: 0
+          random_state: 42
+        n_features: 2
+        n_samples_train:
+          - 1e6
+        n_samples_test:
+          - 1
+
+  daal4py_KNeighborsClassifier:
+    inherit: KNeighborsClassifier
+    source: daal4py.sklearn.neighbors.KNeighborsClassifier

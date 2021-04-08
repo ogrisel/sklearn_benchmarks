@@ -1,6 +1,7 @@
 from pathlib import Path
 import yaml
 import json
+import os
 import time
 import importlib
 import time
@@ -13,6 +14,7 @@ from sklearn_benchmarks.utils import (
     predict_or_transform,
     clean_results,
     convert,
+    get_config_path,
 )
 from sklearn.model_selection import train_test_split
 
@@ -173,8 +175,7 @@ def _prepare_params(params):
 def main():
     clean_results()
 
-    current_path = Path(__file__).resolve().parent
-    config_path = current_path / "config.yaml"
+    config_path = get_config_path()
     with open(config_path, "r") as config_file:
         config = yaml.full_load(config_file)
 

@@ -7,6 +7,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      CONFIG_FILE: test_config.yaml
     defaults:
       run:
         shell: bash -l {0}
