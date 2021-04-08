@@ -11,5 +11,3 @@ dependencies:
   - jupyter
   - qgrid
   - viztracer
-variables:
-  CONFIG_FILE: test_config.yaml
