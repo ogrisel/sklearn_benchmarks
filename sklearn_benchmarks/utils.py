@@ -64,7 +64,9 @@ def predict_or_transform(estimator):
 
 
 def print_time_report():
-    df = pd.read_csv("time_report.csv", index_col="algo")
+    path = Path(__file__).resolve().parent
+    path = path / "results/time_report.csv"
+    df = pd.read_csv(str(path), index_col="algo")
     return df
 
 
@@ -90,8 +92,9 @@ def _make_dataset(
     add_merge_cols=[],
 ):
     merge_cols = def_merge_cols + add_merge_cols
-    lib_df = pd.read_csv("%s/%s.csv" % (lib, algo))
-    skl_df = pd.read_csv("sklearn/%s.csv" % algo)
+    results_path = Path(__file__).resolve().parent / "results"
+    lib_df = pd.read_csv("%s/%s/%s.csv" % (str(results_path), lib, algo))
+    skl_df = pd.read_csv("%s/sklearn/%s.csv" % (str(results_path), algo))
     lib_suffix = _make_suffix(lib)
     merged_df = skl_df.merge(lib_df, on=merge_cols, suffixes=["_sklearn", lib_suffix])
 
