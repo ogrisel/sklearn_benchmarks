@@ -7,7 +7,7 @@ import time
 import pandas as pd
 from sklearn.model_selection import ParameterGrid
 from sklearn_benchmarks.utils import (
-    ExecutionTimer,
+    FuncExecutor,
     gen_data,
     is_scientific_notation,
     predict_or_transform,
@@ -90,8 +90,17 @@ class Benchmark:
                 )
                 for params in parameters_grid:
                     estimator = estimator_class(**params)
-                    _, mean_time_elapsed, std_time_elapsed = ExecutionTimer.run(
-                        estimator.fit, X_train, y_train
+
+                    # make profiling result path
+                    results_path = Path(__file__).resolve().parent / "results"
+                    lib_path = f"{str(results_path)}/{self._lib()}"
+                    Path(lib_path).mkdir(parents=True, exist_ok=True)
+                    lib_path = lib_path + "profiling"
+                    Path(lib_path).mkdir(parents=True, exist_ok=True)
+                    profiling_output_file = f"{lib_path}/profiling_fit_{self.name}.html"
+
+                    _, mean_time_elapsed, std_time_elapsed = FuncExecutor.run(
+                        estimator.fit, profiling_output_file, X_train, y_train
                     )
                     row = dict(
                         estimator=self.name,
@@ -112,11 +121,18 @@ class Benchmark:
                         ns_test = n_samples_test[i]
                         X_test_, y_test_ = X_test[:ns_test], y_test[:ns_test]
                         bench_func = predict_or_transform(estimator)
+
+                        # make profiling result path
+                        results_path = Path(__file__).resolve().parent / "results"
+                        lib_path = f"{str(results_path)}/{self._lib()}"
+                        Path(lib_path).mkdir(parents=True, exist_ok=True)
+                        profiling_output_file = f"{lib_path}/profiling_{bench_func.__name__}_{self.name}.html"
+
                         (
                             y_pred,
                             mean_time_elapsed,
                             std_time_elapsed,
-                        ) = ExecutionTimer.run(bench_func, X_test_)
+                        ) = FuncExecutor.run(bench_func, profiling_output_file, X_test_)
                         if i == 0:
                             scores = {
                                 func.__name__: func(y_test_, y_pred)

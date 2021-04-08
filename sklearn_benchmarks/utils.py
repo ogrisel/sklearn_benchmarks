@@ -11,16 +11,24 @@ import importlib
 import itertools
 import re
 from joblib import Memory
+from viztracer import VizTracer
 
 
-class ExecutionTimer:
+class FuncExecutor:
     @staticmethod
-    def run(func, *args):
+    def run(func, profiling_output_file, *args):
         times = []
         start = time.perf_counter()
-        for _ in range(10):
+        for i in range(10):
             start_ = time.perf_counter()
-            result = func(*args)
+            if i == 0:
+                with VizTracer(output_file=profiling_output_file) as tracer:
+                    tracer.start()
+                    result = func(*args)
+                    tracer.stop()
+                    tracer.save()
+            else:
+                result = func(*args)
             end_ = time.perf_counter()
             times.append(end_ - start_)
             curr = time.perf_counter()
