@@ -1,7 +1,6 @@
 from pathlib import Path
 import yaml
 import json
-import os
 import time
 import importlib
 import time
@@ -38,7 +37,7 @@ class Benchmark:
         self.hyperparameters = hyperparameters
         self.datasets = datasets
 
-    def _lib_name(self):
+    def _lib(self):
         return self.source.split(".")[0]
 
     def _load_estimator_class(self):
@@ -96,7 +95,7 @@ class Benchmark:
                     )
                     row = dict(
                         estimator=self.name,
-                        lib=self._lib_name(),
+                        lib=self._lib(),
                         function="fit",
                         mean_time_elapsed=mean_time_elapsed,
                         std_time_elapsed=std_time_elapsed,
@@ -125,7 +124,7 @@ class Benchmark:
                             }
                         row = dict(
                             estimator=self.name,
-                            lib=self._lib_name(),
+                            lib=self._lib(),
                             function="predict",
                             mean_time_elapsed=mean_time_elapsed,
                             std_time_elapsed=std_time_elapsed,
@@ -140,12 +139,12 @@ class Benchmark:
         return self
 
     def to_csv(self):
-        current_path = Path(__file__).resolve()
-        current_path = current_path.parent
-        csv_path = current_path / f"results/{self._lib_name()}/{self.name}.csv"
-        results = pd.DataFrame(self.results_)
-        results.to_csv(
-            str(csv_path),
+        results_path = Path(__file__).resolve().parent / "results"
+        lib_path = f"{str(results_path)}/{self._lib()}"
+        Path(lib_path).mkdir(parents=True, exist_ok=True)
+        csv_path = f"{lib_path}/{self.name}.csv"
+        pd.DataFrame(self.results_).to_csv(
+            csv_path,
             mode="w+",
             index=False,
         )
