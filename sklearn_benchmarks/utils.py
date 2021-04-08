@@ -90,26 +90,15 @@ def _make_dataset(
     add_merge_cols=[],
 ):
     merge_cols = def_merge_cols + add_merge_cols
-    # get df of lib in folder results
     lib_df = pd.read_csv("%s/%s.csv" % (lib, algo))
-    # get df sklearn
     skl_df = pd.read_csv("sklearn/%s.csv" % algo)
-    # merge both dfs on:
-    # estimator
-    # function
-    # n_samples
-    # n_features
-    # all estimator params (how to get them? -> pass as args)
-    # add suffixes using skl and lib arg
     lib_suffix = _make_suffix(lib)
     merged_df = skl_df.merge(lib_df, on=merge_cols, suffixes=["_sklearn", lib_suffix])
 
     skl_col = speedup_col + "_sklearn"
     lib_col = speedup_col + lib_suffix
-    # compute speedup + speedup err
     merged_df["speedup"] = merged_df[skl_col] / merged_df[lib_col]
 
-    # compute speedup err
     skl_col = speedup_err_col + "_sklearn"
     lib_col = speedup_err_col + lib_suffix
     merged_df["speedup_err"] = merged_df[skl_col] / merged_df[lib_col]
@@ -118,27 +107,6 @@ def _make_dataset(
 
 
 def plot_knn(algo="KNeighborsClassifier", n_cols=2):
-    # d4p_knn = pd.read_csv(f"daal4py/{algo}.csv")
-    # skl_knn = pd.read_csv(f"sklearn/{algo}.csv")
-    # merged_df_knn = skl_knn.merge(
-    #     d4p_knn,
-    #     on=[
-    #         "estimator",
-    #         "function",
-    #         "n_samples",
-    #         "n_features",
-    # "algorithm",
-    # "n_jobs",
-    # "n_neighbors",
-    #     ],
-    #     suffixes=["_skl", "_d4p"],
-    # )
-    # merged_df_knn["speedup"] = (
-    #     merged_df_knn["mean_time_elapsed_skl"] / merged_df_knn["mean_time_elapsed_d4p"]
-    # )
-    # merged_df_knn["speedup_err"] = (
-    #     merged_df_knn["std_time_elapsed_skl"] / merged_df_knn["std_time_elapsed_d4p"]
-    # )
     merged_df_knn = _make_dataset(
         algo,
         "daal4py",
@@ -246,27 +214,6 @@ def plot_knn(algo="KNeighborsClassifier", n_cols=2):
 
 
 def plot_kmeans():
-    # d4p_kmeans = pd.read_csv("daal4py/KMeans.csv")
-    # skl_kmeans = pd.read_csv("sklearn/KMeans.csv")
-    # merged_df_kmeans = skl_kmeans.merge(
-    #     d4p_kmeans,
-    #     on=[
-    #         "estimator",
-    #         "function",
-    #         "n_samples",
-    #         "n_features",
-    # "init",
-    # "max_iter",
-    # "n_clusters",
-    # "n_init",
-    # "tol",
-    #     ],
-    #     suffixes=["_skl", "_d4p"],
-    # )
-    # merged_df_kmeans["speedup"] = (
-    #     merged_df_kmeans["mean_time_elapsed_skl"]
-    #     / merged_df_kmeans["mean_time_elapsed_d4p"]
-    # )
     merged_df_kmeans = _make_dataset(
         "kmeans",
         "daal4py",
