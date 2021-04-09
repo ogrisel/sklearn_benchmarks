@@ -182,10 +182,6 @@ def plot_results(
                         go.Bar(
                             x=x,
                             y=y,
-                            # error_y=dict(
-                            #     type="data",
-                            #     array=df[df[split_col] == split_val]["stdev_speedup"],
-                            # ),
                             name="%s: %s" % (split_col, split_val),
                             marker_color=px.colors.qualitative.Plotly[index],
                             hovertemplate=_make_hover_template(
@@ -205,10 +201,6 @@ def plot_results(
                 go.Bar(
                     x=x,
                     y=y,
-                    # error_y=dict(
-                    #     type="data",
-                    #     array=df[df[split_col] == split_val]["stdev_speedup"],
-                    # ),
                     hovertemplate=_make_hover_template(df),
                     customdata=df.values,
                     showlegend=False,
