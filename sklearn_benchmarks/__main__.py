@@ -200,9 +200,9 @@ def main():
     t0 = time.perf_counter()
     for name, params in estimators.items():
         if "inherit" in params:
-            curr_source = params["source"]
+            curr_estimator = params["estimator"]
             params = estimators[params["inherit"]]
-            params["source"] = curr_source
+            params["estimator"] = curr_estimator
 
         params = _prepare_params(params)
 
