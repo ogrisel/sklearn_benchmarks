@@ -22,7 +22,7 @@ class FuncExecutor:
         for i in range(10):
             start_ = time.perf_counter()
             if i == 0:
-                with VizTracer(output_file=profiling_output_file) as tracer:
+                with VizTracer(output_file=profiling_output_file, verbose=0) as tracer:
                     tracer.start()
                     result = func(*args)
                     tracer.stop()
