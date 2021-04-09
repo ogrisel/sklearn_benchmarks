@@ -1,17 +1,24 @@
 import os
+import math
 import glob
 import glob
 import time
 import importlib
 import itertools
 import re
+import qgrid
 import numpy as np
-import plotly.graph_objects as go
 import pandas as pd
+import plotly.graph_objects as go
+import plotly.express as px
+
+from IPython.display import display
 from pathlib import Path
 from plotly.subplots import make_subplots
 from joblib import Memory
 from viztracer import VizTracer
+
+RESULTS_PATH = Path(__file__).resolve().parent / "results"
 
 
 class FuncExecutor:
@@ -78,6 +85,12 @@ def print_time_report():
     return df
 
 
+def print_results(algo="", versus_lib=""):
+    data = _make_dataset(algo, versus_lib)
+    qgrid_widget = qgrid.show_grid(data, show_toolbar=True)
+    display(qgrid_widget)
+
+
 def _gen_coordinates_grid(n_rows, n_cols):
     coordinates = [[j for j in range(n_cols)] for _ in range(n_rows)]
     for i in range(len(coordinates)):
@@ -87,219 +100,125 @@ def _gen_coordinates_grid(n_rows, n_cols):
     return coordinates
 
 
-def _make_suffix(lib):
-    return "_" + lib
-
-
-def _make_dataset(
-    algo,
-    lib,
-    speedup_col="mean_time_elapsed",
-    speedup_err_col="stdev_time_elapsed",
-    def_merge_cols=["estimator", "function", "n_samples", "n_features"],
-    add_merge_cols=[],
-):
-    merge_cols = def_merge_cols + add_merge_cols
+def _make_dataset(algo, lib, speedup_col="mean", stdev_speedup_col="stdev"):
     results_path = Path(__file__).resolve().parent / "results"
-    lib_df = pd.read_csv("%s/%s/%s.csv" % (str(results_path), lib, algo))
-    skl_df = pd.read_csv("%s/sklearn/%s.csv" % (str(results_path), algo))
-    lib_suffix = _make_suffix(lib)
-    merged_df = skl_df.merge(lib_df, on=merge_cols, suffixes=["_sklearn", lib_suffix])
+    lib_df = pd.read_csv("%s/%s_%s.csv" % (str(results_path), lib, algo))
+    skl_df = pd.read_csv("%s/sklearn_%s.csv" % (str(results_path), algo))
+    lib_suffix = "_" + lib
+    merged_df = pd.merge(
+        skl_df[[speedup_col, stdev_speedup_col, "hyperparams_digest", "dims_digest"]],
+        lib_df[[speedup_col, stdev_speedup_col, "hyperparams_digest", "dims_digest"]],
+        on=["hyperparams_digest", "dims_digest"],
+        suffixes=["_sklearn", lib_suffix],
+    )
+    merged_df = merged_df.drop(["hyperparams_digest", "dims_digest"], axis=1)
+    skl_df = skl_df.drop(
+        [speedup_col, stdev_speedup_col, "hyperparams_digest", "dims_digest"], axis=1
+    )
+    merged_df = pd.merge(skl_df, merged_df, left_index=True, right_index=True)
+    numeric_cols = merged_df.select_dtypes(include=["float64"]).columns
+    merged_df[numeric_cols] = merged_df[numeric_cols].round(4)
 
     skl_col = speedup_col + "_sklearn"
     lib_col = speedup_col + lib_suffix
     merged_df["speedup"] = merged_df[skl_col] / merged_df[lib_col]
+    merged_df["speedup"] = merged_df["speedup"].round(2)
 
-    skl_col = speedup_err_col + "_sklearn"
-    lib_col = speedup_err_col + lib_suffix
-    merged_df["speedup_err"] = merged_df[skl_col] / merged_df[lib_col]
+    skl_col = stdev_speedup_col + "_sklearn"
+    lib_col = stdev_speedup_col + lib_suffix
+    merged_df["stdev_speedup"] = merged_df[skl_col] / merged_df[lib_col]
+    merged_df["stdev_speedup"] = merged_df["stdev_speedup"].round(2)
 
     return merged_df
 
 
-def plot_knn(algo="KNeighborsClassifier", n_cols=2):
-    merged_df_knn = _make_dataset(
-        algo,
-        "daal4py",
-        add_merge_cols=[
-            "algorithm",
-            "n_jobs",
-            "n_neighbors",
-        ],
-    )
-    merged_df_knn = merged_df_knn[
-        [
-            "function",
-            "n_samples",
-            "n_features",
-            "algorithm",
-            "n_jobs",
-            "n_neighbors",
-            "mean_time_elapsed_sklearn",
-            "mean_time_elapsed_daal4py",
-            "speedup",
-            "speedup_err",
-        ]
-    ]
+def _make_hover_template(df):
+    template = ""
+    for index, name in enumerate(df.columns):
+        template += "%s: <b>%%{customdata[%i]}</b><br>" % (name, index)
+    template += "<extra></extra>"
+    return template
 
-    merged_df_knn_grouped = merged_df_knn.groupby(
-        ["algorithm", "n_neighbors", "function"]
-    )
 
-    n_plots = len(merged_df_knn_grouped)
+def plot_results(
+    algo="KNeighborsClassifier",
+    versus_lib="daal4py",
+    group_by_cols=[],
+    split_hist_by=[],
+    n_cols=2,
+):
+    merged_df = _make_dataset(algo, versus_lib)
+    merged_df_grouped = merged_df.groupby(group_by_cols)
+
+    n_plots = len(merged_df_grouped)
     n_rows = n_plots // n_cols + n_plots % n_cols
     coordinates = _gen_coordinates_grid(n_rows, n_cols)
 
-    subplot_titles = [
-        "algo: %s, k: %s, func: %s" % params for params, _ in merged_df_knn_grouped
-    ]
-    fig = make_subplots(
-        rows=n_rows, cols=n_cols, subplot_titles=subplot_titles, y_title="Speedup"
-    )
-
-    for (row, col), (_, df) in zip(coordinates, merged_df_knn_grouped):
-        df["speedup"] = df["speedup"].round(2)
-        df["speedup_err"] = df["speedup_err"].round(2)
-        df[["mean_time_elapsed_sklearn", "mean_time_elapsed_daal4py"]] = df[
-            ["mean_time_elapsed_sklearn", "mean_time_elapsed_daal4py"]
-        ].round(4)
-
-        x1 = df[["n_samples", "n_features"]][df["n_jobs"] == 1]
-        x1 = [f"({ns}, {nf})" for ns, nf in x1.values]
-        y1 = df["speedup"][df["n_jobs"] == 1]
-        fig.add_trace(
-            go.Bar(
-                x=x1,
-                y=y1,
-                error_y=dict(type="data", array=df[df["n_jobs"] == 1]["speedup_err"]),
-                name="n_jobs: 1",
-                marker_color="indianred",
-                hovertemplate="function: <b>%{customdata[0]}</b><br>"
-                + "n_samples: <b>%{customdata[1]}</b><br>"
-                + "n_features: <b>%{customdata[2]}</b><br>"
-                + "algo: <b>%{customdata[3]}</b><br>"
-                + "n_jobs: <b>%{customdata[4]}</b><br>"
-                + "n_neighbors: <b>%{customdata[5]}</b><br>"
-                + "Time sklearn (s): <b>%{customdata[6]}</b><br>"
-                + "Time d4p (s): <b>%{customdata[7]}</b><br>"
-                + "speedup: <b>%{customdata[8]}</b><br>"
-                + "speedup error: <b>%{customdata[9]}</b><br>"
-                + "<extra></extra>",
-                customdata=df[df["n_jobs"] == 1].values,
-                showlegend=False,
-            ),
-            row=row,
-            col=col,
-        )
-
-        x2 = df[["n_samples", "n_features"]][df["n_jobs"] == 1]
-        x2 = [f"({ns}, {nf})" for ns, nf in x2.values]
-        y2 = df["speedup"][df["n_jobs"] == -1]
-        fig.add_trace(
-            go.Bar(
-                x=x2,
-                y=y2,
-                error_y=dict(type="data", array=df[df["n_jobs"] == -1]["speedup_err"]),
-                name="n_jobs: -1",
-                marker_color="lightsalmon",
-                hovertemplate="function: <b>%{customdata[0]}</b><br>"
-                + "n_samples: <b>%{customdata[1]}</b><br>"
-                + "n_features: <b>%{customdata[2]}</b><br>"
-                + "algo: <b>%{customdata[3]}</b><br>"
-                + "n_jobs: <b>%{customdata[4]}</b><br>"
-                + "n_neighbors: <b>%{customdata[5]}</b><br>"
-                + "Time sklearn (s): <b>%{customdata[6]}</b><br>"
-                + "Time d4p (s): <b>%{customdata[7]}</b><br>"
-                + "speedup: <b>%{customdata[9]}</b><br>"
-                + "speedup error: <b>%{customdata[10]}</b><br>"
-                + "<extra></extra>",
-                customdata=df[df["n_jobs"] == -1].values,
-                showlegend=False,
-            ),
-            row=row,
-            col=col,
-        )
-
-    fig.update_layout(height=1500, barmode="group", showlegend=False)
-    fig.show()
-
-
-def plot_kmeans():
-    merged_df_kmeans = _make_dataset(
-        "kmeans",
-        "daal4py",
-        add_merge_cols=[
-            "init",
-            "max_iter",
-            "n_clusters",
-            "n_init",
-            "tol",
-        ],
-    )
-    merged_df_kmeans = merged_df_kmeans[
-        [
-            "function",
-            "n_samples",
-            "n_features",
-            "init",
-            "max_iter",
-            "n_clusters",
-            "n_init",
-            "tol",
-            "mean_time_elapsed_skl",
-            "mean_time_elapsed_d4p",
-            "speedup",
-        ]
-    ]
-    merged_df_kmeans_grouped = merged_df_kmeans.groupby(
-        ["init", "max_iter", "n_clusters", "n_init", "tol", "function"]
-    )
-
-    coordinates = _gen_coordinates_grid(6, 2)
-
     subplot_titles = []
-    for params, _ in merged_df_kmeans_grouped:
-        subplot_titles.append("init: %s - function: %s" % (params[0], params[-1]))
+    for params, _ in merged_df_grouped:
+        title = ""
+        for index, (name, val) in enumerate(zip(group_by_cols, params)):
+            title += "%s: %s" % (name, val)
+            title += " - " if index != len(list(zip(group_by_cols, params))) - 1 else ""
+        subplot_titles.append(title)
 
     fig = make_subplots(
-        rows=6,
-        cols=2,
+        rows=n_rows,
+        cols=n_cols,
         subplot_titles=subplot_titles,
-        shared_yaxes=True,
         y_title="Speedup",
+        x_title="(n_samples, n_features)",
     )
 
-    for (row, col), (_, df) in zip(coordinates, merged_df_kmeans_grouped):
-        df["speedup"] = df["speedup"].round(2)
-        df[["mean_time_elapsed_skl", "mean_time_elapsed_d4p"]] = df[
-            ["mean_time_elapsed_skl", "mean_time_elapsed_d4p"]
-        ].round(6)
-        x = df[["n_samples", "n_features"]]
-        x = [f"({ns}, {nf})" for ns, nf in x.values]
-        y = df["speedup"]
-        fig.add_trace(
-            go.Bar(
-                x=x,
-                y=y,
-                hovertemplate="function: <b>%{customdata[0]}</b><br>"
-                + "n_samples: <b>%{customdata[1]}</b><br>"
-                + "n_features: <b>%{customdata[2]}</b><br>"
-                + "init: <b>%{customdata[3]}</b><br>"
-                + "max_iter: <b>%{customdata[4]}</b><br>"
-                + "n_clusters: <b>%{customdata[5]}</b><br>"
-                + "n_init: <b>%{customdata[6]}</b><br>"
-                + "tol: <b>%{customdata[7]}</b><br>"
-                + "Time sklearn (s): <b>%{customdata[8]}</b><br>"
-                + "Time d4p (s): <b>%{customdata[9]}</b><br>"
-                + "speedup: <b>%{customdata[10]}</b><br>"
-                + "<extra></extra>",
-                customdata=df.values,
-                showlegend=False,
-            ),
-            row=row,
-            col=col,
-        )
-    fig.update_layout(height=2000, barmode="group", showlegend=False)
+    for (row, col), (_, df) in zip(coordinates, merged_df_grouped):
+        if split_hist_by:
+            for split_col in split_hist_by:
+                split_col_vals = df[split_col].unique()
+                for index, split_val in enumerate(split_col_vals):
+                    x = df[["n_samples", "n_features"]][df[split_col] == split_val]
+                    x = [f"({ns}, {nf})" for ns, nf in x.values]
+                    y = df["speedup"][df[split_col] == split_val]
+                    fig.add_trace(
+                        go.Bar(
+                            x=x,
+                            y=y,
+                            # error_y=dict(
+                            #     type="data",
+                            #     array=df[df[split_col] == split_val]["stdev_speedup"],
+                            # ),
+                            name="%s: %s" % (split_col, split_val),
+                            marker_color=px.colors.qualitative.Plotly[index],
+                            hovertemplate=_make_hover_template(
+                                df[df[split_col] == split_val]
+                            ),
+                            customdata=df[df[split_col] == split_val].values,
+                            showlegend=(row, col) == (1, 1),
+                        ),
+                        row=row,
+                        col=col,
+                    )
+        else:
+            x = df[["n_samples", "n_features"]]
+            x = [f"({ns}, {nf})" for ns, nf in x.values]
+            y = df["speedup"]
+            fig.add_trace(
+                go.Bar(
+                    x=x,
+                    y=y,
+                    # error_y=dict(
+                    #     type="data",
+                    #     array=df[df[split_col] == split_val]["stdev_speedup"],
+                    # ),
+                    hovertemplate=_make_hover_template(df),
+                    customdata=df.values,
+                    showlegend=False,
+                ),
+                row=row,
+                col=col,
+            )
+
+    fig.update_annotations(font_size=8)
+    fig.update_layout(height=1000, barmode="group", showlegend=True)
     fig.show()
 
 
