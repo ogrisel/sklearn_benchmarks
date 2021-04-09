@@ -170,8 +170,6 @@ def plot_results(
         rows=n_rows,
         cols=n_cols,
         subplot_titles=subplot_titles,
-        y_title="Speedup",
-        x_title="(n_samples, n_features)",
     )
 
     for (row, col), (_, df) in zip(coordinates, merged_df_grouped):
@@ -214,6 +212,11 @@ def plot_results(
                 col=col,
             )
 
+    for i in range(1, n_plots + 1):
+        fig["layout"]["xaxis{}".format(i)]["title"] = "(n_samples, n_features)"
+        fig["layout"]["yaxis{}".format(i)]["title"] = "Speedup"
+    fig.for_each_xaxis(lambda axis: axis.title.update(font=dict(size=10)))
+    fig.for_each_yaxis(lambda axis: axis.title.update(font=dict(size=10)))
     fig.update_annotations(font_size=10)
     fig.update_layout(height=n_rows * 250, barmode="group", showlegend=True)
     fig.show()
