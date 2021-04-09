@@ -21,6 +21,8 @@ from sklearn.model_selection import train_test_split
 class Benchmark:
     """Runs benchmarks on one estimator for one library, accross potentially multiple datasets"""
 
+    RESULTS_PATH = Path(__file__).resolve().parent / "results"
+
     def __init__(
         self,
         name,
@@ -91,23 +93,19 @@ class Benchmark:
                 for params in parameters_grid:
                     estimator = estimator_class(**params)
 
-                    profiling_path = (
-                        Path(__file__).resolve().parent / "results" / "profiling"
-                    )
+                    profiling_path = self.RESULTS_PATH / "profiling"
                     Path(profiling_path).mkdir(parents=True, exist_ok=True)
-                    profiling_output_file = (
-                        f"{str(profiling_path)}/fit_{self.name}.html"
-                    )
+                    prof_out_path = f"{str(profiling_path)}/fit_{self.name}.html"
 
-                    _, mean_time_elapsed, std_time_elapsed = FuncExecutor.run(
-                        estimator.fit, profiling_output_file, X_train, y_train
+                    _, mean_time, stdev_time = FuncExecutor.run(
+                        estimator.fit, prof_out_path, X_train, y_train
                     )
                     row = dict(
                         estimator=self.name,
                         lib=self._lib(),
                         function="fit",
-                        mean_time_elapsed=mean_time_elapsed,
-                        std_time_elapsed=std_time_elapsed,
+                        mean_time=mean_time,
+                        stdev_time=stdev_time,
                         n_samples=ns_train,
                         n_features=n_features,
                         **params,
@@ -122,13 +120,13 @@ class Benchmark:
                         X_test_, y_test_ = X_test[:ns_test], y_test[:ns_test]
                         bench_func = predict_or_transform(estimator)
 
-                        profiling_output_file = f"{str(profiling_path)}/{bench_func.__name__}_{self.name}.html"
+                        prof_out_path = f"{str(profiling_path)}/{bench_func.__name__}_{self.name}.html"
 
                         (
                             y_pred,
-                            mean_time_elapsed,
-                            std_time_elapsed,
-                        ) = FuncExecutor.run(bench_func, profiling_output_file, X_test_)
+                            mean_time,
+                            stdev_time,
+                        ) = FuncExecutor.run(bench_func, prof_out_path, X_test_)
                         if i == 0:
                             scores = {
                                 func.__name__: func(y_test_, y_pred)
@@ -138,8 +136,8 @@ class Benchmark:
                             estimator=self.name,
                             lib=self._lib(),
                             function="predict",
-                            mean_time_elapsed=mean_time_elapsed,
-                            std_time_elapsed=std_time_elapsed,
+                            mean_time=mean_time,
+                            stdev_time=stdev_time,
                             n_samples=ns_test,
                             n_features=n_features,
                             **scores,
@@ -151,8 +149,7 @@ class Benchmark:
         return self
 
     def to_csv(self):
-        results_path = Path(__file__).resolve().parent / "results"
-        csv_path = f"{results_path}/{self._lib()}_{self.name}.csv"
+        csv_path = f"{self.RESULTS_PATH}/{self._lib()}_{self.name}.csv"
         pd.DataFrame(self.results_).to_csv(
             csv_path,
             mode="w+",

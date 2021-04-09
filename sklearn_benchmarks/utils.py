@@ -34,8 +34,8 @@ class FuncExecutor:
             curr = time.perf_counter()
             if curr - start > 3:
                 break
-        mean_time, std_time = np.mean(times), np.std(times)
-        return (result, mean_time, std_time)
+        mean_time, stdev_time = np.mean(times), np.std(times)
+        return (result, mean_time, stdev_time)
 
 
 _cachedir = "tmp"
@@ -95,7 +95,7 @@ def _make_dataset(
     algo,
     lib,
     speedup_col="mean_time_elapsed",
-    speedup_err_col="std_time_elapsed",
+    speedup_err_col="stdev_time_elapsed",
     def_merge_cols=["estimator", "function", "n_samples", "n_features"],
     add_merge_cols=[],
 ):
