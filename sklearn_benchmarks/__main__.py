@@ -1,10 +1,11 @@
-from pathlib import Path
 import yaml
 import json
 import time
+import joblib
 import importlib
 import time
 import pandas as pd
+from pathlib import Path
 from sklearn.model_selection import ParameterGrid
 from sklearn_benchmarks.utils import (
     FuncExecutor,
@@ -39,8 +40,8 @@ class Benchmark:
         self.hyperparameters = hyperparameters
         self.datasets = datasets
 
-    def _lib(self):
-        return self.estimator.split(".")[0]
+    def _set_lib(self):
+        self.lib_ = self.estimator.split(".")[0]
 
     def _load_estimator_class(self):
         splitted_path = self.estimator.split(".")
@@ -72,6 +73,7 @@ class Benchmark:
 
     def run(self):
         self._validate_params()
+        self._set_lib()
         estimator_class = self._load_estimator_class()
         metrics_functions = self._load_metrics_functions()
         parameters_grid = self._init_parameters_grid()
@@ -92,41 +94,46 @@ class Benchmark:
                 )
                 for params in parameters_grid:
                     estimator = estimator_class(**params)
+                    hyperparams_digest = joblib.hash(params)
+                    dims_digest = joblib.hash([ns_train, n_features])
+                    profiling_results_path = str(self.RESULTS_PATH / "profiling")
+                    profiling_path = f"{profiling_results_path}/fit_{hyperparams_digest}_{dims_digest}.html"
 
-                    profiling_path = self.RESULTS_PATH / "profiling"
-                    Path(profiling_path).mkdir(parents=True, exist_ok=True)
-                    prof_out_path = f"{str(profiling_path)}/fit_{self.name}.html"
-
-                    _, mean_time, stdev_time = FuncExecutor.run(
-                        estimator.fit, prof_out_path, X_train, y_train
+                    _, mean, stdev = FuncExecutor.run(
+                        estimator.fit, profiling_path, X_train, y_train
                     )
                     row = dict(
                         estimator=self.name,
-                        lib=self._lib(),
+                        lib=self.lib_,
                         function="fit",
-                        mean_time=mean_time,
-                        stdev_time=stdev_time,
+                        mean=mean,
+                        stdev=stdev,
                         n_samples=ns_train,
                         n_features=n_features,
                         **params,
                     )
                     if hasattr(estimator, "n_iter_"):
                         row["n_iter"] = estimator.n_iter_
-                    print(json.dumps(row, indent=4, ensure_ascii=False))
-                    print("---")
+
                     self.results_.append(row)
+
+                    print(
+                        "%s - %s - %s - mean: %6.3f - stdev: %6.3f"
+                        % (self.lib_, self.name, "fit", mean, stdev)
+                    )
+
                     for i in range(len(n_samples_test)):
                         ns_test = n_samples_test[i]
                         X_test_, y_test_ = X_test[:ns_test], y_test[:ns_test]
                         bench_func = predict_or_transform(estimator)
-
-                        prof_out_path = f"{str(profiling_path)}/{bench_func.__name__}_{self.name}.html"
+                        dims_digest = joblib.hash([ns_test, n_features])
+                        profiling_path = f"{profiling_results_path}/{bench_func.__name__}_{hyperparams_digest}_{dims_digest}.html"
 
                         (
                             y_pred,
-                            mean_time,
-                            stdev_time,
-                        ) = FuncExecutor.run(bench_func, prof_out_path, X_test_)
+                            mean,
+                            stdev,
+                        ) = FuncExecutor.run(bench_func, profiling_path, X_test_)
                         if i == 0:
                             scores = {
                                 func.__name__: func(y_test_, y_pred)
@@ -134,22 +141,24 @@ class Benchmark:
                             }
                         row = dict(
                             estimator=self.name,
-                            lib=self._lib(),
+                            lib=self.lib_,
                             function="predict",
-                            mean_time=mean_time,
-                            stdev_time=stdev_time,
+                            mean=mean,
+                            stdev=stdev,
                             n_samples=ns_test,
                             n_features=n_features,
                             **scores,
                             **params,
                         )
-                        print(json.dumps(row, indent=4, ensure_ascii=False))
-                        print("---")
+                        print(
+                            "%s - %s - %s - mean: %6.3f - stdev: %6.3f"
+                            % (self.lib_, self.name, bench_func.__name__, mean, stdev)
+                        )
                         self.results_.append(row)
         return self
 
     def to_csv(self):
-        csv_path = f"{self.RESULTS_PATH}/{self._lib()}_{self.name}.csv"
+        csv_path = f"{self.RESULTS_PATH}/{self.lib_}_{self.name}.csv"
         pd.DataFrame(self.results_).to_csv(
             csv_path,
             mode="w+",
@@ -198,8 +207,6 @@ def main():
         params = _prepare_params(params)
 
         benchmark_estimator = Benchmark(**params)
-        print(f"start benchmark {name}")
-        print("---")
         t0_ = time.perf_counter()
         benchmark_estimator.run()
         t1_ = time.perf_counter()
