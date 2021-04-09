@@ -24,24 +24,24 @@ class Benchmark:
     def __init__(
         self,
         name,
-        source,
+        estimator,
         inherit=False,
         metrics=["accuracy"],
         hyperparameters={},
         datasets=[],
     ):
         self.name = name
-        self.source = source
+        self.estimator = estimator
         self.inherit = inherit
         self.metrics = metrics
         self.hyperparameters = hyperparameters
         self.datasets = datasets
 
     def _lib(self):
-        return self.source.split(".")[0]
+        return self.estimator.split(".")[0]
 
     def _load_estimator_class(self):
-        splitted_path = self.source.split(".")
+        splitted_path = self.estimator.split(".")
         module, class_name = ".".join(splitted_path[:-1]), splitted_path[-1]
         return getattr(importlib.import_module(module), class_name)
 
@@ -53,8 +53,8 @@ class Benchmark:
             raise ValueError("name should be a string")
         if not self.name:
             raise ValueError("name should not be an empty string")
-        if not isinstance(self.source, str):
-            raise ValueError("source should be a string")
+        if not isinstance(self.estimator, str):
+            raise ValueError("estimator should be a string")
         if not (isinstance(self.inherit, bool) or isinstance(self.inherit, str)):
             raise ValueError("inherit should be a either True, False or a string")
         if not isinstance(self.metrics, list):
@@ -156,9 +156,7 @@ class Benchmark:
 
     def to_csv(self):
         results_path = Path(__file__).resolve().parent / "results"
-        lib_path = f"{str(results_path)}/{self._lib()}"
-        Path(lib_path).mkdir(parents=True, exist_ok=True)
-        csv_path = f"{lib_path}/{self.name}.csv"
+        csv_path = f"{results_path}/{self._lib()}_{self.name}.csv"
         pd.DataFrame(self.results_).to_csv(
             csv_path,
             mode="w+",
