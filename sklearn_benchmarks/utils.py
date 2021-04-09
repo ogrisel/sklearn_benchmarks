@@ -210,7 +210,7 @@ def plot_results(
             )
 
     fig.update_annotations(font_size=8)
-    fig.update_layout(height=1000, barmode="group", showlegend=True)
+    fig.update_layout(height=n_rows * 200, barmode="group", showlegend=True)
     fig.show()
 
 
