@@ -141,8 +141,8 @@ def _make_hover_template(df):
 
 
 def plot_results(
-    algo="KNeighborsClassifier",
-    versus_lib="daal4py",
+    algo="",
+    versus_lib="",
     group_by_cols=[],
     split_hist_by=[],
     n_cols=2,
@@ -159,7 +159,11 @@ def plot_results(
         title = ""
         for index, (name, val) in enumerate(zip(group_by_cols, params)):
             title += "%s: %s" % (name, val)
-            title += " - " if index != len(list(zip(group_by_cols, params))) - 1 else ""
+            if index > 0 and index % 3 == 0:
+                title += "<br>"
+            elif index != len(list(zip(group_by_cols, params))) - 1:
+                title += " - "
+
         subplot_titles.append(title)
 
     fig = make_subplots(
@@ -171,6 +175,7 @@ def plot_results(
     )
 
     for (row, col), (_, df) in zip(coordinates, merged_df_grouped):
+        df = df.sort_values(by=["n_samples", "n_features"])
         if split_hist_by:
             for split_col in split_hist_by:
                 split_col_vals = df[split_col].unique()
@@ -209,8 +214,8 @@ def plot_results(
                 col=col,
             )
 
-    fig.update_annotations(font_size=8)
-    fig.update_layout(height=n_rows * 200, barmode="group", showlegend=True)
+    fig.update_annotations(font_size=10)
+    fig.update_layout(height=n_rows * 300, barmode="group", showlegend=True)
     fig.show()
 
 
