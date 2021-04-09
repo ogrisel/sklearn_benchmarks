@@ -215,7 +215,7 @@ def plot_results(
             )
 
     fig.update_annotations(font_size=10)
-    fig.update_layout(height=n_rows * 300, barmode="group", showlegend=True)
+    fig.update_layout(height=n_rows * 250, barmode="group", showlegend=True)
     fig.show()
 
 
