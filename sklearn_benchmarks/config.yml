@@ -1,13 +1,11 @@
 estimators:
   KNeighborsClassifier:
     name: KNeighborsClassifier
-    source: sklearn.neighbors.KNeighborsClassifier
+    estimator: sklearn.neighbors.KNeighborsClassifier
     hyperparameters:
       n_neighbors:
         - 1
         - 5
-        - 10
-        - 50
         - 1e2
       algorithm:
         - brute
@@ -41,17 +39,15 @@ estimators:
 
   daal4py_KNeighborsClassifier:
     inherit: KNeighborsClassifier
-    source: daal4py.sklearn.neighbors.KNeighborsClassifier
+    estimator: daal4py.sklearn.neighbors.KNeighborsClassifier
 
   KNeighborsClassifier_kd_tree:
     name: KNeighborsClassifier_kd_tree
-    source: sklearn.neighbors.KNeighborsClassifier
+    estimator: sklearn.neighbors.KNeighborsClassifier
     hyperparameters:
       n_neighbors:
         - 1
         - 5
-        - 10
-        - 50
         - 1e2
       algorithm:
         - kd_tree
@@ -85,11 +81,11 @@ estimators:
 
   daal4py_KNeighborsClassifier_kd_tree:
     inherit: KNeighborsClassifier_kd_tree
-    source: daal4py.sklearn.neighbors.KNeighborsClassifier
+    estimator: daal4py.sklearn.neighbors.KNeighborsClassifier
 
   KMeans:
     name: KMeans
-    source: sklearn.cluster.KMeans
+    estimator: sklearn.cluster.KMeans
     hyperparameters:
       init:
         - k-means++
@@ -146,4 +142,4 @@ estimators:
 
   daal4py_KMeans:
     inherit: KMeans
-    source: daal4py.sklearn.cluster.KMeans
+    estimator: daal4py.sklearn.cluster.KMeans
