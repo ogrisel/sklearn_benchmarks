@@ -1,15 +1,15 @@
-import numpy as np
 import os
 import glob
-from pathlib import Path
 import glob
 import time
-from plotly.subplots import make_subplots
-import plotly.graph_objects as go
-import pandas as pd
 import importlib
 import itertools
 import re
+import numpy as np
+import plotly.graph_objects as go
+import pandas as pd
+from pathlib import Path
+from plotly.subplots import make_subplots
 from joblib import Memory
 from viztracer import VizTracer
 
@@ -305,8 +305,11 @@ def plot_kmeans():
 
 def clean_results():
     current_path = Path(__file__).resolve().parent
-    files_path = current_path / "results/**/*.csv"
-    files = glob.glob(str(files_path), recursive=True)
+    extensions = [".csv", ".html"]
+    files = []
+    for extension in extensions:
+        files_path = str(current_path / "results/**/*") + extension
+        files += glob.glob(str(files_path), recursive=True)
 
     for f in files:
         try:
