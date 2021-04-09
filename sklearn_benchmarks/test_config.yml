@@ -28,3 +28,45 @@ estimators:
   daal4py_KNeighborsClassifier:
     inherit: KNeighborsClassifier
     estimator: daal4py.sklearn.neighbors.KNeighborsClassifier
+  KMeans:
+    name: KMeans
+    estimator: sklearn.cluster.KMeans
+    hyperparameters:
+      init:
+        - k-means++
+        - random
+      n_clusters:
+        - 3
+        - 8
+        - 10
+      max_iter:
+        - 30
+      n_init:
+        - 1
+      tol:
+        - 1e-16
+    metrics:
+      - adjusted_rand_score
+    datasets:
+      - sample_generator: sklearn.datasets.make_blobs
+        params:
+          random_state: 42
+        n_features: 2
+        n_samples_train:
+          - 1e4
+        n_samples_test:
+          - 1
+          - 1e3
+      - sample_generator: sklearn.datasets.make_blobs
+        params:
+          random_state: 42
+        n_features: 1e2
+        n_samples_train:
+          - 1e4
+        n_samples_test:
+          - 1
+          - 1e3
+
+  daal4py_KMeans:
+    inherit: KMeans
+    estimator: daal4py.sklearn.cluster.KMeans
