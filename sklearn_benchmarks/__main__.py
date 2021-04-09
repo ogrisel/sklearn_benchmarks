@@ -15,14 +15,13 @@ from sklearn_benchmarks.utils import (
     clean_results,
     convert,
     get_config_path,
+    RESULTS_PATH,
 )
 from sklearn.model_selection import train_test_split
 
 
 class Benchmark:
     """Runs benchmarks on one estimator for one library, accross potentially multiple datasets"""
-
-    RESULTS_PATH = Path(__file__).resolve().parent / "results"
 
     def __init__(
         self,
@@ -96,7 +95,7 @@ class Benchmark:
                     estimator = estimator_class(**params)
                     hyperparams_digest = joblib.hash(params)
                     dims_digest = joblib.hash([ns_train, n_features])
-                    profiling_results_path = str(self.RESULTS_PATH / "profiling")
+                    profiling_results_path = str(RESULTS_PATH / "profiling")
                     profiling_path = f"{profiling_results_path}/fit_{hyperparams_digest}_{dims_digest}.html"
 
                     _, mean, stdev = FuncExecutor.run(
@@ -110,6 +109,8 @@ class Benchmark:
                         stdev=stdev,
                         n_samples=ns_train,
                         n_features=n_features,
+                        hyperparams_digest=hyperparams_digest,
+                        dims_digest=dims_digest,
                         **params,
                     )
                     if hasattr(estimator, "n_iter_"):
@@ -147,6 +148,8 @@ class Benchmark:
                             stdev=stdev,
                             n_samples=ns_test,
                             n_features=n_features,
+                            hyperparams_digest=hyperparams_digest,
+                            dims_digest=dims_digest,
                             **scores,
                             **params,
                         )
@@ -158,7 +161,7 @@ class Benchmark:
         return self
 
     def to_csv(self):
-        csv_path = f"{self.RESULTS_PATH}/{self.lib_}_{self.name}.csv"
+        csv_path = f"{RESULTS_PATH}/{self.lib_}_{self.name}.csv"
         pd.DataFrame(self.results_).to_csv(
             csv_path,
             mode="w+",
