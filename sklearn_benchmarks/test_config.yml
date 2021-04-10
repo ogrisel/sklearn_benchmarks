@@ -5,7 +5,6 @@ estimators:
     hyperparameters:
       n_neighbors:
         - 1
-        - 5
       algorithm:
         - brute
       n_jobs:
@@ -23,7 +22,11 @@ estimators:
         n_samples_train:
           - 1e6
         n_samples_test:
-          - 1
+          - 10
+
+  daal4py_KNeighborsClassifier:
+    inherit: KNeighborsClassifier
+    estimator: daal4py.sklearn.neighbors.KNeighborsClassifier
 
   KNeighborsClassifier_kd_tree:
     name: KNeighborsClassifier_kd_tree
@@ -56,9 +59,6 @@ estimators:
     inherit: KNeighborsClassifier_kd_tree
     estimator: daal4py.sklearn.neighbors.KNeighborsClassifier
 
-  daal4py_KNeighborsClassifier:
-    inherit: KNeighborsClassifier
-    estimator: daal4py.sklearn.neighbors.KNeighborsClassifier
   KMeans:
     name: KMeans
     estimator: sklearn.cluster.KMeans
