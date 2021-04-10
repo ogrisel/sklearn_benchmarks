@@ -1,9 +1,11 @@
 import yaml
-import json
+import argparse
 import time
 import joblib
 import importlib
 import time
+import sys
+import os
 import pandas as pd
 from pathlib import Path
 from sklearn.model_selection import ParameterGrid
@@ -14,7 +16,6 @@ from sklearn_benchmarks.utils import (
     predict_or_transform,
     clean_results,
     convert,
-    get_config_path,
     RESULTS_PATH,
 )
 from sklearn.model_selection import train_test_split
@@ -190,11 +191,11 @@ def _prepare_params(params):
     return params
 
 
-def main():
-    clean_results()
+def main(args):
+    if not args.append:
+        clean_results()
 
-    config_path = get_config_path()
-    with open(config_path, "r") as config_file:
+    with open(args.config_file, "r") as config_file:
         config = yaml.full_load(config_file)
 
     estimators = config["estimators"]
@@ -218,7 +219,9 @@ def main():
 
     t1 = time.perf_counter()
     time_report.loc[len(time_report)] = ["total", *convert(t1 - t0)]
-    time_report = time_report.round(2)
+    time_report[["hour", "min", "sec"]] = time_report[["hour", "min", "sec"]].astype(
+        int
+    )
     current_path = Path(__file__).resolve().parent
     time_report_path = current_path / "results/time_report.csv"
     time_report.to_csv(
@@ -229,4 +232,16 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-a", "--append", dest="append", action="store_true")
+    parser.add_argument("-c", "--config", dest="config_file")
+    parser.set_defaults(append=False, config="config.yml")
+    args = parser.parse_args()
+    try:
+        main(args)
+    except KeyboardInterrupt:
+        clean_results()
+        try:
+            sys.exit(0)
+        except SystemExit:
+            os._exit(0)

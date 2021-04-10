@@ -7,8 +7,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      CONFIG_FILE: config.yml
     defaults:
       run:
         shell: bash -l {0}
@@ -36,7 +34,7 @@ jobs:
           use-only-tar-bz2: true
 
       - name: Run benchmark suite
-        run: python -m sklearn_benchmarks
+        run: python -m sklearn_benchmarks -c config.yml
 
       - name: Convert notebook to html
         run: |
