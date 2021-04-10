@@ -97,7 +97,7 @@ class Benchmark:
                     hyperparams_digest = joblib.hash(params)
                     dims_digest = joblib.hash([ns_train, n_features])
                     profiling_results_path = str(RESULTS_PATH / "profiling")
-                    profiling_path = f"{profiling_results_path}/fit_{hyperparams_digest}_{dims_digest}.html"
+                    profiling_path = f"{profiling_results_path}/{self.lib_}_fit_{hyperparams_digest}_{dims_digest}.html"
 
                     _, mean, stdev = FuncExecutor.run(
                         estimator.fit, profiling_path, X_train, y_train
@@ -129,7 +129,7 @@ class Benchmark:
                         X_test_, y_test_ = X_test[:ns_test], y_test[:ns_test]
                         bench_func = predict_or_transform(estimator)
                         dims_digest = joblib.hash([ns_test, n_features])
-                        profiling_path = f"{profiling_results_path}/{bench_func.__name__}_{hyperparams_digest}_{dims_digest}.html"
+                        profiling_path = f"{profiling_results_path}/{self.lib_}_{bench_func.__name__}_{hyperparams_digest}_{dims_digest}.html"
 
                         (
                             y_pred,
