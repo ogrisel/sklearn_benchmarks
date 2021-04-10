@@ -49,13 +49,6 @@ _cachedir = "tmp"
 memory = Memory(_cachedir, verbose=0)
 
 
-def get_config_path():
-    path = Path(__file__).resolve().parent
-    file = os.environ["CONFIG_FILE"]
-    path = path / file
-    return path
-
-
 @memory.cache
 def gen_data(generator_path, n_samples=1000, n_features=10, **kwargs):
     """Returns a tuple of data from the specified generator."""
@@ -112,9 +105,7 @@ def _make_dataset(algo, lib, speedup_col="mean", stdev_speedup_col="stdev"):
         suffixes=["_sklearn", lib_suffix],
     )
     merged_df = merged_df.drop(["hyperparams_digest", "dims_digest"], axis=1)
-    skl_df = skl_df.drop(
-        [speedup_col, stdev_speedup_col, "hyperparams_digest", "dims_digest"], axis=1
-    )
+    skl_df = skl_df.drop([speedup_col, stdev_speedup_col], axis=1)
     merged_df = pd.merge(skl_df, merged_df, left_index=True, right_index=True)
     numeric_cols = merged_df.select_dtypes(include=["float64"]).columns
     merged_df[numeric_cols] = merged_df[numeric_cols].round(4)
