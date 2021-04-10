@@ -92,8 +92,9 @@ estimators:
         - random
       n_clusters:
         - 3
-        - 8
         - 10
+        - 300
+        - 1000
       max_iter:
         - 30
       n_init:
