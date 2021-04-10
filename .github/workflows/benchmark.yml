@@ -33,6 +33,13 @@ jobs:
           channel-priority: flexible
           use-only-tar-bz2: true
 
+      - name: Set config vars for parallelism
+        run: |
+          export NUM_CORES=`python -c "import joblib; print(joblib.cpu_count())"`
+          export MKL_NUM_THREADS=$NUM_CORES
+          export OMP_NUM_THREADS=$NUM_CORES
+          export OPENBLAS_NUM_THREADS=$NUM_CORES
+
       - name: Run benchmark suite
         run: python -m sklearn_benchmarks -c sklearn_benchmarks/config.yml
 
