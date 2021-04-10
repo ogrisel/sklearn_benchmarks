@@ -34,7 +34,7 @@ jobs:
           use-only-tar-bz2: true
 
       - name: Run benchmark suite
-        run: python -m sklearn_benchmarks -c config.yml
+        run: python -m sklearn_benchmarks -c sklearn_benchmarks/config.yml
 
       - name: Convert notebook to html
         run: |
