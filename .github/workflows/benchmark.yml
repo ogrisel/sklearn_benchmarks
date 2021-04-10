@@ -38,31 +38,25 @@ jobs:
 
       - name: Convert notebook to html
         run: |
-          jupyter nbconvert --to html --execute sklearn_benchmarks/results.ipynb
+          jupyter nbconvert --to html --execute --output results/index.html sklearn_benchmarks/results.ipynb
           rm -rf docs
           mkdir docs
           mv sklearn_benchmarks/results.html docs/index.html
 
-      - name: Upload docs folder
-        uses: actions/upload-artifact@v2
-        with:
-          name: docs
-          path: docs
-
       - name: Upload benchmark results
         uses: actions/upload-artifact@v2
         with:
-          name: benchmark-results
+          name: results
           path: sklearn_benchmarks/results
 
       - name: Download docs folder
         uses: actions/download-artifact@v2
         with:
-          name: docs
-          path: docs
+          name: results
+          path: sklearn_benchmarks/results
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@4.1.1
         with:
           branch: gh-pages
-          folder: docs
+          folder: results
