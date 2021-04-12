@@ -49,9 +49,6 @@ jobs:
       - name: Convert notebook to html
         run: |
           jupyter nbconvert --to html --execute --output results/index.html sklearn_benchmarks/results.ipynb
-          rm -rf docs
-          mkdir docs
-          mv sklearn_benchmarks/index.html docs/index.html
 
       - name: Upload benchmark results
         uses: actions/upload-artifact@v2
