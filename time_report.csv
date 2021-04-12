@@ -1,8 +1,8 @@
 algo,hour,min,sec
-KNeighborsClassifier,0,0,5
-daal4py_KNeighborsClassifier,0,0,2
-KNeighborsClassifier_kd_tree,0,0,19
-daal4py_KNeighborsClassifier_kd_tree,0,0,13
-KMeans,0,1,17
-daal4py_KMeans,0,0,34
-total,0,2,32
+KNeighborsClassifier,0,6,7
+daal4py_KNeighborsClassifier,0,1,20
+KNeighborsClassifier_kd_tree,0,1,19
+daal4py_KNeighborsClassifier_kd_tree,0,0,50
+KMeans,0,9,37
+daal4py_KMeans,0,2,55
+total,0,22,11
