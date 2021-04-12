@@ -36,6 +36,9 @@ jobs:
       - name: Set config vars for parallelism
         run: |
           export NUM_CORES=`python -c "import joblib; print(joblib.cpu_count())"`
+          echo "Num cores:"
+          echo $NUM_CORES
+          echo "---"
           export MKL_NUM_THREADS=$NUM_CORES
           export OMP_NUM_THREADS=$NUM_CORES
           export OPENBLAS_NUM_THREADS=$NUM_CORES
@@ -48,7 +51,7 @@ jobs:
           jupyter nbconvert --to html --execute --output results/index.html sklearn_benchmarks/results.ipynb
           rm -rf docs
           mkdir docs
-          mv sklearn_benchmarks/results.html docs/index.html
+          mv sklearn_benchmarks/index.html docs/index.html
 
       - name: Upload benchmark results
         uses: actions/upload-artifact@v2
