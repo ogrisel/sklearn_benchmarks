@@ -1,63 +1,63 @@
 estimators:
-  KNeighborsClassifier:
-    name: KNeighborsClassifier
-    estimator: sklearn.neighbors.KNeighborsClassifier
-    hyperparameters:
-      n_neighbors:
-        - 1
-      algorithm:
-        - brute
-      n_jobs:
-        - -1
-        - 1
-    metrics:
-      - accuracy_score
-    datasets:
-      - sample_generator: sklearn.datasets.make_classification
-        params:
-          n_classes: 2
-          n_redundant: 0
-          random_state: 42
-        n_features: 2
-        n_samples_train:
-          - 1e6
-        n_samples_test:
-          - 10
+  # KNeighborsClassifier:
+  #   name: KNeighborsClassifier
+  #   estimator: sklearn.neighbors.KNeighborsClassifier
+  #   hyperparameters:
+  #     n_neighbors:
+  #       - 1
+  #     algorithm:
+  #       - brute
+  #     n_jobs:
+  #       - -1
+  #       - 1
+  #   metrics:
+  #     - accuracy_score
+  #   datasets:
+  #     - sample_generator: sklearn.datasets.make_classification
+  #       params:
+  #         n_classes: 2
+  #         n_redundant: 0
+  #         random_state: 42
+  #       n_features: 2
+  #       n_samples_train:
+  #         - 1e6
+  #       n_samples_test:
+  #         - 10
 
-  daal4py_KNeighborsClassifier:
-    inherit: KNeighborsClassifier
-    estimator: daal4py.sklearn.neighbors.KNeighborsClassifier
+  # daal4py_KNeighborsClassifier:
+  #   inherit: KNeighborsClassifier
+  #   estimator: daal4py.sklearn.neighbors.KNeighborsClassifier
 
-  KNeighborsClassifier_kd_tree:
-    name: KNeighborsClassifier_kd_tree
-    estimator: sklearn.neighbors.KNeighborsClassifier
-    hyperparameters:
-      n_neighbors:
-        - 1
-        - 5
-      algorithm:
-        - kd_tree
-      n_jobs:
-        - -1
-        - 1
-    metrics:
-      - accuracy_score
-    datasets:
-      - sample_generator: sklearn.datasets.make_classification
-        params:
-          n_classes: 2
-          n_redundant: 0
-          random_state: 42
-        n_features: 2
-        n_samples_train:
-          - 1e6
-        n_samples_test:
-          - 1
-          - 1e3
+  # KNeighborsClassifier_kd_tree:
+  #   name: KNeighborsClassifier_kd_tree
+  #   estimator: sklearn.neighbors.KNeighborsClassifier
+  #   hyperparameters:
+  #     n_neighbors:
+  #       - 1
+  #       - 5
+  #     algorithm:
+  #       - kd_tree
+  #     n_jobs:
+  #       - -1
+  #       - 1
+  #   metrics:
+  #     - accuracy_score
+  #   datasets:
+  #     - sample_generator: sklearn.datasets.make_classification
+  #       params:
+  #         n_classes: 2
+  #         n_redundant: 0
+  #         random_state: 42
+  #       n_features: 2
+  #       n_samples_train:
+  #         - 1e6
+  #       n_samples_test:
+  #         - 1
+  #         - 1e3
 
-  daal4py_KNeighborsClassifier_kd_tree:
-    inherit: KNeighborsClassifier_kd_tree
-    estimator: daal4py.sklearn.neighbors.KNeighborsClassifier
+  # daal4py_KNeighborsClassifier_kd_tree:
+  #   inherit: KNeighborsClassifier_kd_tree
+  #   estimator: daal4py.sklearn.neighbors.KNeighborsClassifier
 
   KMeans:
     name: KMeans
@@ -68,8 +68,9 @@ estimators:
         - random
       n_clusters:
         - 3
-        - 8
         - 10
+        # - 300
+        # - 1000
       max_iter:
         - 30
       n_init:
@@ -82,6 +83,8 @@ estimators:
       - sample_generator: sklearn.datasets.make_blobs
         params:
           random_state: 42
+          cluster_std: 20.0
+          centers: 200
         n_features: 2
         n_samples_train:
           - 1e4
@@ -91,9 +94,33 @@ estimators:
       - sample_generator: sklearn.datasets.make_blobs
         params:
           random_state: 42
+          cluster_std: 20.0
+          centers: 200
         n_features: 1e2
         n_samples_train:
           - 1e4
+        n_samples_test:
+          - 1
+          - 1e3
+      - sample_generator: sklearn.datasets.make_blobs
+        params:
+          random_state: 42
+          cluster_std: 20.0
+          centers: 200
+        n_features: 2
+        n_samples_train:
+          - 1e6
+        n_samples_test:
+          - 1
+          - 1e3
+      - sample_generator: sklearn.datasets.make_blobs
+        params:
+          random_state: 42
+          cluster_std: 20.0
+          centers: 200
+        n_features: 1e2
+        n_samples_train:
+          - 1e6
         n_samples_test:
           - 1
           - 1e3

@@ -78,8 +78,8 @@ def print_time_report():
     return df
 
 
-def print_results(algo="", versus_lib=""):
-    data = _make_dataset(algo, versus_lib)
+def print_results(algo="", versus_lib="", compare_cols=[]):
+    data = _make_dataset(algo, versus_lib, compare_cols=compare_cols)
     qgrid_widget = qgrid.show_grid(data, show_toolbar=True)
     display(qgrid_widget)
 
@@ -114,7 +114,7 @@ def _make_dataset(
         suffixes=["_sklearn", lib_suffix],
     )
     merged_df = merged_df.drop(["hyperparams_digest", "dims_digest"], axis=1)
-    skl_df = skl_df.drop([speedup_col, stdev_speedup_col], axis=1)
+    skl_df = skl_df.drop(merge_cols, axis=1)
     merged_df = pd.merge(skl_df, merged_df, left_index=True, right_index=True)
     numeric_cols = merged_df.select_dtypes(include=["float64"]).columns
     merged_df[numeric_cols] = merged_df[numeric_cols].round(4)
