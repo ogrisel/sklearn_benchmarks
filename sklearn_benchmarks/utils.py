@@ -93,14 +93,23 @@ def _gen_coordinates_grid(n_rows, n_cols):
     return coordinates
 
 
-def _make_dataset(algo, lib, speedup_col="mean", stdev_speedup_col="stdev"):
+def _make_dataset(
+    algo, lib, speedup_col="mean", stdev_speedup_col="stdev", compare_cols=[]
+):
     results_path = Path(__file__).resolve().parent / "results"
     lib_df = pd.read_csv("%s/%s_%s.csv" % (str(results_path), lib, algo))
     skl_df = pd.read_csv("%s/sklearn_%s.csv" % (str(results_path), algo))
     lib_suffix = "_" + lib
+    merge_cols = [
+        speedup_col,
+        stdev_speedup_col,
+        "hyperparams_digest",
+        "dims_digest",
+        *compare_cols,
+    ]
     merged_df = pd.merge(
-        skl_df[[speedup_col, stdev_speedup_col, "hyperparams_digest", "dims_digest"]],
-        lib_df[[speedup_col, stdev_speedup_col, "hyperparams_digest", "dims_digest"]],
+        skl_df[merge_cols],
+        lib_df[merge_cols],
         on=["hyperparams_digest", "dims_digest"],
         suffixes=["_sklearn", lib_suffix],
     )
@@ -136,9 +145,10 @@ def plot_results(
     versus_lib="",
     group_by_cols=[],
     split_hist_by=[],
+    compare_cols=[],
     n_cols=2,
 ):
-    merged_df = _make_dataset(algo, versus_lib)
+    merged_df = _make_dataset(algo, versus_lib, compare_cols=compare_cols)
     merged_df_grouped = merged_df.groupby(group_by_cols)
 
     n_plots = len(merged_df_grouped)
