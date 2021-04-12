@@ -175,6 +175,7 @@ def plot_results(
 
     for (row, col), (_, df) in zip(coordinates, merged_df_grouped):
         df = df.sort_values(by=["n_samples", "n_features"])
+        df = df.dropna(axis="columns")
         if split_hist_by:
             for split_col in split_hist_by:
                 split_col_vals = df[split_col].unique()
@@ -216,10 +217,11 @@ def plot_results(
     for i in range(1, n_plots + 1):
         fig["layout"]["xaxis{}".format(i)]["title"] = "(n_samples, n_features)"
         fig["layout"]["yaxis{}".format(i)]["title"] = "Speedup"
+
     fig.for_each_xaxis(lambda axis: axis.title.update(font=dict(size=10)))
     fig.for_each_yaxis(lambda axis: axis.title.update(font=dict(size=10)))
     fig.update_annotations(font_size=10)
-    fig.update_layout(height=n_rows * 250, barmode="group", showlegend=True)
+    fig.update_layout(height=n_rows * 300, barmode="group", showlegend=True)
     fig.show()
 
 
