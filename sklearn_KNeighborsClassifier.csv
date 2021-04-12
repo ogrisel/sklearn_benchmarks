@@ -1,0 +1,5 @@
+estimator,lib,function,mean,stdev,n_samples,n_features,hyperparams_digest,dims_digest,algorithm,n_jobs,n_neighbors,accuracy_score
+KNeighborsClassifier,sklearn,fit,0.08318284419999031,0.020835094225669707,1000000,2,e70d8e7886766d41f30889506baa1e67,b123d1b4e4dd6c234920cc529518614f,brute,-1,1,
+KNeighborsClassifier,sklearn,predict,0.23078170170000475,0.03746038012649421,10,2,e70d8e7886766d41f30889506baa1e67,e298594fbab6eaaeab2be8ee71062f7d,brute,-1,1,0.9
+KNeighborsClassifier,sklearn,fit,0.06812303819999102,0.018873592952895462,1000000,2,b79d63bb7670c492de5c3befac58fe29,b123d1b4e4dd6c234920cc529518614f,brute,1,1,
+KNeighborsClassifier,sklearn,predict,0.13026397259999953,0.028238828457603532,10,2,b79d63bb7670c492de5c3befac58fe29,e298594fbab6eaaeab2be8ee71062f7d,brute,1,1,0.9

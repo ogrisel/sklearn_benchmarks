@@ -1,0 +1,5 @@
+estimator,lib,function,mean,stdev,n_samples,n_features,hyperparams_digest,dims_digest,algorithm,n_jobs,n_neighbors,accuracy_score
+KNeighborsClassifier,daal4py,fit,0.09085351279999258,0.020983672214763716,1000000,2,e70d8e7886766d41f30889506baa1e67,b123d1b4e4dd6c234920cc529518614f,brute,-1,1,
+KNeighborsClassifier,daal4py,predict,0.018904455100016548,0.01662440467218999,10,2,e70d8e7886766d41f30889506baa1e67,e298594fbab6eaaeab2be8ee71062f7d,brute,-1,1,0.8
+KNeighborsClassifier,daal4py,fit,0.09161617650000835,0.018948099738502398,1000000,2,b79d63bb7670c492de5c3befac58fe29,b123d1b4e4dd6c234920cc529518614f,brute,1,1,
+KNeighborsClassifier,daal4py,predict,0.01797010629998681,0.014496201797251822,10,2,b79d63bb7670c492de5c3befac58fe29,e298594fbab6eaaeab2be8ee71062f7d,brute,1,1,0.8
