@@ -22,22 +22,22 @@ RESULTS_PATH = Path(__file__).resolve().parent / "results"
 class FuncExecutor:
     @staticmethod
     def run(func, profiling_output_file, *args):
+        # First run with a profiler (not timed)
+        with VizTracer(output_file=profiling_output_file, verbose=0) as tracer:
+            tracer.start()
+            result = func(*args)
+            tracer.stop()
+            tracer.save()
+
+        # Next runs: at most 10 runs or 30 sec
         times = []
         start = time.perf_counter()
         for i in range(10):
             start_ = time.perf_counter()
-            if i == 0:
-                with VizTracer(output_file=profiling_output_file, verbose=0) as tracer:
-                    tracer.start()
-                    result = func(*args)
-                    tracer.stop()
-                    tracer.save()
-            else:
-                result = func(*args)
+            result = func(*args)
             end_ = time.perf_counter()
             times.append(end_ - start_)
-            curr = time.perf_counter()
-            if curr - start > 3:
+            if end_ - start > 30:
                 break
         mean_time, stdev_time = np.mean(times), np.std(times)
         return (result, mean_time, stdev_time)
