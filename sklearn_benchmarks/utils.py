@@ -1,5 +1,4 @@
 import os
-import math
 import glob
 import glob
 import time
@@ -11,7 +10,6 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
-
 from IPython.display import display
 from pathlib import Path
 from plotly.subplots import make_subplots
@@ -183,18 +181,19 @@ def plot_results(
                     x = df[["n_samples", "n_features"]][df[split_col] == split_val]
                     x = [f"({ns}, {nf})" for ns, nf in x.values]
                     y = df["speedup"][df[split_col] == split_val]
-                    fig.add_trace(
-                        go.Bar(
-                            x=x,
-                            y=y,
-                            name="%s: %s" % (split_col, split_val),
-                            marker_color=px.colors.qualitative.Plotly[index],
-                            hovertemplate=_make_hover_template(
-                                df[df[split_col] == split_val]
-                            ),
-                            customdata=df[df[split_col] == split_val].values,
-                            showlegend=(row, col) == (1, 1),
+                    bar = go.Bar(
+                        x=x,
+                        y=y,
+                        name="%s: %s" % (split_col, split_val),
+                        marker_color=px.colors.qualitative.Plotly[index],
+                        hovertemplate=_make_hover_template(
+                            df[df[split_col] == split_val]
                         ),
+                        customdata=df[df[split_col] == split_val].values,
+                        showlegend=(row, col) == (1, 1),
+                    )
+                    fig.add_trace(
+                        bar,
                         row=row,
                         col=col,
                     )
@@ -202,14 +201,15 @@ def plot_results(
             x = df[["n_samples", "n_features"]]
             x = [f"({ns}, {nf})" for ns, nf in x.values]
             y = df["speedup"]
+            bar = go.Bar(
+                x=x,
+                y=y,
+                hovertemplate=_make_hover_template(df),
+                customdata=df.values,
+                showlegend=False,
+            )
             fig.add_trace(
-                go.Bar(
-                    x=x,
-                    y=y,
-                    hovertemplate=_make_hover_template(df),
-                    customdata=df.values,
-                    showlegend=False,
-                ),
+                bar,
                 row=row,
                 col=col,
             )

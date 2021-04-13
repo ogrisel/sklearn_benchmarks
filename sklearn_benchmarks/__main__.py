@@ -19,6 +19,7 @@ from sklearn_benchmarks.utils import (
     RESULTS_PATH,
 )
 from sklearn.model_selection import train_test_split
+from sklearn.utils._testing import set_random_state
 
 
 class Benchmark:
@@ -94,6 +95,7 @@ class Benchmark:
                 )
                 for params in parameters_grid:
                     estimator = estimator_class(**params)
+                    set_random_state(estimator, random_state=42)
                     hyperparams_digest = joblib.hash(params)
                     dims_digest = joblib.hash([ns_train, n_features])
                     profiling_results_path = str(RESULTS_PATH / "profiling")
