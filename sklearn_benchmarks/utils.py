@@ -1,3 +1,4 @@
+import yaml
 import os
 import glob
 import glob
@@ -32,7 +33,7 @@ class FuncExecutor:
         # Next runs: at most 10 runs or 30 sec
         times = []
         start = time.perf_counter()
-        for i in range(10):
+        for _ in range(10):
             start_ = time.perf_counter()
             result = func(*args)
             end_ = time.perf_counter()
@@ -78,6 +79,7 @@ def print_time_report():
 
 def print_results(algo="", versus_lib="", compare_cols=[]):
     data = _make_dataset(algo, versus_lib, compare_cols=compare_cols)
+    data["profiling"] = '<a href="http://google.com" target="_blank">test link</a>'
     qgrid_widget = qgrid.show_grid(data, show_toolbar=True)
     display(qgrid_widget)
 
@@ -94,9 +96,8 @@ def _gen_coordinates_grid(n_rows, n_cols):
 def _make_dataset(
     algo, lib, speedup_col="mean", stdev_speedup_col="stdev", compare_cols=[]
 ):
-    results_path = Path(__file__).resolve().parent / "results"
-    lib_df = pd.read_csv("%s/%s_%s.csv" % (str(results_path), lib, algo))
-    skl_df = pd.read_csv("%s/sklearn_%s.csv" % (str(results_path), algo))
+    lib_df = pd.read_csv("%s/%s_%s.csv" % (str(RESULTS_PATH), lib, algo))
+    skl_df = pd.read_csv("%s/sklearn_%s.csv" % (str(RESULTS_PATH), algo))
     lib_suffix = "_" + lib
     merge_cols = [
         speedup_col,
@@ -109,22 +110,21 @@ def _make_dataset(
         skl_df[merge_cols],
         lib_df[merge_cols],
         on=["hyperparams_digest", "dims_digest"],
-        suffixes=["_sklearn", lib_suffix],
+        suffixes=["", lib_suffix],
     )
     merged_df = merged_df.drop(["hyperparams_digest", "dims_digest"], axis=1)
     skl_df = skl_df.drop(merge_cols, axis=1)
     merged_df = pd.merge(skl_df, merged_df, left_index=True, right_index=True)
+
     numeric_cols = merged_df.select_dtypes(include=["float64"]).columns
     merged_df[numeric_cols] = merged_df[numeric_cols].round(4)
 
-    skl_col = speedup_col + "_sklearn"
-    lib_col = speedup_col + lib_suffix
-    merged_df["speedup"] = merged_df[skl_col] / merged_df[lib_col]
+    merged_df["speedup"] = merged_df[speedup_col] / merged_df[speedup_col + lib_suffix]
     merged_df["speedup"] = merged_df["speedup"].round(2)
 
-    skl_col = stdev_speedup_col + "_sklearn"
-    lib_col = stdev_speedup_col + lib_suffix
-    merged_df["stdev_speedup"] = merged_df[skl_col] / merged_df[lib_col]
+    merged_df["stdev_speedup"] = (
+        merged_df[stdev_speedup_col] / merged_df[speedup_col + lib_suffix]
+    )
     merged_df["stdev_speedup"] = merged_df["stdev_speedup"].round(2)
 
     return merged_df
@@ -244,3 +244,44 @@ def convert(seconds):
     min, sec = divmod(seconds, 60)
     hour, min = divmod(min, 60)
     return hour, min, sec
+
+
+def print_profiling_links(algo="", versus_lib=""):
+    pass
+
+
+class Reporting:
+    """
+    Runs reporting on specified algorithms.
+    """
+
+    def __init__(self, config_file="", estimators_names=[]):
+        self.estimators_names = estimators_names
+        self.config_file = config_file
+
+    def _load_estimators(self):
+        estimators = yaml.load_all(self.config_file)["estimators"]
+        if self.estimators_names:
+            estimators = {name: estimators[name] for name in self.estimators_names}
+        return estimators
+
+    def run(self):
+        estimators = self._load_estimators()
+        for estimator in estimators:
+            report = Report(estimator)
+            report.run()
+
+
+class Report:
+    def __init__(self, estimator):
+        self.estimator = estimator
+
+    def _print(self):
+        return self
+
+    def _plot(self):
+        return self
+
+    def run(self):
+        self._print()
+        self._plot()
