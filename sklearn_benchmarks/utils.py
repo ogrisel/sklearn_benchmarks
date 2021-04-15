@@ -252,36 +252,90 @@ def print_profiling_links(algo="", versus_lib=""):
 
 class Reporting:
     """
-    Runs reporting on specified algorithms.
+    Runs reporting for specified estimators.
     """
 
-    def __init__(self, config_file="", estimators_names=[]):
+    def __init__(self, estimators_names, versus_libs, config_file):
         self.estimators_names = estimators_names
+        self.versus_libs = versus_libs
         self.config_file = config_file
 
     def _load_estimators(self):
-        estimators = yaml.load_all(self.config_file)["estimators"]
+        with open(self.config_file, "r") as config_file:
+            config = yaml.full_load(config_file)
+        estimators = config["estimators"]
         if self.estimators_names:
             estimators = {name: estimators[name] for name in self.estimators_names}
         return estimators
 
     def run(self):
         estimators = self._load_estimators()
-        for estimator in estimators:
-            report = Report(estimator)
+        for name, params in estimators.items():
+            report = Report(name, params, self.versus_libs)
             report.run()
 
 
-class Report:
-    def __init__(self, estimator):
-        self.estimator = estimator
+def _compute_ratio_stdev(A, B):
+    return A / B
 
-    def _print(self):
-        return self
+
+BASE_LIB = "sklearn"
+
+
+class Report:
+    """
+    Runs reporting for one estimator.
+    """
+
+    def __init__(self, estimator_name, estimator_params, versus_libs, mode="all"):
+        self.estimator_name = estimator_name
+        self.estimator_params = estimator_params
+        self.versus_libs = versus_libs
+        self.mode = mode
+
+    def _make_table_dataset(self):
+        libs_files = [
+            f"results/{lib}_{self.estimator_name}.csv" for lib in self.versus_libs
+        ]
+        base_file = f"results/{BASE_LIB}_{self.estimator_name}.csv"
+        base_df = pd.read_csv(base_file)
+        libs_dfs = [pd.read_csv(file) for file in libs_files]
+        merge_on_cols = [
+            "hyperparams_digest",
+            "dims_digest",
+            *self.estimator_params["hyperparameters"].keys(),
+        ]
+        merged_df = base_df
+        for df in libs_dfs:
+            lib = df["lib"]
+            merged_df.merge(df, on=merge_on_cols, suffixes=["", f"_{lib}"])
+            merged_df[f"speedup_{lib}"] = merged_df["mean"] / merged_df[f"mean_{lib}"]
+            merged_df[f"stdev_speedup_{lib}"] = _compute_ratio_stdev(
+                merged_df["stdev"], merged_df[f"mean_{lib}"]
+            )
+
+        numeric_cols = merged_df.select_dtypes(include=["float64"]).columns
+        merged_df[numeric_cols] = merged_df[numeric_cols].round(4)
+
+        return merged_df
+
+    def _print_table(self):
+        data = self._make_table_dataset()
+        base_profiling_link = f"{BASE_LIB}_{data['function']}_{data['hyperparams_digest']}_{data['dataset_digest']}"
+        data[
+            f"{BASE_LIB}_profiling"
+        ] = f"<a href='{base_profiling_link}' target='_blank'>See</a>"
+        for lib in self.versus_libs:
+            lib_profiling_link = f"{lib}_{data['function']}_{data['hyperparams_digest']}_{data['dataset_digest']}"
+            data[
+                f"{lib}_profiling"
+            ] = f"<a href='{base_profiling_link}' target='_blank'>See</a>"
+        qgrid_widget = qgrid.show_grid(data, show_toolbar=True)
+        display(qgrid_widget)
 
     def _plot(self):
         return self
 
     def run(self):
-        self._print()
+        self._print_table()
         self._plot()
