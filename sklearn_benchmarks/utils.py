@@ -1,3 +1,4 @@
+import yaml
 import os
 import glob
 import glob
@@ -32,7 +33,7 @@ class FuncExecutor:
         # Next runs: at most 10 runs or 30 sec
         times = []
         start = time.perf_counter()
-        for i in range(10):
+        for _ in range(10):
             start_ = time.perf_counter()
             result = func(*args)
             end_ = time.perf_counter()
@@ -94,9 +95,8 @@ def _gen_coordinates_grid(n_rows, n_cols):
 def _make_dataset(
     algo, lib, speedup_col="mean", stdev_speedup_col="stdev", compare_cols=[]
 ):
-    results_path = Path(__file__).resolve().parent / "results"
-    lib_df = pd.read_csv("%s/%s_%s.csv" % (str(results_path), lib, algo))
-    skl_df = pd.read_csv("%s/sklearn_%s.csv" % (str(results_path), algo))
+    lib_df = pd.read_csv("%s/%s_%s.csv" % (str(RESULTS_PATH), lib, algo))
+    skl_df = pd.read_csv("%s/sklearn_%s.csv" % (str(RESULTS_PATH), algo))
     lib_suffix = "_" + lib
     merge_cols = [
         speedup_col,
@@ -109,19 +109,20 @@ def _make_dataset(
         skl_df[merge_cols],
         lib_df[merge_cols],
         on=["hyperparams_digest", "dims_digest"],
-        suffixes=["_sklearn", lib_suffix],
+        suffixes=["", lib_suffix],
     )
-    merged_df = merged_df.drop(["hyperparams_digest", "dims_digest"], axis=1)
+    # merged_df = merged_df.drop(["hyperparams_digest", "dims_digest"], axis=1)
     skl_df = skl_df.drop(merge_cols, axis=1)
     merged_df = pd.merge(skl_df, merged_df, left_index=True, right_index=True)
+
     numeric_cols = merged_df.select_dtypes(include=["float64"]).columns
     merged_df[numeric_cols] = merged_df[numeric_cols].round(4)
 
-    skl_time = merged_df[speedup_col + "_sklearn"]
+    skl_time = merged_df[speedup_col]
     lib_time = merged_df[speedup_col + lib_suffix]
     merged_df["speedup"] = skl_time / lib_time
 
-    skl_std = merged_df[stdev_speedup_col + "_sklearn"]
+    skl_std = merged_df[stdev_speedup_col]
     lib_std = merged_df[stdev_speedup_col + lib_suffix]
     merged_df["stdev_speedup"] = (
         merged_df["speedup"] *
@@ -248,3 +249,144 @@ def convert(seconds):
     min, sec = divmod(seconds, 60)
     hour, min = divmod(min, 60)
     return hour, min, sec
+
+
+def _make_clickable(val):
+    return '<a href="{}" target="_blank">{}</a>'.format(val, "See")
+
+
+def print_profiling_links(algo="", versus_lib=""):
+    data = _make_dataset(algo, versus_lib)
+    for lib in [BASE_LIB, versus_lib]:
+        data[f"{lib}_profiling"] = (
+            "results/profiling/"
+            + f"{lib}_"
+            + data["function"]
+            + "_"
+            + data["hyperparams_digest"]
+            + "_"
+            + data["dims_digest"]
+            + ".html"
+        )
+        data[f"{lib}_profiling"] = data[f"{lib}_profiling"].apply(_make_clickable)
+    qgrid_widget = qgrid.show_grid(data, show_toolbar=True)
+    display(qgrid_widget)
+
+
+class Reporting:
+    """
+    Runs reporting for specified estimators.
+    """
+
+    def __init__(self, estimators_names=[], versus_libs=[], config_file=""):
+        self.estimators_names = estimators_names
+        self.versus_libs = versus_libs
+        self.config_file = config_file
+
+    def _load_estimators(self):
+        with open(self.config_file, "r") as config_file:
+            config = yaml.full_load(config_file)
+        estimators = config["estimators"]
+        if self.estimators_names:
+            estimators = {name: estimators[name] for name in self.estimators_names}
+        return estimators
+
+    def run(self):
+        estimators = self._load_estimators()
+        for params in estimators.values():
+            report = Report(params, self.versus_libs)
+            report.run()
+
+
+def _compute_ratio_stdev(A, B):
+    return A / B
+
+
+BASE_LIB = "sklearn"
+
+
+class Report:
+    """
+    Runs reporting for one estimator.
+    """
+
+    def __init__(self, estimator_params={}, versus_libs=[], mode="all"):
+        self.estimator_params = estimator_params
+        self.versus_libs = versus_libs
+        self.mode = mode
+
+    def _make_table_dataset(self):
+        libs_files = [
+            f"results/{lib}_{self.estimator_name}.csv" for lib in self.versus_libs
+        ]
+        base_file = f"results/{BASE_LIB}_{self.estimator_name}.csv"
+        base_df = pd.read_csv(base_file)
+        libs_dfs = [pd.read_csv(file) for file in libs_files]
+        merge_cols = [
+            "mean",
+            "stdev",
+            "hyperparams_digest",
+            "dims_digest",
+            *compare_cols,
+        ]
+        merged_df = base_df
+        for df in libs_dfs:
+            lib = df["lib"].values[0]
+            merged_df = merged_df.merge(
+                df, how="right", on=merge_on_cols, suffixes=["", f"_{lib}"]
+            )
+            merged_df[f"speedup_{lib}"] = merged_df["mean"] / merged_df[f"mean_{lib}"]
+            merged_df[f"stdev_speedup_{lib}"] = _compute_ratio_stdev(
+                merged_df["stdev"], merged_df[f"mean_{lib}"]
+            )
+
+        numeric_cols = merged_df.select_dtypes(include=["float64"]).columns
+        merged_df[numeric_cols] = merged_df[numeric_cols].round(4)
+        print(merged_df.columns)
+
+        return merged_df
+
+    def _print_table(self):
+        data = self._make_table_dataset()
+        data[f"{BASE_LIB}_profiling"] = (
+            "results/profiling/"
+            + f"{BASE_LIB}_"
+            + data["function"]
+            + "_"
+            + data["hyperparams_digest"]
+            + "_"
+            + data["dims_digest"]
+            + ".html"
+        )
+        data[f"{BASE_LIB}_profiling"] = (
+            "<a href='"
+            + data[f"{BASE_LIB}_profiling"]
+            + "'"
+            + " target='_blank'>See</a>"
+        )
+        for lib in self.versus_libs:
+            data[f"{lib}_profiling"] = (
+                "results/profiling/"
+                + f"{lib}_"
+                + data["function"]
+                + "_"
+                + data["hyperparams_digest"]
+                + "_"
+                + data["dims_digest"]
+                + ".html"
+            )
+            data[f"{lib}_profiling"] = (
+                "<a href='"
+                + data[f"{lib}_profiling"]
+                + "'"
+                + " target='_blank'>See</a>"
+            )
+        qgrid_widget = qgrid.show_grid(data, show_toolbar=True)
+        display(qgrid_widget)
+
+    def _plot(self):
+        return self
+
+    def run(self):
+        self._print_table()
+        self._plot()

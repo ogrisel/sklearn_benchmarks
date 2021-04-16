@@ -71,7 +71,6 @@ estimators:
       n_clusters:
         - 3
         - 10
-        - 300
       max_iter:
         - 30
       n_init:
