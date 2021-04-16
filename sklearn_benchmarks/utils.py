@@ -79,7 +79,6 @@ def print_time_report():
 
 def print_results(algo="", versus_lib="", compare_cols=[]):
     data = _make_dataset(algo, versus_lib, compare_cols=compare_cols)
-    data["profiling"] = '<a href="http://google.com" target="_blank">test link</a>'
     qgrid_widget = qgrid.show_grid(data, show_toolbar=True)
     display(qgrid_widget)
 
@@ -112,7 +111,7 @@ def _make_dataset(
         on=["hyperparams_digest", "dims_digest"],
         suffixes=["", lib_suffix],
     )
-    merged_df = merged_df.drop(["hyperparams_digest", "dims_digest"], axis=1)
+    # merged_df = merged_df.drop(["hyperparams_digest", "dims_digest"], axis=1)
     skl_df = skl_df.drop(merge_cols, axis=1)
     merged_df = pd.merge(skl_df, merged_df, left_index=True, right_index=True)
 
@@ -246,8 +245,26 @@ def convert(seconds):
     return hour, min, sec
 
 
+def _make_clickable(val):
+    return '<a href="{}" target="_blank">{}</a>'.format(val, "See")
+
+
 def print_profiling_links(algo="", versus_lib=""):
-    pass
+    data = _make_dataset(algo, versus_lib)
+    for lib in [BASE_LIB, versus_lib]:
+        data[f"{lib}_profiling"] = (
+            "http://localhost:8888/view/results/profiling/"
+            + f"{lib}_"
+            + data["function"]
+            + "_"
+            + data["hyperparams_digest"]
+            + "_"
+            + data["dims_digest"]
+            + ".html"
+        )
+        data[f"{lib}_profiling"] = data[f"{lib}_profiling"].apply(_make_clickable)
+    qgrid_widget = qgrid.show_grid(data, show_toolbar=True)
+    display(qgrid_widget)
 
 
 class Reporting:
