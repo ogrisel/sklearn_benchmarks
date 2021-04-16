@@ -117,14 +117,18 @@ def _make_dataset(
     numeric_cols = merged_df.select_dtypes(include=["float64"]).columns
     merged_df[numeric_cols] = merged_df[numeric_cols].round(4)
 
-    skl_col = speedup_col + "_sklearn"
-    lib_col = speedup_col + lib_suffix
-    merged_df["speedup"] = merged_df[skl_col] / merged_df[lib_col]
-    merged_df["speedup"] = merged_df["speedup"].round(2)
+    skl_time = merged_df[speedup_col + "_sklearn"]
+    lib_time = merged_df[speedup_col + lib_suffix]
+    merged_df["speedup"] = skl_time / lib_time
 
-    skl_col = stdev_speedup_col + "_sklearn"
-    lib_col = stdev_speedup_col + lib_suffix
-    merged_df["stdev_speedup"] = merged_df[skl_col] / merged_df[lib_col]
+    skl_std = merged_df[stdev_speedup_col + "_sklearn"]
+    lib_std = merged_df[stdev_speedup_col + lib_suffix]
+    merged_df["stdev_speedup"] = (
+        merged_df["speedup"] *
+        np.sqrt((skl_std / skl_time)**2 + (lib_std / lib_time)**2)
+    )
+
+    merged_df["speedup"] = merged_df["speedup"].round(2)
     merged_df["stdev_speedup"] = merged_df["stdev_speedup"].round(2)
 
     return merged_df
