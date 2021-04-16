@@ -253,7 +253,7 @@ def print_profiling_links(algo="", versus_lib=""):
     data = _make_dataset(algo, versus_lib)
     for lib in [BASE_LIB, versus_lib]:
         data[f"{lib}_profiling"] = (
-            "http://localhost:8888/view/results/profiling/"
+            "results/profiling/"
             + f"{lib}_"
             + data["function"]
             + "_"
