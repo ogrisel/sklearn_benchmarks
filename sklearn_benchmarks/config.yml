@@ -90,6 +90,8 @@ estimators:
       init:
         - k-means++
         - random
+      algorithm:
+        - full
       n_clusters:
         - 3
         - 10
