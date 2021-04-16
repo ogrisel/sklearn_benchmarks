@@ -255,7 +255,7 @@ class Reporting:
     Runs reporting for specified estimators.
     """
 
-    def __init__(self, estimators_names, versus_libs, config_file):
+    def __init__(self, estimators_names=[], versus_libs=[], config_file=""):
         self.estimators_names = estimators_names
         self.versus_libs = versus_libs
         self.config_file = config_file
@@ -270,8 +270,8 @@ class Reporting:
 
     def run(self):
         estimators = self._load_estimators()
-        for name, params in estimators.items():
-            report = Report(name, params, self.versus_libs)
+        for params in estimators.values():
+            report = Report(params, self.versus_libs)
             report.run()
 
 
@@ -287,8 +287,7 @@ class Report:
     Runs reporting for one estimator.
     """
 
-    def __init__(self, estimator_name, estimator_params, versus_libs, mode="all"):
-        self.estimator_name = estimator_name
+    def __init__(self, estimator_params={}, versus_libs=[], mode="all"):
         self.estimator_params = estimator_params
         self.versus_libs = versus_libs
         self.mode = mode
@@ -300,15 +299,19 @@ class Report:
         base_file = f"results/{BASE_LIB}_{self.estimator_name}.csv"
         base_df = pd.read_csv(base_file)
         libs_dfs = [pd.read_csv(file) for file in libs_files]
-        merge_on_cols = [
+        merge_cols = [
+            "mean",
+            "stdev",
             "hyperparams_digest",
             "dims_digest",
-            *self.estimator_params["hyperparameters"].keys(),
+            *compare_cols,
         ]
         merged_df = base_df
         for df in libs_dfs:
-            lib = df["lib"]
-            merged_df.merge(df, on=merge_on_cols, suffixes=["", f"_{lib}"])
+            lib = df["lib"].values[0]
+            merged_df = merged_df.merge(
+                df, how="right", on=merge_on_cols, suffixes=["", f"_{lib}"]
+            )
             merged_df[f"speedup_{lib}"] = merged_df["mean"] / merged_df[f"mean_{lib}"]
             merged_df[f"stdev_speedup_{lib}"] = _compute_ratio_stdev(
                 merged_df["stdev"], merged_df[f"mean_{lib}"]
@@ -316,20 +319,45 @@ class Report:
 
         numeric_cols = merged_df.select_dtypes(include=["float64"]).columns
         merged_df[numeric_cols] = merged_df[numeric_cols].round(4)
+        print(merged_df.columns)
 
         return merged_df
 
     def _print_table(self):
         data = self._make_table_dataset()
-        base_profiling_link = f"{BASE_LIB}_{data['function']}_{data['hyperparams_digest']}_{data['dataset_digest']}"
-        data[
-            f"{BASE_LIB}_profiling"
-        ] = f"<a href='{base_profiling_link}' target='_blank'>See</a>"
+        data[f"{BASE_LIB}_profiling"] = (
+            "results/profiling/"
+            + f"{BASE_LIB}_"
+            + data["function"]
+            + "_"
+            + data["hyperparams_digest"]
+            + "_"
+            + data["dims_digest"]
+            + ".html"
+        )
+        data[f"{BASE_LIB}_profiling"] = (
+            "<a href='"
+            + data[f"{BASE_LIB}_profiling"]
+            + "'"
+            + " target='_blank'>See</a>"
+        )
         for lib in self.versus_libs:
-            lib_profiling_link = f"{lib}_{data['function']}_{data['hyperparams_digest']}_{data['dataset_digest']}"
-            data[
-                f"{lib}_profiling"
-            ] = f"<a href='{base_profiling_link}' target='_blank'>See</a>"
+            data[f"{lib}_profiling"] = (
+                "results/profiling/"
+                + f"{lib}_"
+                + data["function"]
+                + "_"
+                + data["hyperparams_digest"]
+                + "_"
+                + data["dims_digest"]
+                + ".html"
+            )
+            data[f"{lib}_profiling"] = (
+                "<a href='"
+                + data[f"{lib}_profiling"]
+                + "'"
+                + " target='_blank'>See</a>"
+            )
         qgrid_widget = qgrid.show_grid(data, show_toolbar=True)
         display(qgrid_widget)
 
