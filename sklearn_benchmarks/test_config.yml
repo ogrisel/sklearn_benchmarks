@@ -4,11 +4,11 @@ estimators:
     estimator: sklearn.neighbors.KNeighborsClassifier
     hyperparameters:
       n_neighbors:
-        - 1
+        - 10
       algorithm:
         - brute
       n_jobs:
-        - -1
+        # - -1
         - 1
     metrics:
       - accuracy_score
@@ -18,11 +18,11 @@ estimators:
           n_classes: 2
           n_redundant: 0
           random_state: 42
-        n_features: 2
+        n_features: 1e2
         n_samples_train:
           - 1e6
         n_samples_test:
-          - 10
+          - 1e2
 
   daal4py_KNeighborsClassifier:
     inherit: KNeighborsClassifier
@@ -69,8 +69,9 @@ estimators:
       algorithm:
         - full
       n_clusters:
-        - 3
-        - 10
+        # - 3
+        # - 10
+        - 50
       max_iter:
         - 30
       n_init:
