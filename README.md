@@ -22,14 +22,13 @@ Options:
 
 ## List of estimators available
 
-- KNeighborsClassifier (brute force)
-- KNeighborsClassifier (kd tree)
-- KMeans
-
-## List of libraries available
-
-- [daal4py](https://github.com/intel/scikit-learn-intelex)
+- Against [daal4py](https://github.com/intel/scikit-learn-intelex)
+  - [KNeighborsClassifier (brute force)](https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html)
+  - [KNeighborsClassifier (kd tree)](https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html)
+  - [KMeans](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html)
+  - [LogisticRegression](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html)
+  - [Ridge](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html)
 
 ## Results
 
-[See results](https://mbatoul.github.io/sklearn_benchmarks/)
+[See here](https://mbatoul.github.io/sklearn_benchmarks/)
