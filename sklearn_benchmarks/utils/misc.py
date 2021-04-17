@@ -1,4 +1,5 @@
 import os
+import yaml
 import glob
 import glob
 import importlib
@@ -11,12 +12,16 @@ memory = Memory(_cachedir, verbose=0)
 
 
 @memory.cache
-def gen_data(generator_path, n_samples=1000, n_features=10, **kwargs):
+def gen_data(
+    generator_path, n_samples=1000, n_features=10, random_state=None, **kwargs
+):
     """Returns a tuple of data from the specified generator."""
     splitted_path = generator_path.split(".")
     module, func = ".".join(splitted_path[:-1]), splitted_path[-1]
     generator_func = getattr(importlib.import_module(module), func)
-    data = generator_func(n_samples=n_samples, n_features=n_features, **kwargs)
+    data = generator_func(
+        n_samples=n_samples, n_features=n_features, random_state=random_state, **kwargs
+    )
     return data
 
 
@@ -36,7 +41,7 @@ def clean_results():
     extensions = [".csv", ".html", ".json.gz"]
     files = []
     for extension in extensions:
-        files_path = str(RESULTS_PATH / "/**/*") + extension
+        files_path = str(RESULTS_PATH / "**/*") + extension
         files += glob.glob(str(files_path), recursive=True)
 
     for f in files:

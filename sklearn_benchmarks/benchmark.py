@@ -7,7 +7,12 @@ from viztracer import VizTracer
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import train_test_split
 from sklearn.utils._testing import set_random_state
-from sklearn_benchmarks.config import BENCHMARKING_RESULTS_PATH, PROFILING_RESULTS_PATH
+from sklearn_benchmarks.config import (
+    BENCHMARKING_RESULTS_PATH,
+    PROFILING_RESULTS_PATH,
+    BENCHMARK_SECONDS_BUDGET,
+    BENCHMARK_MAX_ITER,
+)
 from sklearn_benchmarks.utils.misc import gen_data, predict_or_transform
 
 
@@ -24,12 +29,12 @@ class FuncExecutor:
         # Next runs: at most 10 runs or 30 sec
         times = []
         start = time.perf_counter()
-        for _ in range(10):
+        for _ in range(BENCHMARK_MAX_ITER):
             start_ = time.perf_counter()
             result = func(*args)
             end_ = time.perf_counter()
             times.append(end_ - start_)
-            if end_ - start > 30:
+            if end_ - start > BENCHMARK_SECONDS_BUDGET:
                 break
         mean_time, stdev_time = np.mean(times), np.std(times)
         return (result, mean_time, stdev_time)
@@ -42,12 +47,14 @@ class Benchmark:
 
     def __init__(
         self,
-        name,
-        estimator,
+        name="",
+        estimator="",
         inherit=False,
-        metrics=["accuracy"],
+        metrics=[],
         hyperparameters={},
         datasets=[],
+        random_state=None,
+        profiling_file_type="",
     ):
         self.name = name
         self.estimator = estimator
@@ -55,6 +62,8 @@ class Benchmark:
         self.metrics = metrics
         self.hyperparameters = hyperparameters
         self.datasets = datasets
+        self.random_state = random_state
+        self.profiling_file_type = profiling_file_type
 
     def _set_lib(self):
         self.lib_ = self.estimator.split(".")[0]
@@ -65,30 +74,19 @@ class Benchmark:
         return getattr(importlib.import_module(module), class_name)
 
     def _init_parameters_grid(self):
-        return ParameterGrid(self.hyperparameters)
-
-    def _validate_params(self):
-        if not isinstance(self.name, str):
-            raise ValueError("name should be a string")
-        if not self.name:
-            raise ValueError("name should not be an empty string")
-        if not isinstance(self.estimator, str):
-            raise ValueError("estimator should be a string")
-        if not (isinstance(self.inherit, bool) or isinstance(self.inherit, str)):
-            raise ValueError("inherit should be a either True, False or a string")
-        if not isinstance(self.metrics, list):
-            raise ValueError("metrics should be a list")
-        if not isinstance(self.datasets, list):
-            raise ValueError("datasets should be a list")
-        if not isinstance(self.hyperparameters, object):
-            raise ValueError("hyperparameters should be an object")
+        hyperparameters = self.hyperparameters
+        if not hyperparameters:
+            estimator_class = self._load_estimator_class()
+            estimator = estimator_class()
+            # Parameters grid should have list values
+            hyperparameters = {k: [v] for k, v in estimator.__dict__.items()}
+        return ParameterGrid(hyperparameters)
 
     def _load_metrics_functions(self):
         module = importlib.import_module("sklearn.metrics")
         return [getattr(module, m) for m in self.metrics]
 
     def run(self):
-        self._validate_params()
         self._set_lib()
         estimator_class = self._load_estimator_class()
         metrics_functions = self._load_metrics_functions()
@@ -106,18 +104,21 @@ class Benchmark:
                     **dataset["params"],
                 )
                 X_train, X_test, y_train, y_test = train_test_split(
-                    X, y, train_size=ns_train
+                    X, y, train_size=ns_train, random_state=self.random_state
                 )
                 for params in parameters_grid:
                     estimator = estimator_class(**params)
-                    set_random_state(estimator, random_state=42)
+                    # Set random state on all estimators to ensure deterministic results
+                    set_random_state(estimator, random_state=self.random_state)
+                    # Use digests to identify results later in reporting
                     hyperparams_digest = joblib.hash(params)
                     dataset_digest = joblib.hash([ns_train, n_features])
-                    profiling_path = f"{PROFILING_RESULTS_PATH}/{self.lib_}_fit_{hyperparams_digest}_{dataset_digest}.json.gz"
+                    profiling_path = f"{PROFILING_RESULTS_PATH}/{self.lib_}_fit_{hyperparams_digest}_{dataset_digest}.{self.profiling_file_type}"
 
                     _, mean, stdev = FuncExecutor.run(
                         estimator.fit, profiling_path, X_train, y_train
                     )
+
                     row = dict(
                         estimator=self.name,
                         lib=self.lib_,
@@ -130,6 +131,7 @@ class Benchmark:
                         dataset_digest=dataset_digest,
                         **params,
                     )
+
                     if hasattr(estimator, "n_iter_"):
                         row["n_iter"] = estimator.n_iter_
 
@@ -145,18 +147,21 @@ class Benchmark:
                         X_test_, y_test_ = X_test[:ns_test], y_test[:ns_test]
                         bench_func = predict_or_transform(estimator)
                         dataset_digest = joblib.hash([ns_test, n_features])
-                        profiling_path = f"{PROFILING_RESULTS_PATH}/{self.lib_}_{bench_func.__name__}_{hyperparams_digest}_{dataset_digest}.json.gz"
+                        profiling_path = f"{PROFILING_RESULTS_PATH}/{self.lib_}_{bench_func.__name__}_{hyperparams_digest}_{dataset_digest}.{self.profiling_file_type}"
 
                         (
                             y_pred,
                             mean,
                             stdev,
                         ) = FuncExecutor.run(bench_func, profiling_path, X_test_)
+
+                        # We store the scores computed on the biggest dataset
                         if i == 0:
                             scores = {
                                 func.__name__: func(y_test_, y_pred)
                                 for func in metrics_functions
                             }
+
                         row = dict(
                             estimator=self.name,
                             lib=self.lib_,
@@ -170,6 +175,7 @@ class Benchmark:
                             **scores,
                             **params,
                         )
+
                         print(
                             "%s - %s - %s - mean: %6.3f - stdev: %6.3f"
                             % (self.lib_, self.name, bench_func.__name__, mean, stdev)

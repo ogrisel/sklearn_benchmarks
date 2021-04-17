@@ -10,6 +10,7 @@ from sklearn_benchmarks.benchmark import Benchmark
 from sklearn_benchmarks.config import (
     DEFAULT_CONFIG_FILE_PATH,
     TIME_REPORT_PATH,
+    get_full_config,
     prepare_params,
 )
 
@@ -19,6 +20,7 @@ from sklearn_benchmarks.config import (
     "--append",
     "--a",
     is_flag=True,
+    required=False,
     default=False,
     help="Append benchmark results to existing ones.",
 )
@@ -27,28 +29,38 @@ from sklearn_benchmarks.config import (
     "--c",
     type=str,
     default=DEFAULT_CONFIG_FILE_PATH,
-    show_default=True,
     help="Path to config file.",
 )
-def main(append, config):
+@click.option(
+    "--profiling_file_type",
+    "--pft",
+    type=str,
+    default="json.gz",
+    help="Profiling files type.",
+)
+def main(append, config, profiling_file_type):
     if not append:
         clean_results()
+    config = get_full_config(config)
+    benchmarking_config = config["benchmarking"]
+    if not "estimators" in benchmarking_config:
+        return
 
-    with open(config, "r") as config:
-        config = yaml.full_load(config)
-
-    estimators = config["estimators"]
+    estimators = benchmarking_config["estimators"]
 
     time_report = pd.DataFrame(columns=["algo", "hour", "min", "sec"])
     t0 = time.perf_counter()
     for name, params in estimators.items():
+        # When inherit is set, we fetch params from parent estimator
         if "inherit" in params:
             curr_estimator = params["estimator"]
             params = estimators[params["inherit"]]
             params["estimator"] = curr_estimator
 
         params = prepare_params(params)
-
+        if "random_state" in config:
+            params["random_state"] = config["random_state"]
+        params["profiling_file_type"] = profiling_file_type
         benchmark_estimator = Benchmark(**params)
         t0_ = time.perf_counter()
         benchmark_estimator.run()
@@ -58,9 +70,6 @@ def main(append, config):
 
     t1 = time.perf_counter()
     time_report.loc[len(time_report)] = ["total", *convert(t1 - t0)]
-    time_report[["hour", "min", "sec"]] = time_report[["hour", "min", "sec"]].astype(
-        int
-    )
     time_report.to_csv(
         str(TIME_REPORT_PATH),
         mode="w+",
