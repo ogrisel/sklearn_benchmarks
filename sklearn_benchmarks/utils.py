@@ -102,16 +102,16 @@ def _make_dataset(
         speedup_col,
         stdev_speedup_col,
         "hyperparams_digest",
-        "dims_digest",
+        "dataset_digest",
         *compare_cols,
     ]
     merged_df = pd.merge(
         skl_df[merge_cols],
         lib_df[merge_cols],
-        on=["hyperparams_digest", "dims_digest"],
+        on=["hyperparams_digest", "dataset_digest"],
         suffixes=["", lib_suffix],
     )
-    # merged_df = merged_df.drop(["hyperparams_digest", "dims_digest"], axis=1)
+    # merged_df = merged_df.drop(["hyperparams_digest", "dataset_digest"], axis=1)
     skl_df = skl_df.drop(merge_cols, axis=1)
     merged_df = pd.merge(skl_df, merged_df, left_index=True, right_index=True)
 
@@ -124,9 +124,8 @@ def _make_dataset(
 
     skl_std = merged_df[stdev_speedup_col]
     lib_std = merged_df[stdev_speedup_col + lib_suffix]
-    merged_df["stdev_speedup"] = (
-        merged_df["speedup"] *
-        np.sqrt((skl_std / skl_time)**2 + (lib_std / lib_time)**2)
+    merged_df["stdev_speedup"] = merged_df["speedup"] * np.sqrt(
+        (skl_std / skl_time) ** 2 + (lib_std / lib_time) ** 2
     )
 
     merged_df["speedup"] = merged_df["speedup"].round(2)
@@ -265,7 +264,7 @@ def print_profiling_links(algo="", versus_lib=""):
             + "_"
             + data["hyperparams_digest"]
             + "_"
-            + data["dims_digest"]
+            + data["dataset_digest"]
             + ".html"
         )
         data[f"{lib}_profiling"] = data[f"{lib}_profiling"].apply(_make_clickable)
@@ -326,7 +325,7 @@ class Report:
             "mean",
             "stdev",
             "hyperparams_digest",
-            "dims_digest",
+            "dataset_digest",
             *compare_cols,
         ]
         merged_df = base_df
@@ -355,7 +354,7 @@ class Report:
             + "_"
             + data["hyperparams_digest"]
             + "_"
-            + data["dims_digest"]
+            + data["dataset_digest"]
             + ".html"
         )
         data[f"{BASE_LIB}_profiling"] = (
@@ -372,7 +371,7 @@ class Report:
                 + "_"
                 + data["hyperparams_digest"]
                 + "_"
-                + data["dims_digest"]
+                + data["dataset_digest"]
                 + ".html"
             )
             data[f"{lib}_profiling"] = (

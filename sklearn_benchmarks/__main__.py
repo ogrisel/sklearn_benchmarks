@@ -97,9 +97,9 @@ class Benchmark:
                     estimator = estimator_class(**params)
                     set_random_state(estimator, random_state=42)
                     hyperparams_digest = joblib.hash(params)
-                    dims_digest = joblib.hash([ns_train, n_features])
+                    dataset_digest = joblib.hash([ns_train, n_features])
                     profiling_results_path = str(RESULTS_PATH / "profiling")
-                    profiling_path = f"{profiling_results_path}/{self.lib_}_fit_{hyperparams_digest}_{dims_digest}.json.gz"
+                    profiling_path = f"{profiling_results_path}/{self.lib_}_fit_{hyperparams_digest}_{dataset_digest}.json.gz"
 
                     _, mean, stdev = FuncExecutor.run(
                         estimator.fit, profiling_path, X_train, y_train
@@ -113,7 +113,7 @@ class Benchmark:
                         n_samples=ns_train,
                         n_features=n_features,
                         hyperparams_digest=hyperparams_digest,
-                        dims_digest=dims_digest,
+                        dataset_digest=dataset_digest,
                         **params,
                     )
                     if hasattr(estimator, "n_iter_"):
@@ -130,8 +130,8 @@ class Benchmark:
                         ns_test = n_samples_test[i]
                         X_test_, y_test_ = X_test[:ns_test], y_test[:ns_test]
                         bench_func = predict_or_transform(estimator)
-                        dims_digest = joblib.hash([ns_test, n_features])
-                        profiling_path = f"{profiling_results_path}/{self.lib_}_{bench_func.__name__}_{hyperparams_digest}_{dims_digest}.json.gz"
+                        dataset_digest = joblib.hash([ns_test, n_features])
+                        profiling_path = f"{profiling_results_path}/{self.lib_}_{bench_func.__name__}_{hyperparams_digest}_{dataset_digest}.json.gz"
 
                         (
                             y_pred,
@@ -152,7 +152,7 @@ class Benchmark:
                             n_samples=ns_test,
                             n_features=n_features,
                             hyperparams_digest=hyperparams_digest,
-                            dims_digest=dims_digest,
+                            dataset_digest=dataset_digest,
                             **scores,
                             **params,
                         )
