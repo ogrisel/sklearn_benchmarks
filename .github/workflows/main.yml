@@ -44,26 +44,26 @@ jobs:
           export OPENBLAS_NUM_THREADS=$NUM_CORES
 
       - name: Run benchmark suite
-        run: python -m sklearn_benchmarks -c sklearn_benchmarks/config.yml
+        run: python -m sklearn_benchmarks -c config.yml
 
       - name: Convert notebook to html
         run: |
-          jupyter nbconvert --to html --execute --output results/index.html sklearn_benchmarks/results.ipynb
+          jupyter nbconvert --to html --execute --output results/index.html results/reporting.ipynb
 
       - name: Upload benchmark results
         uses: actions/upload-artifact@v2
         with:
           name: results
-          path: sklearn_benchmarks/results
+          path: results
 
       - name: Download docs folder
         uses: actions/download-artifact@v2
         with:
           name: results
-          path: sklearn_benchmarks/results
+          path: results
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@4.1.1
         with:
           branch: gh-pages
-          folder: sklearn_benchmarks/results
+          folder: results
