@@ -150,3 +150,5 @@ tmp
 *.sh
 
 work.ipynb
+
+*.json.gz
