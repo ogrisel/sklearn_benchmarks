@@ -12,24 +12,23 @@ $ pip install .
 Usage: python -m sklearn_benchmarks [OPTIONS]
 
 Options:
-  --append, -a
-                                  When set, benchmarking and profiling results
-                                  will be added to existing results.
-  --config, --c <TEXT>
-                                  Path to config file. Default is
-                                  sklearn_benchmarks/config.yml.
+  --append, --a                   Append benchmark results to existing ones.
+  --config, --c TEXT              Path to config file.
+  --profiling_file_type, --pft TEXT
+                                  Profiling files type.
+  --help                          Show this message and exit.
+
 ```
 
 ## List of estimators available
 
-- KNeighborsClassifier (brute force)
-- KNeighborsClassifier (kd tree)
-- KMeans
-
-## List of libraries available
-
-- [daal4py](https://github.com/intel/scikit-learn-intelex)
+- Against [daal4py](https://github.com/intel/scikit-learn-intelex)
+  - [KNeighborsClassifier (brute force)](https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html)
+  - [KNeighborsClassifier (kd tree)](https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html)
+  - [KMeans](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html)
+  - [LogisticRegression](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html)
+  - [Ridge](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html)
 
 ## Results
 
-[See results](https://mbatoul.github.io/sklearn_benchmarks/)
+[See here](https://mbatoul.github.io/sklearn_benchmarks/)
