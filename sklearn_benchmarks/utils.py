@@ -141,7 +141,7 @@ def plot_results(
     algo="",
     versus_lib="",
     group_by_cols=[],
-    split_hist_by=[],
+    split_bar_by=[],
     compare_cols=[],
     n_cols=2,
 ):
@@ -173,8 +173,8 @@ def plot_results(
     for (row, col), (_, df) in zip(coordinates, merged_df_grouped):
         df = df.sort_values(by=["n_samples", "n_features"])
         df = df.dropna(axis="columns")
-        if split_hist_by:
-            for split_col in split_hist_by:
+        if split_bar_by:
+            for split_col in split_bar_by:
                 split_col_vals = df[split_col].unique()
                 for index, split_val in enumerate(split_col_vals):
                     x = df[["n_samples", "n_features"]][df[split_col] == split_val]
@@ -226,7 +226,7 @@ def plot_results(
 
 def clean_results():
     current_path = Path(__file__).resolve().parent
-    extensions = [".csv", ".html"]
+    extensions = [".csv", ".html", ".json.gz"]
     files = []
     for extension in extensions:
         files_path = str(current_path / "results/**/*") + extension
