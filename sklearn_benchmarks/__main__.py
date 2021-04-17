@@ -237,7 +237,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-a", "--append", dest="append", action="store_true")
     parser.add_argument("-c", "--config", dest="config_file")
-    parser.set_defaults(append=False, config="config.yml")
+    parser.set_defaults(append=False, config="sklearn_benchmarks/config.yml")
     args = parser.parse_args()
     try:
         main(args)
