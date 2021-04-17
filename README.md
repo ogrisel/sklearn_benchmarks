@@ -12,12 +12,12 @@ $ pip install .
 Usage: python -m sklearn_benchmarks [OPTIONS]
 
 Options:
-  --append, -a
-                                  When set, benchmarking and profiling results
-                                  will be added to existing results.
-  --config, --c <TEXT>
-                                  Path to config file. Default is
-                                  sklearn_benchmarks/config.yml.
+  --append, --a                   Append benchmark results to existing ones.
+  --config, --c TEXT              Path to config file.
+  --profiling_file_type, --pft TEXT
+                                  Profiling files type.
+  --help                          Show this message and exit.
+
 ```
 
 ## List of estimators available
