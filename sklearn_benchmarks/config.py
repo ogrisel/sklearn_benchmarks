@@ -13,6 +13,8 @@ BENCHMARK_SECONDS_BUDGET = 30
 BENCHMARK_MAX_ITER = 10
 SPEEDUP_COL = "mean"
 STDEV_SPEEDUP_COL = "stdev"
+PLOT_HEIGHT_IN_PX = 300
+REPORTING_FONT_SIZE = 10
 
 
 def get_full_config(config_file_path=None):

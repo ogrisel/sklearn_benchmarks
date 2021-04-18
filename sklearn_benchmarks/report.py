@@ -1,14 +1,22 @@
+import os
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import qgrid
-from IPython.display import Markdown, display
+from IPython.display import Markdown, display, HTML
 from plotly.subplots import make_subplots
 
 from sklearn_benchmarks.config import (
     BASE_LIB,
     BENCHMARKING_RESULTS_PATH,
+    PROFILING_RESULTS_PATH,
+    PLOT_HEIGHT_IN_PX,
+    REPORTING_FONT_SIZE,
+    SPEEDUP_COL,
+    STDEV_SPEEDUP_COL,
     TIME_REPORT_PATH,
     get_full_config,
 )
@@ -31,7 +39,7 @@ class Reporting:
         config = get_full_config(config_file_path=self.config_file_path)
         reporting_config = config["reporting"]
         display(Markdown("## Time report"))
-        self._print_time_report()
+        # self._print_time_report()
         estimators = reporting_config["estimators"]
         for name, params in estimators.items():
             params["n_cols"] = reporting_config["n_cols"]
@@ -66,21 +74,23 @@ class Report:
         file_path = f"{benchmarking_results_path}/{lib}_{self.name}.csv"
         return pd.read_csv(file_path)
 
-    def _make_dataset(self, speedup_col="mean", stdev_speedup_col="stdev"):
+    def _make_reporting_df(self):
 
         base_lib_df = self._get_benchmark_df()
-        base_lib_time = base_lib_df[speedup_col]
-        base_lib_std = base_lib_df[stdev_speedup_col]
+        base_lib_time = base_lib_df[SPEEDUP_COL]
+        base_lib_std = base_lib_df[STDEV_SPEEDUP_COL]
 
         against_lib_df = self._get_benchmark_df(lib=self.against_lib)
-        against_lib_time = against_lib_df[speedup_col]
-        against_lib_std = against_lib_df[stdev_speedup_col]
+        against_lib_time = against_lib_df[SPEEDUP_COL]
+        against_lib_std = against_lib_df[STDEV_SPEEDUP_COL]
 
+        merge_on_cols = ["hyperparams_digest", "dataset_digest"]
+        merged_cols = self.compare + merge_on_cols
         suffixes = map(lambda lib: f"_{lib}", [BASE_LIB, self.against_lib])
         merged_df = pd.merge(
             base_lib_df,
-            against_lib_df,
-            on=["hyperparams_digest", "dataset_digest"],
+            against_lib_df[merged_cols],
+            on=merge_on_cols,
             suffixes=suffixes,
         )
         merged_df["speedup"] = base_lib_time / against_lib_time
@@ -88,52 +98,31 @@ class Report:
             against_lib_std / against_lib_time
         ) ** 2
 
-        numeric_cols = merged_df.select_dtypes(include=["float64"]).columns
-        merged_df[numeric_cols] = merged_df[numeric_cols].round(4)
-
         return merged_df
 
+    def _make_profiling_link(self, digests):
+        hyperparams_digest, dataset_digest = digests
+        path = Path(
+            f"{PROFILING_RESULTS_PATH}/sklearn_{hyperparams_digest}_{dataset_digest}.html"
+        )
+        if os.environ.get("SKLEARN_RESULTS_BASE_URL") is not None:
+            base_url = os.environ.get("SKLEARN_RESULTS_BASE_URL")
+        else:
+            base_url = "file://"
+            path = os.path.abspath(path)
+        return f"<a href='{base_url}{path}' target='_blank'>See</a>"
+
     def _print_table(self):
-        data = self._make_dataset()
-        display(data)
-        data[f"{BASE_LIB}_profiling"] = (
-            "results/profiling/"
-            + f"{BASE_LIB}_"
-            + data["function"]
-            + "_"
-            + data["hyperparams_digest"]
-            + "_"
-            + data["dataset_digest"]
-            + ".html"
+        df = self._make_reporting_df()
+
+        df["profiling"] = df[["hyperparams_digest", "dataset_digest"]].apply(
+            self._make_profiling_link, axis=1
         )
-        data[f"{BASE_LIB}_profiling"] = (
-            "<a href='"
-            + data[f"{BASE_LIB}_profiling"]
-            + "'"
-            + " target='_blank'>See</a>"
-        )
-        for lib in self.against_lib:
-            data[f"{lib}_profiling"] = (
-                "results/profiling/"
-                + f"{lib}_"
-                + data["function"]
-                + "_"
-                + data["hyperparams_digest"]
-                + "_"
-                + data["dataset_digest"]
-                + ".html"
-            )
-            data[f"{lib}_profiling"] = (
-                "<a href='"
-                + data[f"{lib}_profiling"]
-                + "'"
-                + " target='_blank'>See</a>"
-            )
-        qgrid_widget = qgrid.show_grid(data, show_toolbar=True)
+        qgrid_widget = qgrid.show_grid(df, show_toolbar=True)
         display(qgrid_widget)
 
     def _plot(self):
-        merged_df = self._make_dataset()
+        merged_df = self._make_reporting_df()
         merged_df_grouped = merged_df.groupby(self.group_by)
 
         n_plots = len(merged_df_grouped)
@@ -159,7 +148,6 @@ class Report:
         )
 
         for (row, col), (_, df) in zip(coordinates, merged_df_grouped):
-            lib = df["lib"].values[0]
             df = df.sort_values(by=["n_samples", "n_features"])
             df = df.dropna(axis="columns")
             if self.split_bar:
@@ -168,8 +156,7 @@ class Report:
                     for index, split_val in enumerate(split_vals):
                         x = df[["n_samples", "n_features"]][df[split] == split_val]
                         x = [f"({ns}, {nf})" for ns, nf in x.values]
-                        display(df.head())
-                        y = df[f"speedup_{lib}"][df[split] == split_val]
+                        y = df["speedup"][df[split] == split_val]
                         bar = go.Bar(
                             x=x,
                             y=y,
@@ -189,7 +176,7 @@ class Report:
             else:
                 x = df[["n_samples", "n_features"]]
                 x = [f"({ns}, {nf})" for ns, nf in x.values]
-                y = df[f"speedup_{lib}"]
+                y = df["speedup"]
                 bar = go.Bar(
                     x=x,
                     y=y,
@@ -207,12 +194,20 @@ class Report:
             fig["layout"]["xaxis{}".format(i)]["title"] = "(n_samples, n_features)"
             fig["layout"]["yaxis{}".format(i)]["title"] = "Speedup"
 
-        fig.for_each_xaxis(lambda axis: axis.title.update(font=dict(size=10)))
-        fig.for_each_yaxis(lambda axis: axis.title.update(font=dict(size=10)))
-        fig.update_annotations(font_size=10)
-        fig.update_layout(height=n_rows * 300, barmode="group", showlegend=True)
+        fig.for_each_xaxis(
+            lambda axis: axis.title.update(font=dict(size=REPORTING_FONT_SIZE))
+        )
+        fig.for_each_yaxis(
+            lambda axis: axis.title.update(font=dict(size=REPORTING_FONT_SIZE))
+        )
+        fig.update_annotations(font_size=REPORTING_FONT_SIZE)
+        fig.update_layout(
+            height=n_rows * PLOT_HEIGHT_IN_PX, barmode="group", showlegend=True
+        )
         fig.show()
 
     def run(self):
+        display(Markdown(f"### Results"))
         self._print_table()
+        display(Markdown(f"### Plots"))
         self._plot()

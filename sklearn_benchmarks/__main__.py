@@ -1,6 +1,8 @@
 """
 The main entry point. Invoke as `sklearn_benchmarks' or `python sklearn_benchmarks'.
 """
+import os
+import sys
 import time
 
 import click
@@ -82,4 +84,11 @@ def main(append, config, profiling_file_type):
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        clean_results()
+        try:
+            sys.exit(0)
+        except SystemExit:
+            os._exit(0)

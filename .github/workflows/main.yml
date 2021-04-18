@@ -50,7 +50,7 @@ jobs:
 
       - name: Convert notebook to html
         run: |
-          jupyter nbconvert --to html --execute --output results/index.html results/reporting.ipynb
+          jupyter nbconvert --to html --execute --output results/index.html reporting.ipynb
 
       - name: Upload benchmark results
         uses: actions/upload-artifact@v2

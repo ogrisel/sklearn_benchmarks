@@ -16,7 +16,11 @@ from sklearn_benchmarks.config import (
 from sklearn_benchmarks.utils.misc import gen_data, predict_or_transform
 
 
-class FuncExecutor:
+class BenchFuncExecutor:
+    """
+    Executes a benchmark function (fit, predict or transform)
+    """
+
     @staticmethod
     def run(func, profiling_output_file, *args):
         # First run with a profiler (not timed)
@@ -115,13 +119,12 @@ class Benchmark:
                     dataset_digest = joblib.hash([ns_train, n_features])
                     profiling_path = f"{PROFILING_RESULTS_PATH}/{self.lib_}_fit_{hyperparams_digest}_{dataset_digest}.{self.profiling_file_type}"
 
-                    _, mean, stdev = FuncExecutor.run(
+                    _, mean, stdev = BenchFuncExecutor.run(
                         estimator.fit, profiling_path, X_train, y_train
                     )
 
                     row = dict(
                         estimator=self.name,
-                        lib=self.lib_,
                         function="fit",
                         mean=mean,
                         stdev=stdev,
@@ -153,7 +156,7 @@ class Benchmark:
                             y_pred,
                             mean,
                             stdev,
-                        ) = FuncExecutor.run(bench_func, profiling_path, X_test_)
+                        ) = BenchFuncExecutor.run(bench_func, profiling_path, X_test_)
 
                         # We store the scores computed on the biggest dataset
                         if i == 0:
@@ -164,8 +167,7 @@ class Benchmark:
 
                         row = dict(
                             estimator=self.name,
-                            lib=self.lib_,
-                            function="predict",
+                            function=bench_func.__name__,
                             mean=mean,
                             stdev=stdev,
                             n_samples=ns_test,
