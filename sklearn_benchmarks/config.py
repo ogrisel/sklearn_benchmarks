@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import yaml
+import os
 
 RESULTS_PATH = Path(__file__).resolve().parent.parent / "results"
 PROFILING_RESULTS_PATH = RESULTS_PATH / "profiling"
@@ -10,6 +11,8 @@ DEFAULT_CONFIG_FILE_PATH = "config.yml"
 BASE_LIB = "sklearn"
 BENCHMARK_SECONDS_BUDGET = 30
 BENCHMARK_MAX_ITER = 10
+SPEEDUP_COL = "mean"
+STDEV_SPEEDUP_COL = "stdev"
 
 
 def get_full_config(config_file_path=None):

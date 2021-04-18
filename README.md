@@ -20,7 +20,7 @@ Options:
 
 ```
 
-## List of estimators available
+## List of benchmarkable estimators
 
 - Against [daal4py](https://github.com/intel/scikit-learn-intelex)
   - [KNeighborsClassifier (brute force)](https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html)

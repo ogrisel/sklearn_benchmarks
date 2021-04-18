@@ -23,9 +23,9 @@ class Reporting:
     def __init__(self, config_file_path=None):
         self.config_file_path = config_file_path
 
-    def _print_time_report():
+    def _print_time_report(self):
         df = pd.read_csv(str(TIME_REPORT_PATH), index_col="algo")
-        return df
+        display(df)
 
     def run(self):
         config = get_full_config(config_file_path=self.config_file_path)
@@ -36,7 +36,7 @@ class Reporting:
         for name, params in estimators.items():
             params["n_cols"] = reporting_config["n_cols"]
             display(Markdown(f"## {name}"))
-            report = Report(params, self.versus)
+            report = Report(**params)
             report.run()
 
 
@@ -46,61 +46,56 @@ class Report:
     """
 
     def __init__(
-        self, name="", versus=[], split_bar=[], group_by=[], compare=[], n_cols=None
+        self,
+        name="",
+        against_lib="",
+        split_bar=[],
+        group_by=[],
+        compare=[],
+        n_cols=None,
     ):
         self.name = name
-        self.versus = versus
+        self.against_lib = against_lib
         self.split_bar = split_bar
         self.group_by = group_by
         self.compare = compare
         self.n_cols = n_cols
 
-    def _make_dataset(self, speedup_col="mean", stdev_speedup_col="stdev"):
+    def _get_benchmark_df(self, lib=BASE_LIB):
         benchmarking_results_path = str(BENCHMARKING_RESULTS_PATH)
-        lib_df = pd.read_csv(
-            "%s/%s_%s.csv" % (benchmarking_results_path, lib, self.name)
-        )
-        skl_df = pd.read_csv(
-            "%s/sklearn_%s.csv" % (benchmarking_results_path, self.name)
-        )
-        lib_suffix = "_" + lib
-        merge_cols = [
-            speedup_col,
-            stdev_speedup_col,
-            "hyperparams_digest",
-            "dataset_digest",
-            *self.compare,
-        ]
+        file_path = f"{benchmarking_results_path}/{lib}_{self.name}.csv"
+        return pd.read_csv(file_path)
+
+    def _make_dataset(self, speedup_col="mean", stdev_speedup_col="stdev"):
+
+        base_lib_df = self._get_benchmark_df()
+        base_lib_time = base_lib_df[speedup_col]
+        base_lib_std = base_lib_df[stdev_speedup_col]
+
+        against_lib_df = self._get_benchmark_df(lib=self.against_lib)
+        against_lib_time = against_lib_df[speedup_col]
+        against_lib_std = against_lib_df[stdev_speedup_col]
+
+        suffixes = map(lambda lib: f"_{lib}", [BASE_LIB, self.against_lib])
         merged_df = pd.merge(
-            skl_df[merge_cols],
-            lib_df[merge_cols],
+            base_lib_df,
+            against_lib_df,
             on=["hyperparams_digest", "dataset_digest"],
-            suffixes=["", lib_suffix],
+            suffixes=suffixes,
         )
-        # merged_df = merged_df.drop(["hyperparams_digest", "dataset_digest"], axis=1)
-        skl_df = skl_df.drop(merge_cols, axis=1)
-        merged_df = pd.merge(skl_df, merged_df, left_index=True, right_index=True)
+        merged_df["speedup"] = base_lib_time / against_lib_time
+        merged_df["stdev_speedup"] = (base_lib_std / base_lib_time) ** 2 + (
+            against_lib_std / against_lib_time
+        ) ** 2
 
         numeric_cols = merged_df.select_dtypes(include=["float64"]).columns
         merged_df[numeric_cols] = merged_df[numeric_cols].round(4)
-
-        skl_time = merged_df[speedup_col]
-        lib_time = merged_df[speedup_col + lib_suffix]
-        merged_df["speedup"] = skl_time / lib_time
-
-        skl_std = merged_df[stdev_speedup_col]
-        lib_std = merged_df[stdev_speedup_col + lib_suffix]
-        merged_df["stdev_speedup"] = merged_df["speedup"] * np.sqrt(
-            (skl_std / skl_time) ** 2 + (lib_std / lib_time) ** 2
-        )
-
-        merged_df["speedup"] = merged_df["speedup"].round(2)
-        merged_df["stdev_speedup"] = merged_df["stdev_speedup"].round(2)
 
         return merged_df
 
     def _print_table(self):
         data = self._make_dataset()
+        display(data)
         data[f"{BASE_LIB}_profiling"] = (
             "results/profiling/"
             + f"{BASE_LIB}_"
@@ -117,7 +112,7 @@ class Report:
             + "'"
             + " target='_blank'>See</a>"
         )
-        for lib in self.versus:
+        for lib in self.against_lib:
             data[f"{lib}_profiling"] = (
                 "results/profiling/"
                 + f"{lib}_"
@@ -164,6 +159,7 @@ class Report:
         )
 
         for (row, col), (_, df) in zip(coordinates, merged_df_grouped):
+            lib = df["lib"].values[0]
             df = df.sort_values(by=["n_samples", "n_features"])
             df = df.dropna(axis="columns")
             if self.split_bar:
@@ -172,7 +168,8 @@ class Report:
                     for index, split_val in enumerate(split_vals):
                         x = df[["n_samples", "n_features"]][df[split] == split_val]
                         x = [f"({ns}, {nf})" for ns, nf in x.values]
-                        y = df["speedup"][df[split] == split_val]
+                        display(df.head())
+                        y = df[f"speedup_{lib}"][df[split] == split_val]
                         bar = go.Bar(
                             x=x,
                             y=y,
@@ -192,7 +189,7 @@ class Report:
             else:
                 x = df[["n_samples", "n_features"]]
                 x = [f"({ns}, {nf})" for ns, nf in x.values]
-                y = df["speedup"]
+                y = df[f"speedup_{lib}"]
                 bar = go.Bar(
                     x=x,
                     y=y,

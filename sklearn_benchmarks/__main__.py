@@ -1,11 +1,11 @@
 """
 The main entry point. Invoke as `sklearn_benchmarks' or `python sklearn_benchmarks'.
 """
-import click
-import yaml
 import time
+
+import click
 import pandas as pd
-from sklearn_benchmarks.utils.misc import clean_results, convert
+
 from sklearn_benchmarks.benchmark import Benchmark
 from sklearn_benchmarks.config import (
     DEFAULT_CONFIG_FILE_PATH,
@@ -13,6 +13,7 @@ from sklearn_benchmarks.config import (
     get_full_config,
     prepare_params,
 )
+from sklearn_benchmarks.utils.misc import clean_results, convert
 
 
 @click.command()
@@ -38,6 +39,9 @@ from sklearn_benchmarks.config import (
     default="json.gz",
     help="Profiling files type.",
 )
+# @click.option(
+#     "--base_url", "--bu", type=str, default="file://", help="Base URL to serve files."
+# )
 def main(append, config, profiling_file_type):
     if not append:
         clean_results()

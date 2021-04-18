@@ -160,8 +160,8 @@ reporting:
   n_cols: 2
   estimators:
     KNeighborsClassifier:
-      versus:
-        - daal4py
+      name: KNeighborsClassifier
+      against_lib: daal4py
       split_bar:
         - n_jobs
       group_by:
@@ -172,8 +172,8 @@ reporting:
         - accuracy_score
 
     KNeighborsClassifier_kd_tree:
-      versus:
-        - daal4py
+      name: KNeighborsClassifier_kd_tree
+      against_lib: daal4py
       split_bar:
         - n_jobs
       group_by:
@@ -182,8 +182,8 @@ reporting:
         - function
 
     KMeans:
-      versus:
-        - daal4py
+      name: KMeans
+      against_lib: daal4py
       group_by:
         - algorithm
         - init
