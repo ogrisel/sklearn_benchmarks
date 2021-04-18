@@ -84,15 +84,15 @@ class Report:
         against_lib_time = against_lib_df[SPEEDUP_COL]
         against_lib_std = against_lib_df[STDEV_SPEEDUP_COL]
 
-        merge_on_cols = ["hyperparams_digest", "dataset_digest"]
-        merged_cols = self.compare + merge_on_cols
         suffixes = map(lambda lib: f"_{lib}", [BASE_LIB, self.against_lib])
         merged_df = pd.merge(
             base_lib_df,
-            against_lib_df[merged_cols],
-            on=merge_on_cols,
+            against_lib_df[self.compare],
+            left_index=True,
+            right_index=True,
             suffixes=suffixes,
         )
+
         merged_df["speedup"] = base_lib_time / against_lib_time
         merged_df["stdev_speedup"] = (base_lib_std / base_lib_time) ** 2 + (
             against_lib_std / against_lib_time

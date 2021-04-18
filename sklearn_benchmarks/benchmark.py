@@ -141,7 +141,7 @@ class Benchmark:
                     self.results_.append(row)
 
                     print(
-                        "%s - %s - %s - mean: %6.3f - stdev: %6.3f"
+                        "%s - %s - %s - mean: %6.10f - stdev: %6.10f"
                         % (self.lib_, self.name, "fit", mean, stdev)
                     )
 
@@ -179,7 +179,7 @@ class Benchmark:
                         )
 
                         print(
-                            "%s - %s - %s - mean: %6.3f - stdev: %6.3f"
+                            "%s - %s - %s - mean: %6.10f - stdev: %6.10f"
                             % (self.lib_, self.name, bench_func.__name__, mean, stdev)
                         )
                         self.results_.append(row)
