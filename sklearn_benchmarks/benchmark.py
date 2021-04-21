@@ -99,7 +99,8 @@ class Benchmark:
         for dataset in self.datasets:
             n_features = dataset["n_features"]
             n_samples_train = dataset["n_samples_train"]
-            n_samples_test = list(reversed(sorted(dataset["n_samples_test"])))
+            # n_samples_test = list(reversed(sorted(dataset["n_samples_test"])))
+            n_samples_test = dataset["n_samples_test"]
             for ns_train in n_samples_train:
                 X, y = gen_data(
                     dataset["sample_generator"],
@@ -114,20 +115,22 @@ class Benchmark:
                     estimator = estimator_class(**params)
                     # Set random state on all estimators to ensure deterministic results
                     set_random_state(estimator, random_state=self.random_state)
+                    bench_func = estimator.fit
                     # Use digests to identify results later in reporting
                     hyperparams_digest = joblib.hash(params)
-                    dataset_digest = joblib.hash([ns_train, n_features])
+                    dataset_digest = joblib.hash(dataset)
                     profiling_path = f"{PROFILING_RESULTS_PATH}/{self.lib_}_fit_{hyperparams_digest}_{dataset_digest}.{self.profiling_file_type}"
 
                     _, mean, stdev = BenchFuncExecutor.run(
-                        estimator.fit, profiling_path, X_train, y_train
+                        bench_func, profiling_path, X_train, y_train
                     )
 
                     row = dict(
                         estimator=self.name,
-                        function="fit",
+                        function=bench_func.__name__,
                         mean=mean,
                         stdev=stdev,
+                        n_samples_train=ns_train,
                         n_samples=ns_train,
                         n_features=n_features,
                         hyperparams_digest=hyperparams_digest,
@@ -141,15 +144,22 @@ class Benchmark:
                     self.results_.append(row)
 
                     print(
-                        "%s - %s - %s - mean: %6.10f - stdev: %6.10f"
-                        % (self.lib_, self.name, "fit", mean, stdev)
+                        "%s - %s - %s - n_samples: %i - n_features: %i - mean: %6.7f - stdev: %6.7f"
+                        % (
+                            self.lib_,
+                            self.name,
+                            "fit",
+                            ns_train,
+                            n_features,
+                            mean,
+                            stdev,
+                        )
                     )
 
                     for i in range(len(n_samples_test)):
                         ns_test = n_samples_test[i]
                         X_test_, y_test_ = X_test[:ns_test], y_test[:ns_test]
                         bench_func = predict_or_transform(estimator)
-                        dataset_digest = joblib.hash([ns_test, n_features])
                         profiling_path = f"{PROFILING_RESULTS_PATH}/{self.lib_}_{bench_func.__name__}_{hyperparams_digest}_{dataset_digest}.{self.profiling_file_type}"
 
                         (
@@ -170,6 +180,7 @@ class Benchmark:
                             function=bench_func.__name__,
                             mean=mean,
                             stdev=stdev,
+                            n_samples_train=ns_train,
                             n_samples=ns_test,
                             n_features=n_features,
                             hyperparams_digest=hyperparams_digest,
@@ -179,8 +190,16 @@ class Benchmark:
                         )
 
                         print(
-                            "%s - %s - %s - mean: %6.10f - stdev: %6.10f"
-                            % (self.lib_, self.name, bench_func.__name__, mean, stdev)
+                            "%s - %s - %s - n_samples: %i - n_features: %i - mean: %6.7f - stdev: %6.7f"
+                            % (
+                                self.lib_,
+                                self.name,
+                                bench_func.__name__,
+                                ns_test,
+                                n_features,
+                                mean,
+                                stdev,
+                            )
                         )
                         self.results_.append(row)
         return self

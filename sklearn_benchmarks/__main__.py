@@ -1,5 +1,5 @@
 """
-The main entry point. Invoke as `sklearn_benchmarks' or `python sklearn_benchmarks'.
+The main entry point. Invoke as `sklearn_benchmarks' or `python -m sklearn_benchmarks'.
 """
 import os
 import sys
@@ -38,7 +38,7 @@ from sklearn_benchmarks.utils.misc import clean_results, convert
     "--profiling_file_type",
     "--pft",
     type=str,
-    default="json.gz",
+    default="html",
     help="Profiling files type.",
 )
 # @click.option(

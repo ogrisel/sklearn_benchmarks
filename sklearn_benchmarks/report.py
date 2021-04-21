@@ -39,7 +39,7 @@ class Reporting:
         config = get_full_config(config_file_path=self.config_file_path)
         reporting_config = config["reporting"]
         display(Markdown("## Time report"))
-        # self._print_time_report()
+        self._print_time_report()
         estimators = reporting_config["estimators"]
         for name, params in estimators.items():
             params["n_cols"] = reporting_config["n_cols"]
@@ -58,14 +58,12 @@ class Report:
         name="",
         against_lib="",
         split_bar=[],
-        group_by=[],
         compare=[],
         n_cols=None,
     ):
         self.name = name
         self.against_lib = against_lib
         self.split_bar = split_bar
-        self.group_by = group_by
         self.compare = compare
         self.n_cols = n_cols
 
@@ -112,6 +110,9 @@ class Report:
             path = os.path.abspath(path)
         return f"<a href='{base_url}{path}' target='_blank'>See</a>"
 
+    def _make_plot_title(self, df):
+        pass
+
     def _print_table(self):
         df = self._make_reporting_df()
 
@@ -123,23 +124,13 @@ class Report:
 
     def _plot(self):
         merged_df = self._make_reporting_df()
-        merged_df_grouped = merged_df.groupby(self.group_by)
+        merged_df_grouped = merged_df.groupby(["hyperparams_digest", "dataset_digest"])
 
         n_plots = len(merged_df_grouped)
         n_rows = n_plots // self.n_cols + n_plots % self.n_cols
         coordinates = gen_coordinates_grid(n_rows, self.n_cols)
 
-        subplot_titles = []
-        for params, _ in merged_df_grouped:
-            title = ""
-            for index, (name, val) in enumerate(zip(self.group_by, params)):
-                title += "%s: %s" % (name, val)
-                if index > 0 and index % 3 == 0:
-                    title += "<br>"
-                elif index != len(list(zip(self.group_by, params))) - 1:
-                    title += " - "
-
-            subplot_titles.append(title)
+        subplot_titles = [self._make_plot_title(df) for _, df in merged_df_grouped]
 
         fig = make_subplots(
             rows=n_rows,
@@ -148,47 +139,29 @@ class Report:
         )
 
         for (row, col), (_, df) in zip(coordinates, merged_df_grouped):
-            df = df.sort_values(by=["n_samples", "n_features"])
+            df = df.sort_values(by=["function", "n_samples", "n_features"])
             df = df.dropna(axis="columns")
-            if self.split_bar:
-                for split in self.split_bar:
-                    split_vals = df[split].unique()
-                    for index, split_val in enumerate(split_vals):
-                        x = df[["n_samples", "n_features"]][df[split] == split_val]
-                        x = [f"({ns}, {nf})" for ns, nf in x.values]
-                        y = df["speedup"][df[split] == split_val]
-                        bar = go.Bar(
-                            x=x,
-                            y=y,
-                            name="%s: %s" % (split, split_val),
-                            marker_color=px.colors.qualitative.Plotly[index],
-                            hovertemplate=make_hover_template(
-                                df[df[split] == split_val]
-                            ),
-                            customdata=df[df[split] == split_val].values,
-                            showlegend=(row, col) == (1, 1),
-                        )
-                        fig.add_trace(
-                            bar,
-                            row=row,
-                            col=col,
-                        )
-            else:
-                x = df[["n_samples", "n_features"]]
-                x = [f"({ns}, {nf})" for ns, nf in x.values]
-                y = df["speedup"]
-                bar = go.Bar(
-                    x=x,
-                    y=y,
-                    hovertemplate=make_hover_template(df),
-                    customdata=df.values,
-                    showlegend=False,
-                )
-                fig.add_trace(
-                    bar,
-                    row=row,
-                    col=col,
-                )
+            df["color"] = df["function"].apply(
+                lambda func: "indianred" if func == "fit" else "lightsalmon"
+            )
+            x = df[["n_samples", "n_features"]]
+            x = [f"({ns}, {nf})" for ns, nf in x.values]
+            y = df["speedup"]
+            bar = go.Bar(
+                x=x,
+                y=y,
+                hovertemplate=make_hover_template(df),
+                marker_color=df["color"],
+                text=df["function"],
+                textposition="auto",
+                customdata=df.values,
+                showlegend=False,
+            )
+            fig.add_trace(
+                bar,
+                row=row,
+                col=col,
+            )
 
         for i in range(1, n_plots + 1):
             fig["layout"]["xaxis{}".format(i)]["title"] = "(n_samples, n_features)"
