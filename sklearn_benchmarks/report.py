@@ -38,11 +38,17 @@ class Reporting:
     def run(self):
         config = get_full_config(config_file_path=self.config_file_path)
         reporting_config = config["reporting"]
+        benchmarking_config = config["benchmarking"]
+
         display(Markdown("## Time report"))
         self._print_time_report()
+
         estimators = reporting_config["estimators"]
         for name, params in estimators.items():
             params["n_cols"] = reporting_config["n_cols"]
+            params["estimator_hyperparameters"] = benchmarking_config["estimators"][
+                name
+            ]["hyperparameters"].keys()
             display(Markdown(f"## {name}"))
             report = Report(**params)
             report.run()
@@ -59,6 +65,7 @@ class Report:
         against_lib="",
         split_bar=[],
         compare=[],
+        estimator_hyperparameters={},
         n_cols=None,
     ):
         self.name = name
@@ -66,6 +73,7 @@ class Report:
         self.split_bar = split_bar
         self.compare = compare
         self.n_cols = n_cols
+        self.estimator_hyperparameters = estimator_hyperparameters
 
     def _get_benchmark_df(self, lib=BASE_LIB):
         benchmarking_results_path = str(BENCHMARKING_RESULTS_PATH)
@@ -111,7 +119,16 @@ class Report:
         return f"<a href='{base_url}{path}' target='_blank'>See</a>"
 
     def _make_plot_title(self, df):
-        pass
+        title = ""
+        values = df[self.estimator_hyperparameters].values[0]
+        params = self.estimator_hyperparameters
+        for index, (param, value) in enumerate(zip(params, values)):
+            title += "%s: %s" % (param, value)
+            if index > 0 and index % 3 == 0:
+                title += "<br>"
+            elif index != len(list(enumerate(zip(params, values)))) - 1:
+                title += " - "
+        return title
 
     def _print_table(self):
         df = self._make_reporting_df()
@@ -124,7 +141,7 @@ class Report:
 
     def _plot(self):
         merged_df = self._make_reporting_df()
-        merged_df_grouped = merged_df.groupby(["hyperparams_digest", "dataset_digest"])
+        merged_df_grouped = merged_df.groupby(["hyperparams_digest"])
 
         n_plots = len(merged_df_grouped)
         n_rows = n_plots // self.n_cols + n_plots % self.n_cols
