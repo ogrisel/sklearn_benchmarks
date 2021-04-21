@@ -164,10 +164,6 @@ reporting:
       against_lib: daal4py
       split_bar:
         - n_jobs
-      # group_by:
-      #   - algorithm
-      #   - n_neighbors
-      #   - function
       compare:
         - accuracy_score
 
@@ -176,22 +172,12 @@ reporting:
       against_lib: daal4py
       split_bar:
         - n_jobs
-      # group_by:
-      #   - algorithm
-      #   - n_neighbors
-      #   - function
+      compare:
+        - accuracy_score
 
     KMeans:
       name: KMeans
       against_lib: daal4py
-      # group_by:
-      #   - algorithm
-      #   - init
-      #   - max_iter
-      #   - n_clusters
-      #   - n_init
-      #   - tol
-      #   - function
       compare:
         - n_iter
         - adjusted_rand_score

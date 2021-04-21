@@ -161,24 +161,68 @@ class Report:
             df["color"] = df["function"].apply(
                 lambda func: "indianred" if func == "fit" else "lightsalmon"
             )
-            x = df[["n_samples", "n_features"]]
-            x = [f"({ns}, {nf})" for ns, nf in x.values]
-            y = df["speedup"]
-            bar = go.Bar(
-                x=x,
-                y=y,
-                hovertemplate=make_hover_template(df),
-                marker_color=df["color"],
-                text=df["function"],
-                textposition="auto",
-                customdata=df.values,
-                showlegend=False,
-            )
-            fig.add_trace(
-                bar,
-                row=row,
-                col=col,
-            )
+            #     x = df[["n_samples", "n_features"]]
+            #     x = [f"({ns}, {nf})" for ns, nf in x.values]
+            #     y = df["speedup"]
+            #     bar = go.Bar(
+            #         x=x,
+            #         y=y,
+            #         hovertemplate=make_hover_template(df),
+            #         marker_color=df["color"],
+            #         text=df["function"],
+            #         textposition="auto",
+            #         customdata=df.values,
+            #         showlegend=False,
+            #     )
+            #     fig.add_trace(
+            #         bar,
+            #         row=row,
+            #         col=col,
+            #     )
+
+            if self.split_bar:
+                for split_col in self.split_bar:
+                    split_col_vals = df[split_col].unique()
+                    for index, split_val in enumerate(split_col_vals):
+                        x = df[["n_samples", "n_features"]][df[split_col] == split_val]
+                        x = [f"({ns}, {nf})" for ns, nf in x.values]
+                        y = df["speedup"][df[split_col] == split_val]
+                        bar = go.Bar(
+                            x=x,
+                            y=y,
+                            name="%s: %s" % (split_col, split_val),
+                            marker_color=px.colors.qualitative.Plotly[index],
+                            hovertemplate=make_hover_template(
+                                df[df[split_col] == split_val]
+                            ),
+                            customdata=df[df[split_col] == split_val].values,
+                            showlegend=(row, col) == (1, 1),
+                            text=df["function"],
+                            textposition="auto",
+                        )
+                        fig.add_trace(
+                            bar,
+                            row=row,
+                            col=col,
+                        )
+            else:
+                x = df[["n_samples", "n_features"]]
+                x = [f"({ns}, {nf})" for ns, nf in x.values]
+                y = df["speedup"]
+                bar = go.Bar(
+                    x=x,
+                    y=y,
+                    hovertemplate=make_hover_template(df),
+                    customdata=df.values,
+                    showlegend=False,
+                    text=df["function"],
+                    textposition="auto",
+                )
+                fig.add_trace(
+                    bar,
+                    row=row,
+                    col=col,
+                )
 
         for i in range(1, n_plots + 1):
             fig["layout"]["xaxis{}".format(i)]["title"] = "(n_samples, n_features)"
