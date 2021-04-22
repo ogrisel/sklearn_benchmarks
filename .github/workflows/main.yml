@@ -7,6 +7,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      SKLEARN_RESULTS_BASE_URL: https://mbatoul.github.io/sklearn_benchmarks/results
     defaults:
       run:
         shell: bash -l {0}
@@ -21,14 +23,14 @@ jobs:
         with:
           path: ~/conda_pkgs_dir
           key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{
-            hashFiles('bench_environment.yml') }}
+            hashFiles('environment.yml') }}
 
       - name: Setup miniconda
         uses: conda-incubator/setup-miniconda@v2
         with:
           python-version: 3.8
           activate-environment: sklbench
-          environment-file: bench_environment.yml
+          environment-file: environment.yml
           channels: conda-forge,intel
           channel-priority: flexible
           use-only-tar-bz2: true
@@ -44,26 +46,26 @@ jobs:
           export OPENBLAS_NUM_THREADS=$NUM_CORES
 
       - name: Run benchmark suite
-        run: python -m sklearn_benchmarks -c sklearn_benchmarks/config.yml
+        run: python -m sklearn_benchmarks -c config.yml
 
       - name: Convert notebook to html
         run: |
-          jupyter nbconvert --to html --execute --output results/index.html sklearn_benchmarks/results.ipynb
+          jupyter nbconvert --to html --execute --output results/index.html reporting.ipynb
 
       - name: Upload benchmark results
         uses: actions/upload-artifact@v2
         with:
           name: results
-          path: sklearn_benchmarks/results
+          path: results
 
       - name: Download docs folder
         uses: actions/download-artifact@v2
         with:
           name: results
-          path: sklearn_benchmarks/results
+          path: results
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@4.1.1
         with:
           branch: gh-pages
-          folder: sklearn_benchmarks/results
+          folder: results
