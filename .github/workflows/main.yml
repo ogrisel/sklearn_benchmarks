@@ -46,7 +46,7 @@ jobs:
           export OPENBLAS_NUM_THREADS=$NUM_CORES
 
       - name: Run benchmark suite
-        run: python -m sklearn_benchmarks -c config.yml
+        run: python -m sklearn_benchmarks --config config.yml
 
       - name: Convert notebook to html
         run: |
