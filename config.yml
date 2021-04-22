@@ -16,7 +16,6 @@ benchmarking:
           - 1
       metrics:
         - accuracy_score
-        - roc_auc_score
       datasets:
         - sample_generator: sklearn.datasets.make_classification
           params:
@@ -60,7 +59,6 @@ benchmarking:
           - 1
       metrics:
         - accuracy_score
-        - roc_auc_score
       datasets:
         - sample_generator: sklearn.datasets.make_classification
           params:
