@@ -139,9 +139,17 @@ class Report:
         qgrid_widget = qgrid.show_grid(df, show_toolbar=True)
         display(qgrid_widget)
 
+    def _add_trace(self, fig, df, row, col):
+        pass
+
     def _plot(self):
         merged_df = self._make_reporting_df()
-        merged_df_grouped = merged_df.groupby(["hyperparams_digest"])
+        group_by_params = [
+            param
+            for param in self.estimator_hyperparameters
+            if param not in self.split_bar
+        ]
+        merged_df_grouped = merged_df.groupby(group_by_params)
 
         n_plots = len(merged_df_grouped)
         n_rows = n_plots // self.n_cols + n_plots % self.n_cols
@@ -161,32 +169,13 @@ class Report:
             df["color"] = df["function"].apply(
                 lambda func: "indianred" if func == "fit" else "lightsalmon"
             )
-            #     x = df[["n_samples", "n_features"]]
-            #     x = [f"({ns}, {nf})" for ns, nf in x.values]
-            #     y = df["speedup"]
-            #     bar = go.Bar(
-            #         x=x,
-            #         y=y,
-            #         hovertemplate=make_hover_template(df),
-            #         marker_color=df["color"],
-            #         text=df["function"],
-            #         textposition="auto",
-            #         customdata=df.values,
-            #         showlegend=False,
-            #     )
-            #     fig.add_trace(
-            #         bar,
-            #         row=row,
-            #         col=col,
-            #     )
-
             if self.split_bar:
                 for split_col in self.split_bar:
                     split_col_vals = df[split_col].unique()
                     for index, split_val in enumerate(split_col_vals):
-                        x = df[["n_samples", "n_features"]][df[split_col] == split_val]
+                        x = df[df[split_col] == split_val][["n_samples", "n_features"]]
                         x = [f"({ns}, {nf})" for ns, nf in x.values]
-                        y = df["speedup"][df[split_col] == split_val]
+                        y = df[df[split_col] == split_val]["speedup"]
                         bar = go.Bar(
                             x=x,
                             y=y,
@@ -197,7 +186,7 @@ class Report:
                             ),
                             customdata=df[df[split_col] == split_val].values,
                             showlegend=(row, col) == (1, 1),
-                            text=df["function"],
+                            text=df[df[split_col] == split_val]["function"],
                             textposition="auto",
                         )
                         fig.add_trace(
