@@ -20,6 +20,8 @@ benchmarking:
       datasets:
         - sample_generator: sklearn.datasets.make_classification
           params:
+            n_classes: 2
+            n_redundant: 0
             random_state: 42
           n_features: 1e2
           n_samples_train:
@@ -62,6 +64,8 @@ benchmarking:
       datasets:
         - sample_generator: sklearn.datasets.make_classification
           params:
+            n_classes: 2
+            n_redundant: 0
             random_state: 42
           n_features: 10
           n_samples_train:
