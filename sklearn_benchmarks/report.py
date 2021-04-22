@@ -120,13 +120,17 @@ class Report:
 
     def _make_plot_title(self, df):
         title = ""
-        values = df[self.estimator_hyperparameters].values[0]
-        params = self.estimator_hyperparameters
-        for index, (param, value) in enumerate(zip(params, values)):
+        params_cols = [
+            param
+            for param in self.estimator_hyperparameters
+            if param not in self.split_bar
+        ]
+        values = df[params_cols].values[0]
+        for index, (param, value) in enumerate(zip(params_cols, values)):
             title += "%s: %s" % (param, value)
             if index > 0 and index % 3 == 0:
                 title += "<br>"
-            elif index != len(list(enumerate(zip(params, values)))) - 1:
+            elif index != len(list(enumerate(zip(params_cols, values)))) - 1:
                 title += " - "
         return title
 
@@ -166,9 +170,7 @@ class Report:
         for (row, col), (_, df) in zip(coordinates, merged_df_grouped):
             df = df.sort_values(by=["function", "n_samples", "n_features"])
             df = df.dropna(axis="columns")
-            df["color"] = df["function"].apply(
-                lambda func: "indianred" if func == "fit" else "lightsalmon"
-            )
+
             if self.split_bar:
                 for split_col in self.split_bar:
                     split_col_vals = df[split_col].unique()
@@ -197,7 +199,9 @@ class Report:
             else:
                 x = df[["n_samples", "n_features"]]
                 x = [f"({ns}, {nf})" for ns, nf in x.values]
+                print(x)
                 y = df["speedup"]
+                print(y)
                 bar = go.Bar(
                     x=x,
                     y=y,
