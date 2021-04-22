@@ -168,7 +168,7 @@ class Benchmark:
                             stdev,
                         ) = BenchFuncExecutor.run(bench_func, profiling_path, X_test_)
 
-                        # We store the scores computed on the biggest dataset
+                        # Store the scores computed on the biggest dataset
                         if i == 0:
                             scores = {
                                 func.__name__: func(y_test_, y_pred)
