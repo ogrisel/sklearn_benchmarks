@@ -1,0 +1,7 @@
+estimator,function,mean,stdev,n_samples_train,n_samples,n_features,hyperparams_digest,dataset_digest,C,class_weight,dual,fit_intercept,intercept_scaling,l1_ratio,max_iter,multi_class,n_jobs,penalty,random_state,solver,tol,verbose,warm_start,n_iter
+LogisticRegression,fit,0.2349599746000422,0.022490010098302666,1000,1000,1000,f11be2529b0a77bc8fb5ee8de141e6b2,87df8708b64e2831c82c5e60d77c73aa,1.0,,False,True,1,,100,auto,,l2,,lbfgs,0.0001,0,False,[51]
+LogisticRegression,predict,0.0003514050000831048,0.00011321870711532345,1000,1,1000,f11be2529b0a77bc8fb5ee8de141e6b2,87df8708b64e2831c82c5e60d77c73aa,1.0,,False,True,1,,100,auto,,l2,,lbfgs,0.0001,0,False,
+LogisticRegression,predict,0.0005075418999695103,0.00011117842648780946,1000,100,1000,f11be2529b0a77bc8fb5ee8de141e6b2,87df8708b64e2831c82c5e60d77c73aa,1.0,,False,True,1,,100,auto,,l2,,lbfgs,0.0001,0,False,
+LogisticRegression,fit,0.13759778440007722,0.0014014695694599458,10000,10000,100,f11be2529b0a77bc8fb5ee8de141e6b2,42d2d17798f0471ec3d5da7cbdf7681d,1.0,,False,True,1,,100,auto,,l2,,lbfgs,0.0001,0,False,[21]
+LogisticRegression,predict,0.00027648069999486324,0.00010502965434828664,10000,1,100,f11be2529b0a77bc8fb5ee8de141e6b2,42d2d17798f0471ec3d5da7cbdf7681d,1.0,,False,True,1,,100,auto,,l2,,lbfgs,0.0001,0,False,
+LogisticRegression,predict,0.0003787044000091555,0.00010284720649499085,10000,1000,100,f11be2529b0a77bc8fb5ee8de141e6b2,42d2d17798f0471ec3d5da7cbdf7681d,1.0,,False,True,1,,100,auto,,l2,,lbfgs,0.0001,0,False,
