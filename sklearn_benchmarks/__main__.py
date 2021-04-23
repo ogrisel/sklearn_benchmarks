@@ -35,9 +35,9 @@ from sklearn_benchmarks.utils.misc import clean_results, convert
     help="Path to config file.",
 )
 @click.option(
-    "--profiling_file_type",
-    "--pft",
-    type=str,
+    "--profiling",
+    "--p",
+    type=click.Choice(["html", "json.gz"], case_sensitive=True),
     default="html",
     help="Profiling files type.",
 )

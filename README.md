@@ -14,10 +14,9 @@ Usage: python -m sklearn_benchmarks [OPTIONS]
 Options:
   --append, --a                   Append benchmark results to existing ones.
   --config, --c TEXT              Path to config file.
-  --profiling_file_type, --pft TEXT
+  --profiling, --p [html|json.gz]
                                   Profiling files type.
   --help                          Show this message and exit.
-
 ```
 
 ## List of benchmarkable estimators
