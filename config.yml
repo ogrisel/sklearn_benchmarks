@@ -205,10 +205,9 @@ benchmarking:
           n_samples_test:
             - 1
             - 1e2
-        - sample_generator: sklearn.datasets.make_classification
+        - sample_generator: sklearn.datasets.make_regression
           params:
-            n_classes: 5
-            n_redundant: 0
+            n_informative: 10
             random_state: 42
           n_features: 1e2
           n_samples_train:
