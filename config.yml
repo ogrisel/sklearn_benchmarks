@@ -173,7 +173,7 @@ benchmarking:
             - 1e3
           n_samples_test:
             - 1
-            - 5 1e2
+            - 1e2
         - sample_generator: sklearn.datasets.make_classification
           params:
             n_classes: 5
