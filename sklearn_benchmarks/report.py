@@ -1,4 +1,5 @@
 import os
+import importlib
 from pathlib import Path
 
 import numpy as np
@@ -35,21 +36,37 @@ class Reporting:
         df = pd.read_csv(str(TIME_REPORT_PATH), index_col="algo")
         display(df)
 
+    def _get_estimator_default_hyperparameters(self, estimator):
+        splitted_path = estimator.split(".")
+        module, class_name = ".".join(splitted_path[:-1]), splitted_path[-1]
+        estimator_class = getattr(importlib.import_module(module), class_name)
+        estimator_instance = estimator_class()
+        hyperparameters = estimator_instance.__dict__.keys()
+        return hyperparameters
+
+    def _get_estimator_hyperparameters(self, estimator_config):
+        if "hyperparameters" in estimator_config:
+            return estimator_config["hyperparameters"].keys()
+        else:
+            return self._get_estimator_default_hyperparameters(
+                estimator_config["estimator"]
+            )
+
     def run(self):
         config = get_full_config(config_file_path=self.config_file_path)
         reporting_config = config["reporting"]
-        benchmarking_config = config["benchmarking"]
+        benchmarking_estimators = config["benchmarking"]["estimators"]
 
         display(Markdown("## Time report"))
         self._print_time_report()
 
-        estimators = reporting_config["estimators"]
-        for name, params in estimators.items():
+        reporting_estimators = reporting_config["estimators"]
+        for name, params in reporting_estimators.items():
             params["n_cols"] = reporting_config["n_cols"]
-            params["estimator_hyperparameters"] = benchmarking_config["estimators"][
-                name
-            ]["hyperparameters"].keys()
-            display(Markdown(f"## {name}"))
+            params["estimator_hyperparameters"] = self._get_estimator_hyperparameters(
+                benchmarking_estimators[name]
+            )
+            display(Markdown(f"## {name} vs {params['against_lib']}"))
             report = Report(**params)
             report.run()
 
@@ -144,18 +161,20 @@ class Report:
         display(qgrid_widget)
 
     def _make_x_plot(self, df):
-        df = df.sort_values(by=["function", "n_samples", "n_features"])
+        # df = df.sort_values(by=["function", "n_samples", "n_features"])
         return [f"({ns}, {nf})" for ns, nf in df[["n_samples", "n_features"]].values]
 
     def _plot(self):
         merged_df = self._make_reporting_df()
-        group_by_params = [
-            param
-            for param in self.estimator_hyperparameters
-            if param not in self.split_bar
-        ]
-        # group_by_params.append("function")
-        merged_df_grouped = merged_df.groupby(group_by_params)
+        if self.split_bar:
+            group_by_params = [
+                param
+                for param in self.estimator_hyperparameters
+                if param not in self.split_bar
+            ]
+            merged_df_grouped = merged_df.groupby(group_by_params)
+        else:
+            merged_df_grouped = merged_df.groupby("hyperparams_digest")
 
         n_plots = len(merged_df_grouped)
         n_rows = n_plots // self.n_cols + n_plots % self.n_cols
