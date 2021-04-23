@@ -226,7 +226,7 @@ reporting:
     KNeighborsClassifier:
       name: KNeighborsClassifier
       against_lib: daal4py
-      split_bar:
+      split_bars:
         - n_jobs
       compare:
         - accuracy_score
@@ -234,7 +234,7 @@ reporting:
     KNeighborsClassifier_kd_tree:
       name: KNeighborsClassifier_kd_tree
       against_lib: daal4py
-      split_bar:
+      split_bars:
         - n_jobs
       compare:
         - accuracy_score

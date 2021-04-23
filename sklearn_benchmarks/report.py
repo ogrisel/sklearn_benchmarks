@@ -80,14 +80,14 @@ class Report:
         self,
         name="",
         against_lib="",
-        split_bar=[],
+        split_bars=[],
         compare=[],
         estimator_hyperparameters={},
         n_cols=None,
     ):
         self.name = name
         self.against_lib = against_lib
-        self.split_bar = split_bar
+        self.split_bars = split_bars
         self.compare = compare
         self.n_cols = n_cols
         self.estimator_hyperparameters = estimator_hyperparameters
@@ -140,7 +140,7 @@ class Report:
         params_cols = [
             param
             for param in self.estimator_hyperparameters
-            if param not in self.split_bar
+            if param not in self.split_bars
         ]
         values = df[params_cols].values[0]
         for index, (param, value) in enumerate(zip(params_cols, values)):
@@ -161,20 +161,50 @@ class Report:
         display(qgrid_widget)
 
     def _make_x_plot(self, df):
-        # df = df.sort_values(by=["function", "n_samples", "n_features"])
         return [f"({ns}, {nf})" for ns, nf in df[["n_samples", "n_features"]].values]
+
+    def _should_split_n_samples_train(self, df):
+        return np.any(df[["n_samples", "n_features"]].duplicated().values)
+
+    def _get_split_cols(self, df):
+        split_cols = []
+        if self.split_bars:
+            split_cols = self.split_bars
+        elif self._should_split_n_samples_train(df):
+            split_cols = ["n_samples_train"]
+        return split_cols
+
+    def _add_bar_to_plotly_fig(
+        self, fig, row, col, df, color="dodgerblue", name="", showlegend=False
+    ):
+        bar = go.Bar(
+            x=self._make_x_plot(df),
+            y=df["speedup"],
+            name=name,
+            marker_color=color,
+            hovertemplate=make_hover_template(df),
+            customdata=df.values,
+            showlegend=showlegend,
+            text=df["function"],
+            textposition="auto",
+        )
+        fig.add_trace(
+            bar,
+            row=row,
+            col=col,
+        )
 
     def _plot(self):
         merged_df = self._make_reporting_df()
-        if self.split_bar:
+        if self.split_bars:
             group_by_params = [
                 param
                 for param in self.estimator_hyperparameters
-                if param not in self.split_bar
+                if param not in self.split_bars
             ]
-            merged_df_grouped = merged_df.groupby(group_by_params)
         else:
-            merged_df_grouped = merged_df.groupby("hyperparams_digest")
+            group_by_params = "hyperparams_digest"
+        merged_df_grouped = merged_df.groupby(group_by_params)
 
         n_plots = len(merged_df_grouped)
         n_rows = n_plots // self.n_cols + n_plots % self.n_cols
@@ -192,61 +222,23 @@ class Report:
             df = df.sort_values(by=["function", "n_samples", "n_features"])
             df = df.dropna(axis="columns")
 
-            if self.split_bar:
-                for split_col in self.split_bar:
+            split_cols = self._get_split_cols(df)
+            if split_cols:
+                for split_col in split_cols:
                     split_col_vals = df[split_col].unique()
                     for index, split_val in enumerate(split_col_vals):
-                        x = df[df[split_col] == split_val][["n_samples", "n_features"]]
-                        x = [f"({ns}, {nf})" for ns, nf in x.values]
-                        y = df[df[split_col] == split_val]["speedup"]
-                        bar = go.Bar(
-                            x=x,
-                            y=y,
+                        filtered_df = df[df[split_col] == split_val]
+                        self._add_bar_to_plotly_fig(
+                            fig,
+                            row,
+                            col,
+                            filtered_df,
+                            color=px.colors.qualitative.Plotly[index],
                             name="%s: %s" % (split_col, split_val),
-                            marker_color=px.colors.qualitative.Plotly[index],
-                            hovertemplate=make_hover_template(
-                                df[df[split_col] == split_val]
-                            ),
-                            customdata=df[df[split_col] == split_val].values,
                             showlegend=(row, col) == (1, 1),
-                            text=df[df[split_col] == split_val]["function"],
-                            textposition="auto",
-                        )
-                        fig.add_trace(
-                            bar,
-                            row=row,
-                            col=col,
                         )
             else:
-                n_samples_train_vals = df["n_samples_train"].unique()
-                for index in range(len(n_samples_train_vals)):
-                    n_sample_train_val = n_samples_train_vals[index]
-                    x = self._make_x_plot(
-                        df[df["n_samples_train"] == n_sample_train_val]
-                    )
-                    y = df[df["n_samples_train"] == n_sample_train_val]["speedup"]
-                    bar = go.Bar(
-                        x=x,
-                        y=y,
-                        name="%s: %s" % ("n_sample_train", n_sample_train_val),
-                        hovertemplate=make_hover_template(
-                            df[df["n_samples_train"] == n_sample_train_val]
-                        ),
-                        customdata=df[
-                            df["n_samples_train"] == n_sample_train_val
-                        ].values,
-                        text=df[df["n_samples_train"] == n_sample_train_val][
-                            "function"
-                        ],
-                        textposition="auto",
-                        showlegend=(row, col) == (1, 1),
-                        marker_color=px.colors.qualitative.Plotly[index],
-                    )
-                    fig.add_trace(
-                        bar,
-                        row=row,
-                        col=col,
-                    )
+                self._add_bar_to_plotly_fig(fig, row, col, df)
 
         for i in range(1, n_plots + 1):
             fig["layout"]["xaxis{}".format(i)]["title"] = "(n_samples, n_features)"
