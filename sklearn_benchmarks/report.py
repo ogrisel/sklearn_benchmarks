@@ -143,8 +143,9 @@ class Report:
         qgrid_widget = qgrid.show_grid(df, show_toolbar=True)
         display(qgrid_widget)
 
-    def _add_trace(self, fig, df, row, col):
-        pass
+    def _make_x_plot(self, df):
+        df = df.sort_values(by=["function", "n_samples", "n_features"])
+        return [f"({ns}, {nf})" for ns, nf in df[["n_samples", "n_features"]].values]
 
     def _plot(self):
         merged_df = self._make_reporting_df()
@@ -153,6 +154,7 @@ class Report:
             for param in self.estimator_hyperparameters
             if param not in self.split_bar
         ]
+        # group_by_params.append("function")
         merged_df_grouped = merged_df.groupby(group_by_params)
 
         n_plots = len(merged_df_grouped)
@@ -197,25 +199,35 @@ class Report:
                             col=col,
                         )
             else:
-                x = df[["n_samples", "n_features"]]
-                x = [f"({ns}, {nf})" for ns, nf in x.values]
-                print(x)
-                y = df["speedup"]
-                print(y)
-                bar = go.Bar(
-                    x=x,
-                    y=y,
-                    hovertemplate=make_hover_template(df),
-                    customdata=df.values,
-                    showlegend=False,
-                    text=df["function"],
-                    textposition="auto",
-                )
-                fig.add_trace(
-                    bar,
-                    row=row,
-                    col=col,
-                )
+                n_samples_train_vals = df["n_samples_train"].unique()
+                for index in range(len(n_samples_train_vals)):
+                    n_sample_train_val = n_samples_train_vals[index]
+                    x = self._make_x_plot(
+                        df[df["n_samples_train"] == n_sample_train_val]
+                    )
+                    y = df[df["n_samples_train"] == n_sample_train_val]["speedup"]
+                    bar = go.Bar(
+                        x=x,
+                        y=y,
+                        name="%s: %s" % ("n_sample_train", n_sample_train_val),
+                        hovertemplate=make_hover_template(
+                            df[df["n_samples_train"] == n_sample_train_val]
+                        ),
+                        customdata=df[
+                            df["n_samples_train"] == n_sample_train_val
+                        ].values,
+                        text=df[df["n_samples_train"] == n_sample_train_val][
+                            "function"
+                        ],
+                        textposition="auto",
+                        showlegend=(row, col) == (1, 1),
+                        marker_color=px.colors.qualitative.Plotly[index],
+                    )
+                    fig.add_trace(
+                        bar,
+                        row=row,
+                        col=col,
+                    )
 
         for i in range(1, n_plots + 1):
             fig["layout"]["xaxis{}".format(i)]["title"] = "(n_samples, n_features)"
