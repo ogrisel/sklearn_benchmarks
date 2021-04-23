@@ -19,9 +19,14 @@ from sklearn_benchmarks.config import (
     SPEEDUP_COL,
     STDEV_SPEEDUP_COL,
     TIME_REPORT_PATH,
+    DEFAULT_COMPARE_COLS,
     get_full_config,
 )
-from sklearn_benchmarks.utils.plotting import gen_coordinates_grid, make_hover_template
+from sklearn_benchmarks.utils.plotting import (
+    _gen_coordinates_grid,
+    _make_hover_template,
+    _order_columns,
+)
 
 
 class Reporting:
@@ -97,8 +102,10 @@ class Report:
         file_path = f"{benchmarking_results_path}/{lib}_{self.name}.csv"
         return pd.read_csv(file_path)
 
-    def _make_reporting_df(self):
+    def _get_compare_cols(self):
+        return [*self.compare, *DEFAULT_COMPARE_COLS]
 
+    def _make_reporting_df(self):
         base_lib_df = self._get_benchmark_df()
         base_lib_time = base_lib_df[SPEEDUP_COL]
         base_lib_std = base_lib_df[STDEV_SPEEDUP_COL]
@@ -107,10 +114,12 @@ class Report:
         against_lib_time = against_lib_df[SPEEDUP_COL]
         against_lib_std = against_lib_df[STDEV_SPEEDUP_COL]
 
+        compare_cols = self._get_compare_cols()
+
         suffixes = map(lambda lib: f"_{lib}", [BASE_LIB, self.against_lib])
         merged_df = pd.merge(
             base_lib_df,
-            against_lib_df[self.compare],
+            against_lib_df[compare_cols],
             left_index=True,
             right_index=True,
             suffixes=suffixes,
@@ -182,8 +191,8 @@ class Report:
             y=df["speedup"],
             name=name,
             marker_color=color,
-            hovertemplate=make_hover_template(df),
-            customdata=df.values,
+            hovertemplate=_make_hover_template(df),
+            customdata=df[_order_columns(df)].values,
             showlegend=showlegend,
             text=df["function"],
             textposition="auto",
@@ -208,7 +217,7 @@ class Report:
 
         n_plots = len(merged_df_grouped)
         n_rows = n_plots // self.n_cols + n_plots % self.n_cols
-        coordinates = gen_coordinates_grid(n_rows, self.n_cols)
+        coordinates = _gen_coordinates_grid(n_rows, self.n_cols)
 
         subplot_titles = [self._make_plot_title(df) for _, df in merged_df_grouped]
 
@@ -221,6 +230,8 @@ class Report:
         for (row, col), (_, df) in zip(coordinates, merged_df_grouped):
             df = df.sort_values(by=["function", "n_samples", "n_features"])
             df = df.dropna(axis="columns")
+            df = df.drop(["hyperparams_digest", "dataset_digest"], axis=1)
+            df = df.round(3)
 
             split_cols = self._get_split_cols(df)
             if split_cols:

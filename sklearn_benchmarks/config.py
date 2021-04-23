@@ -15,6 +15,7 @@ SPEEDUP_COL = "mean"
 STDEV_SPEEDUP_COL = "stdev"
 PLOT_HEIGHT_IN_PX = 300
 REPORTING_FONT_SIZE = 10
+DEFAULT_COMPARE_COLS = [SPEEDUP_COL, STDEV_SPEEDUP_COL]
 
 
 def get_full_config(config_file_path=None):
