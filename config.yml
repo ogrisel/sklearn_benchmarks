@@ -158,6 +158,69 @@ benchmarking:
       inherit: KMeans
       estimator: daal4py.sklearn.cluster.KMeans
 
+    LogisticRegression:
+      name: LogisticRegression
+      estimator: sklearn.linear_model.LogisticRegression
+      datasets:
+        - sample_generator: sklearn.datasets.make_classification
+          params:
+            n_classes: 5
+            n_informative: 5
+            n_redundant: 0
+            random_state: 42
+          n_features: 1e3
+          n_samples_train:
+            - 1e3
+          n_samples_test:
+            - 1
+            - 5 1e2
+        - sample_generator: sklearn.datasets.make_classification
+          params:
+            n_classes: 5
+            n_informative: 5
+            n_redundant: 0
+            random_state: 42
+          n_features: 1e2
+          n_samples_train:
+            - 1e4
+          n_samples_test:
+            - 1
+            - 1e3
+
+    daal4py_LogisticRegression:
+      inherit: LogisticRegression
+      estimator: daal4py.sklearn.linear_model.LogisticRegression
+
+    Ridge:
+      name: Ridge
+      estimator: sklearn.linear_model.Ridge
+      datasets:
+        - sample_generator: sklearn.datasets.make_regression
+          params:
+            n_informative: 10
+            random_state: 42
+          n_features: 1e3
+          n_samples_train:
+            - 1e3
+          n_samples_test:
+            - 1
+            - 1e2
+        - sample_generator: sklearn.datasets.make_classification
+          params:
+            n_classes: 5
+            n_redundant: 0
+            random_state: 42
+          n_features: 1e2
+          n_samples_train:
+            - 1e4
+          n_samples_test:
+            - 1
+            - 1e3
+
+    daal4py_Ridge:
+      inherit: Ridge
+      estimator: daal4py.sklearn.linear_model.Ridge
+
 reporting:
   n_cols: 2
   estimators:
@@ -183,3 +246,11 @@ reporting:
       compare:
         - n_iter
         - adjusted_rand_score
+
+    LogisticRegression:
+      name: LogisticRegression
+      against_lib: daal4py
+
+    Ridge:
+      name: Ridge
+      against_lib: daal4py

@@ -44,7 +44,7 @@ from sklearn_benchmarks.utils.misc import clean_results, convert
 # @click.option(
 #     "--base_url", "--bu", type=str, default="file://", help="Base URL to serve files."
 # )
-def main(append, config, profiling_file_type):
+def main(append, config, profiling):
     if not append:
         clean_results()
     config = get_full_config(config)
@@ -66,7 +66,7 @@ def main(append, config, profiling_file_type):
         params = prepare_params(params)
         if "random_state" in config:
             params["random_state"] = config["random_state"]
-        params["profiling_file_type"] = profiling_file_type
+        params["profiling_file_type"] = profiling
         benchmark_estimator = Benchmark(**params)
         t0_ = time.perf_counter()
         benchmark_estimator.run()
