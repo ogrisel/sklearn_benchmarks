@@ -132,17 +132,17 @@ class Report:
 
         return merged_df
 
-    def _make_profiling_link(self, digests):
-        hyperparams_digest, dataset_digest = digests
+    def _make_profiling_link(self, components):
+        function, hyperparams_digest, dataset_digest = components
         path = Path(
-            f"{PROFILING_RESULTS_PATH}/sklearn_{hyperparams_digest}_{dataset_digest}.html"
+            f"{PROFILING_RESULTS_PATH}/sklearn_{function}_{hyperparams_digest}_{dataset_digest}.html"
         )
         if os.environ.get("SKLEARN_RESULTS_BASE_URL") is not None:
             base_url = os.environ.get("SKLEARN_RESULTS_BASE_URL")
         else:
             base_url = "file://"
             path = os.path.abspath(path)
-        return f"<a href='{base_url}{path}' target='_blank'>See</a>"
+        return f"<a href='{base_url}{path}'>See</a>"
 
     def _make_plot_title(self, df):
         title = ""
@@ -150,24 +150,25 @@ class Report:
             param
             for param in self.estimator_hyperparameters
             if param not in self.split_bars
+            and param not in self._get_shared_hyperpameters().keys()
         ]
         values = df[params_cols].values[0]
         for index, (param, value) in enumerate(zip(params_cols, values)):
             title += "%s: %s" % (param, value)
-            if index > 0 and index % 3 == 0:
+            if index != len(list(enumerate(zip(params_cols, values)))) - 1:
                 title += "<br>"
-            elif index != len(list(enumerate(zip(params_cols, values)))) - 1:
-                title += " - "
         return title
 
     def _print_table(self):
         df = self._make_reporting_df()
-
-        df["profiling"] = df[["hyperparams_digest", "dataset_digest"]].apply(
-            self._make_profiling_link, axis=1
-        )
-        qgrid_widget = qgrid.show_grid(df, show_toolbar=True)
-        display(qgrid_widget)
+        df = df.round(3)
+        df["profiling"] = df[
+            ["function", "hyperparams_digest", "dataset_digest"]
+        ].apply(self._make_profiling_link, axis=1)
+        df = df.drop(["hyperparams_digest", "dataset_digest"], axis=1)
+        # qgrid_widget = qgrid.show_grid(df, show_toolbar=True)
+        # display(qgrid_widget)
+        display(df)
 
     def _make_x_plot(self, df):
         return [f"({ns}, {nf})" for ns, nf in df[["n_samples", "n_features"]].values]
@@ -202,6 +203,15 @@ class Report:
             row=row,
             col=col,
         )
+
+    def _get_shared_hyperpameters(self):
+        merged_df = self._make_reporting_df()
+        ret = {}
+        for col in self.estimator_hyperparameters:
+            unique_vals = merged_df[col].unique()
+            if unique_vals.size == 1:
+                ret[col] = unique_vals[0]
+        return ret
 
     def _plot(self):
         merged_df = self._make_reporting_df()
@@ -239,6 +249,9 @@ class Report:
                     split_col_vals = df[split_col].unique()
                     for index, split_val in enumerate(split_col_vals):
                         filtered_df = df[df[split_col] == split_val]
+                        filtered_df = filtered_df.sort_values(
+                            by=["function", "n_samples", "n_features"]
+                        )
                         self._add_bar_to_plotly_fig(
                             fig,
                             row,
@@ -265,6 +278,12 @@ class Report:
         fig.update_layout(
             height=n_rows * PLOT_HEIGHT_IN_PX, barmode="group", showlegend=True
         )
+        display(Markdown(f"**Shared hyperparameters**:"))
+        df_shared_hyperparameters = pd.DataFrame.from_dict(
+            self._get_shared_hyperpameters(), orient="index", columns=["value"]
+        )
+        display(df_shared_hyperparameters)
+
         fig.show()
 
     def run(self):
