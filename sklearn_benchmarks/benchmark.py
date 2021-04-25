@@ -138,8 +138,12 @@ class Benchmark:
                         **params,
                     )
 
+                    n_iter = 1
                     if hasattr(estimator, "n_iter_"):
                         row["n_iter"] = estimator.n_iter_
+                        n_iter = estimator.n_iter_
+
+                    row["throughput"] = X_train.nbytes * n_iter / mean / 1e9
 
                     self.results_.append(row)
 
@@ -188,6 +192,9 @@ class Benchmark:
                             **scores,
                             **params,
                         )
+
+                        row["throughput"] = X_test.nbytes / mean / 1e9
+                        row["latency"] = mean / X_test.shape[0]
 
                         print(
                             "%s - %s - %s - n_samples: %i - n_features: %i - mean: %6.7f - stdev: %6.7f"
