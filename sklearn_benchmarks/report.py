@@ -134,15 +134,14 @@ class Report:
 
     def _make_profiling_link(self, components):
         function, hyperparams_digest, dataset_digest = components
-        path = Path(
-            f"{PROFILING_RESULTS_PATH}/sklearn_{function}_{hyperparams_digest}_{dataset_digest}.html"
-        )
+        # path = f"{PROFILING_RESULTS_PATH}/sklearn_{function}_{hyperparams_digest}_{dataset_digest}.html"
+        path = f"results/profiling/sklearn_{function}_{hyperparams_digest}_{dataset_digest}.html"
         if os.environ.get("SKLEARN_RESULTS_BASE_URL") is not None:
             base_url = os.environ.get("SKLEARN_RESULTS_BASE_URL")
         else:
-            base_url = "file://"
-            path = os.path.abspath(path)
-        return f"<a href='{base_url}{path}'>See</a>"
+            base_url = "http://localhost:8000/"
+            # path = os.path.abspath(path)
+        return f"<a href='{base_url}{path}' target='_blank'>See</a>"
 
     def _make_plot_title(self, df):
         title = ""
@@ -166,9 +165,7 @@ class Report:
             ["function", "hyperparams_digest", "dataset_digest"]
         ].apply(self._make_profiling_link, axis=1)
         df = df.drop(["hyperparams_digest", "dataset_digest"], axis=1)
-        # qgrid_widget = qgrid.show_grid(df, show_toolbar=True)
-        # display(qgrid_widget)
-        display(df)
+        display(HTML(df.to_html(escape=False)))
 
     def _make_x_plot(self, df):
         return [f"({ns}, {nf})" for ns, nf in df[["n_samples", "n_features"]].values]
