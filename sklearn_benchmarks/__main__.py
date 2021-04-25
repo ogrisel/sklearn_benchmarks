@@ -1,16 +1,21 @@
 """
 The main entry point. Invoke as `sklearn_benchmarks' or `python -m sklearn_benchmarks'.
 """
+import json
 import os
 import sys
 import time
 
 import click
+import joblib
 import pandas as pd
+from sklearn.utils._show_versions import _get_deps_info, _get_sys_info
+from threadpoolctl import threadpool_info
 
 from sklearn_benchmarks.benchmark import Benchmark
 from sklearn_benchmarks.config import (
     DEFAULT_CONFIG_FILE_PATH,
+    ENV_INFO_PATH,
     TIME_REPORT_PATH,
     get_full_config,
     prepare_params,
@@ -41,9 +46,6 @@ from sklearn_benchmarks.utils.misc import clean_results, convert
     default="html",
     help="Profiling files type.",
 )
-# @click.option(
-#     "--base_url", "--bu", type=str, default="file://", help="Base URL to serve files."
-# )
 def main(append, config, profiling):
     if not append:
         clean_results()
@@ -81,6 +83,15 @@ def main(append, config, profiling):
         mode="w+",
         index=False,
     )
+
+    env_info = {}
+    env_info["system_info"] = _get_sys_info()
+    env_info["dependencies_info"] = _get_deps_info()
+    env_info["threadpool_info"] = threadpool_info()
+    env_info["cpu_count"] = joblib.cpu_count(only_physical_cores=True)
+
+    with open(ENV_INFO_PATH, "w") as outfile:
+        json.dump(env_info, outfile)
 
 
 if __name__ == "__main__":

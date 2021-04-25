@@ -1,5 +1,6 @@
-import os
 import importlib
+import json
+import os
 from pathlib import Path
 
 import numpy as np
@@ -7,19 +8,20 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import qgrid
-from IPython.display import Markdown, display, HTML
+from IPython.display import HTML, Markdown, display, JSON
 from plotly.subplots import make_subplots
 
 from sklearn_benchmarks.config import (
     BASE_LIB,
     BENCHMARKING_RESULTS_PATH,
-    PROFILING_RESULTS_PATH,
+    ENV_INFO_PATH,
+    DEFAULT_COMPARE_COLS,
     PLOT_HEIGHT_IN_PX,
+    PROFILING_RESULTS_PATH,
     REPORTING_FONT_SIZE,
     SPEEDUP_COL,
     STDEV_SPEEDUP_COL,
     TIME_REPORT_PATH,
-    DEFAULT_COMPARE_COLS,
     get_full_config,
 )
 from sklearn_benchmarks.utils.plotting import (
@@ -40,6 +42,12 @@ class Reporting:
     def _print_time_report(self):
         df = pd.read_csv(str(TIME_REPORT_PATH), index_col="algo")
         display(df)
+
+    def _print_env_info(self):
+        with open(ENV_INFO_PATH) as json_file:
+            data = json.load(json_file)
+
+        print(json.dumps(data, indent=2))
 
     def _get_estimator_default_hyperparameters(self, estimator):
         splitted_path = estimator.split(".")
@@ -74,6 +82,9 @@ class Reporting:
             display(Markdown(f"## {name} vs {params['against_lib']}"))
             report = Report(**params)
             report.run()
+
+        display(Markdown("## Environment information"))
+        self._print_env_info()
 
 
 class Report:

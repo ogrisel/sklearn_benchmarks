@@ -7,6 +7,7 @@ RESULTS_PATH = Path(__file__).resolve().parent.parent / "results"
 PROFILING_RESULTS_PATH = RESULTS_PATH / "profiling"
 BENCHMARKING_RESULTS_PATH = RESULTS_PATH / "benchmarking"
 TIME_REPORT_PATH = RESULTS_PATH / "time_report.csv"
+ENV_INFO_PATH = RESULTS_PATH / "env_info.txt"
 DEFAULT_CONFIG_FILE_PATH = "config.yml"
 BASE_LIB = "sklearn"
 BENCHMARK_SECONDS_BUDGET = 30
