@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      SKLEARN_RESULTS_BASE_URL: https://mbatoul.github.io/sklearn_benchmarks/results
+      SKLEARN_RESULTS_BASE_URL: https://mbatoul.github.io/sklearn_benchmarks/
     defaults:
       run:
         shell: bash -l {0}
