@@ -63,9 +63,6 @@ jobs:
           name: results
           path: results
 
-      - name: Start web server
-        run: python -m http.server
-
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@4.1.1
         with:
