@@ -25,12 +25,7 @@
 
 Benchmarking results can be visualized in the `reporting.ipynb` notebook. These results are automatically deployed to `github-pages`.
 
-`sklearn_benchmarks` is used through a command line as described below. Ultimately the benchmarks should be as simple as doing:
-
-```sh
-$ git clone https://github.com/mbatoul/sklearn_benchmarks
-$ sklearn_benchmarks --config config.yml
-```
+`sklearn_benchmarks` is used through a command line as described below.
 
 So far, the concurrent libraries available are:
 
@@ -38,15 +33,27 @@ So far, the concurrent libraries available are:
 
 The estimators available are:
 
-- [KNeighborsClassifier - Brute force](https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html)
-- [KNeighborsClassifier - KD Tree](https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html)
+- [KNeighborsClassifier - Brute force and KD Tree](https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html)
 - [KMeans](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html)
 - [LogisticRegression](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html)
 - [Ridge](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Ridge.html)
 
+Benchmark and profiling results can be consulted [here](https://mbatoul.github.io/sklearn_benchmarks/).
+
 ## Getting Started
 
+In order to setup the environment, you need to have `conda` installed. See instructions [here](https://conda.io/projects/conda/en/latest/user-guide/install/index.html).
+
 To get a local copy up and running follow these simple example steps:
+
+```sh
+$ git clone https://github.com/mbatoul/sklearn_benchmarks
+$ cd sklearn_benchmarks
+$ conda env create --file environment.yml
+$ conda activate sklbench
+$ pip install .
+$ sklearn_benchmarks
+```
 
 ## Usage
 
