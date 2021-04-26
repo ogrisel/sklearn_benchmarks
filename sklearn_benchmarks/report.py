@@ -137,9 +137,10 @@ class Report:
         )
 
         merged_df["speedup"] = base_lib_time / against_lib_time
-        merged_df["stdev_speedup"] = (base_lib_std / base_lib_time) ** 2 + (
-            against_lib_std / against_lib_time
-        ) ** 2
+        merged_df["stdev_speedup"] = merged_df["speedup"] * (np.sqrt(
+            (base_lib_std / base_lib_time) ** 2 +
+            (against_lib_std / against_lib_time) ** 2
+        ))
 
         return merged_df
 
