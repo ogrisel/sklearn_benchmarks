@@ -151,7 +151,7 @@ class Report:
         if os.environ.get("SKLEARN_RESULTS_BASE_URL") is not None:
             base_url = os.environ.get("SKLEARN_RESULTS_BASE_URL")
         else:
-            base_url = "http://localhost:8000/"
+            base_url = "http://localhost:8000/results/"
         return f"<a href='{base_url}{path}' target='_blank'>See</a>"
 
     def _make_plot_title(self, df):

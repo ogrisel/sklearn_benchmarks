@@ -87,8 +87,8 @@ benchmarking:
       inherit: KNeighborsClassifier_kd_tree
       estimator: daal4py.sklearn.neighbors.KNeighborsClassifier
 
-    KMeans:
-      name: KMeans
+    KMeans_tall:
+      name: KMeans_tall
       estimator: sklearn.cluster.KMeans
       hyperparameters:
         init:
@@ -98,6 +98,52 @@ benchmarking:
           - full
         n_clusters:
           - 3
+        max_iter:
+          - 30
+        n_init:
+          - 1
+        tol:
+          - 1e-16
+      metrics:
+        - adjusted_rand_score
+      datasets:
+        - sample_generator: sklearn.datasets.make_blobs
+          params:
+            random_state: 42
+            cluster_std: 20.0
+            centers: 200
+          n_features: 2
+          n_samples_train:
+            - 1e6
+          n_samples_test:
+            - 1
+            - 1e3
+        - sample_generator: sklearn.datasets.make_blobs
+          params:
+            random_state: 42
+            cluster_std: 20.0
+            centers: 200
+          n_features: 1e2
+          n_samples_train:
+            - 1e6
+          n_samples_test:
+            - 1
+            - 1e3
+
+    daal4py_KMeans_tall:
+      inherit: KMeans_tall
+      estimator: daal4py.sklearn.cluster.KMeans
+
+    KMeans_short:
+      name: KMeans_short
+      estimator: sklearn.cluster.KMeans
+      hyperparameters:
+        init:
+          - k-means++
+          - random
+        algorithm:
+          - full
+        n_clusters:
           - 300
         max_iter:
           - 30
@@ -130,31 +176,9 @@ benchmarking:
           n_samples_test:
             - 1
             - 1e3
-        - sample_generator: sklearn.datasets.make_blobs
-          params:
-            random_state: 42
-            cluster_std: 20.0
-            centers: 200
-          n_features: 2
-          n_samples_train:
-            - 1e6
-          n_samples_test:
-            - 1
-            - 1e3
-        - sample_generator: sklearn.datasets.make_blobs
-          params:
-            random_state: 42
-            cluster_std: 20.0
-            centers: 200
-          n_features: 1e2
-          n_samples_train:
-            - 1e6
-          n_samples_test:
-            - 1
-            - 1e3
 
-    daal4py_KMeans:
-      inherit: KMeans
+    daal4py_KMeans_short:
+      inherit: KMeans_short
       estimator: daal4py.sklearn.cluster.KMeans
 
     LogisticRegression:
@@ -282,8 +306,15 @@ reporting:
       compare:
         - accuracy_score
 
-    KMeans:
-      name: KMeans
+    KMeans_tall:
+      name: KMeans_tall
+      against_lib: daal4py
+      compare:
+        - n_iter
+        - adjusted_rand_score
+
+    KMeans_short:
+      name: KMeans_short
       against_lib: daal4py
       compare:
         - n_iter
