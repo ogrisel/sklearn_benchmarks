@@ -1,7 +1,7 @@
 estimator,function,mean,stdev,n_samples_train,n_samples,n_features,hyperparams_digest,dataset_digest,C,class_weight,dual,fit_intercept,intercept_scaling,l1_ratio,max_iter,multi_class,n_jobs,penalty,random_state,solver,tol,verbose,warm_start,n_iter
-LogisticRegression,fit,11.396071616666783,0.031369122545666636,1000000,1000000,100,f11be2529b0a77bc8fb5ee8de141e6b2,c5fdb575b370d3fe0ae44cf1690bcfb1,1.0,,False,True,1,,100,auto,,l2,,lbfgs,0.0001,0,False,[20]
-LogisticRegression,predict,0.00021560300006058243,0.00016881033909420715,1000000,1,100,f11be2529b0a77bc8fb5ee8de141e6b2,c5fdb575b370d3fe0ae44cf1690bcfb1,1.0,,False,True,1,,100,auto,,l2,,lbfgs,0.0001,0,False,
-LogisticRegression,predict,0.000424305799879221,0.00017994437720922376,1000000,1000,100,f11be2529b0a77bc8fb5ee8de141e6b2,c5fdb575b370d3fe0ae44cf1690bcfb1,1.0,,False,True,1,,100,auto,,l2,,lbfgs,0.0001,0,False,
-LogisticRegression,fit,0.756550690199947,0.0072224396042998625,1000,1000,10000,f11be2529b0a77bc8fb5ee8de141e6b2,a4ea4358bc870ac0ef6a8b403f49c4ca,1.0,,False,True,1,,100,auto,,l2,,lbfgs,0.0001,0,False,[26]
-LogisticRegression,predict,0.0007824708999578433,0.0002605021666419583,1000,1,10000,f11be2529b0a77bc8fb5ee8de141e6b2,a4ea4358bc870ac0ef6a8b403f49c4ca,1.0,,False,True,1,,100,auto,,l2,,lbfgs,0.0001,0,False,
-LogisticRegression,predict,0.003266305299985106,0.00033645134927244683,1000,100,10000,f11be2529b0a77bc8fb5ee8de141e6b2,a4ea4358bc870ac0ef6a8b403f49c4ca,1.0,,False,True,1,,100,auto,,l2,,lbfgs,0.0001,0,False,
+LogisticRegression,fit,15.796417820499983,0.029616427499831843,1000000,1000000,100,f11be2529b0a77bc8fb5ee8de141e6b2,c5fdb575b370d3fe0ae44cf1690bcfb1,1.0,,False,True,1,,100,auto,,l2,,lbfgs,0.0001,0,False,[20]
+LogisticRegression,predict,0.00023992050005290367,9.921121745518742e-05,1000000,1,100,f11be2529b0a77bc8fb5ee8de141e6b2,c5fdb575b370d3fe0ae44cf1690bcfb1,1.0,,False,True,1,,100,auto,,l2,,lbfgs,0.0001,0,False,
+LogisticRegression,predict,0.0003733366999313148,0.00011774758178304253,1000000,1000,100,f11be2529b0a77bc8fb5ee8de141e6b2,c5fdb575b370d3fe0ae44cf1690bcfb1,1.0,,False,True,1,,100,auto,,l2,,lbfgs,0.0001,0,False,
+LogisticRegression,fit,1.1742876758999046,0.011520303189787388,1000,1000,10000,f11be2529b0a77bc8fb5ee8de141e6b2,a4ea4358bc870ac0ef6a8b403f49c4ca,1.0,,False,True,1,,100,auto,,l2,,lbfgs,0.0001,0,False,[26]
+LogisticRegression,predict,0.000880198900040341,0.0002208327164555387,1000,1,10000,f11be2529b0a77bc8fb5ee8de141e6b2,a4ea4358bc870ac0ef6a8b403f49c4ca,1.0,,False,True,1,,100,auto,,l2,,lbfgs,0.0001,0,False,
+LogisticRegression,predict,0.0043660326999997775,0.0008680668923580659,1000,100,10000,f11be2529b0a77bc8fb5ee8de141e6b2,a4ea4358bc870ac0ef6a8b403f49c4ca,1.0,,False,True,1,,100,auto,,l2,,lbfgs,0.0001,0,False,
