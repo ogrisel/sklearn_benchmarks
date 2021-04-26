@@ -60,13 +60,13 @@ $ sklbench
 ## Usage
 
 ```sh
-Usage: sklearn_benchmarks [OPTIONS]
+Usage: sklbench [OPTIONS]
 
 Options:
   --append, --a                   Append benchmark results to existing ones.
   --config, --c TEXT              Path to config file.
   --profiling, --p [html|json.gz]
-                                  Format of profiling results.
+                                  Profiling files type.
+  --estimator, --e TEXT           Estimator to benchmark.
   --help                          Show this message and exit.
-
 ```
