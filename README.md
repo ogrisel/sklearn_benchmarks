@@ -53,6 +53,8 @@ $ conda env create --file environment.yml
 $ conda activate sklbench
 $ pip install .
 $ sklearn_benchmarks
+# or
+$ sklbench
 ```
 
 ## Usage
