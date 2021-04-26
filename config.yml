@@ -221,8 +221,9 @@ benchmarking:
 
     HistGradientBoostingClassifier:
       name: HistGradientBoostingClassifier
-      estimator: sklearn.ensemble.HistGradientBoostingClassifier
+      is_experimental: True
       use_randomized_search: True
+      estimator: sklearn.ensemble.HistGradientBoostingClassifier
       hyperparameters:
         learning_rate:
           - 0.01
@@ -258,9 +259,9 @@ benchmarking:
             - 1
             - 1e3
 
-    LightGBM:
+    lightgbm_HistGradientBoostingClassifier:
       inherit: HistGradientBoostingClassifier
-      estimator: lightgbm.LGBMModel
+      estimator: lightgbm.LGBMClassifier
 
 reporting:
   n_cols: 2
@@ -295,3 +296,7 @@ reporting:
     Ridge:
       name: Ridge
       against_lib: daal4py
+
+    HistGradientBoostingClassifier:
+      name: HistGradientBoostingClassifier
+      against_lib: lightgbm

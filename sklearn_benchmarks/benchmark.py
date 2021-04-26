@@ -54,6 +54,8 @@ class Benchmark:
         name="",
         estimator="",
         inherit=False,
+        is_experimental=False,
+        use_randomized_search=False,
         metrics=[],
         hyperparameters={},
         datasets=[],
@@ -75,6 +77,8 @@ class Benchmark:
     def _load_estimator_class(self):
         splitted_path = self.estimator.split(".")
         module, class_name = ".".join(splitted_path[:-1]), splitted_path[-1]
+        if self.is_experimental:
+            from sklearn.experimental import enable_hist_gradient_boosting
         return getattr(importlib.import_module(module), class_name)
 
     def _init_parameters_grid(self):
