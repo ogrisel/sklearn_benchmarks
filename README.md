@@ -63,10 +63,12 @@ $ sklbench
 Usage: sklbench [OPTIONS]
 
 Options:
-  --append, --a                   Append benchmark results to existing ones. By default, all existing results will be erased before new ones are made.
+  --append, --a                   Append benchmark results to existing ones. By default, all 
+                                  existing results will be erased before new ones are made.
   --config, --c TEXT              Path to config file. Default is config.yml.
   --profiling, --p [html|json.gz]
                                   Profiling files type. Default is html.
-  --estimator, --e TEXT           Estimator to benchmark. By default, all estimators in config file will be benchmarked.
+  --estimator, --e TEXT           Estimator to benchmark. By default, all estimators in config file
+                                  will be benchmarked.
   --help                          Show this message and exit.
 ```
