@@ -224,17 +224,17 @@ benchmarking:
             random_state: 42
           n_features: 1e3
           n_samples_train:
-            - 1e3
+            - 1e5
           n_samples_test:
             - 1
-            - 1e2
+            - 1e3
         - sample_generator: sklearn.datasets.make_regression
           params:
             n_informative: 10
             random_state: 42
           n_features: 1e2
           n_samples_train:
-            - 1e4
+            - 1e6
           n_samples_test:
             - 1
             - 1e3
