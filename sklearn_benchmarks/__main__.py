@@ -46,7 +46,14 @@ from sklearn_benchmarks.utils.misc import clean_results, convert
     default="html",
     help="Profiling files type.",
 )
-def main(append, config, profiling):
+@click.option(
+    "--estimator",
+    "--e",
+    type=str,
+    multiple=True,
+    help="Estimator to benchmark.",
+)
+def main(append, config, profiling, estimator):
     if not append:
         clean_results()
     config = get_full_config(config)
@@ -55,6 +62,8 @@ def main(append, config, profiling):
         return
 
     estimators = benchmarking_config["estimators"]
+    if estimator:
+        estimators = {k: estimators[k] for k in estimator}
 
     time_report = pd.DataFrame(columns=["algo", "hour", "min", "sec"])
     t0 = time.perf_counter()
