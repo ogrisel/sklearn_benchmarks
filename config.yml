@@ -186,7 +186,6 @@ benchmarking:
       estimator: sklearn.linear_model.LogisticRegression
       metrics:
         - accuracy_score
-        - roc_auc_score
       datasets:
         - sample_generator: sklearn.datasets.make_classification
           params:
