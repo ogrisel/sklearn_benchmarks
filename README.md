@@ -21,9 +21,9 @@
 
 ## About
 
-`sklearn_benchmarks` is a framework to benchmark `scikit-learn`'s estimators against concurrent implementations. `sklearn_benchmarks` is written in Python.
+`sklearn_benchmarks` is a framework to benchmark `scikit-learn`'s estimators against concurrent implementations. It is written in Python.
 
-Benchmarking results can be visualized in the `reporting.ipynb` notebook. These results are automatically deployed to `github-pages`.
+Benchmarking results can be visualized in the `reporting.ipynb` notebook. They are automatically deployed to `github-pages`.
 
 `sklearn_benchmarks` is used through a command line as described below.
 
@@ -68,7 +68,7 @@ Options:
   --config, --c TEXT              Path to config file. Default is config.yml.
   --profiling, --p [html|json.gz]
                                   Profiling files type. Default is html.
-  --estimator, --e TEXT           Estimator to benchmark. By default, all estimators in config file
-                                  will be benchmarked.
+  --estimator, --e TEXT           Estimator to benchmark. By default, all estimators in config
+                                  file will be benchmarked.
   --help                          Show this message and exit.
 ```
