@@ -22,13 +22,15 @@ class BenchFuncExecutor:
     """
 
     @staticmethod
-    def run(func, profiling_output_file, *args):
+    def run(func, profiling_output_path, profiling_output_extensions, *args):
         # First run with a profiler (not timed)
-        with VizTracer(output_file=profiling_output_file, verbose=0) as tracer:
+        with VizTracer(verbose=0) as tracer:
             tracer.start()
             result = func(*args)
             tracer.stop()
-            tracer.save()
+            for extension in profiling_output_extensions:
+                output_file = f"{profiling_output_path}.{extension}"
+                tracer.save(output_file=output_file)
 
         # Next runs: at most 10 runs or 30 sec
         times = []
@@ -58,7 +60,7 @@ class Benchmark:
         hyperparameters={},
         datasets=[],
         random_state=None,
-        profiling_file_type="",
+        profiling_output_extensions=[],
     ):
         self.name = name
         self.estimator = estimator
@@ -67,7 +69,7 @@ class Benchmark:
         self.hyperparameters = hyperparameters
         self.datasets = datasets
         self.random_state = random_state
-        self.profiling_file_type = profiling_file_type
+        self.profiling_output_extensions = profiling_output_extensions
 
     def _set_lib(self):
         self.lib_ = self.estimator.split(".")[0]
@@ -90,6 +92,12 @@ class Benchmark:
         module = importlib.import_module("sklearn.metrics")
         return [getattr(module, m) for m in self.metrics]
 
+    def _update_all_scores(self):
+        df = pd.DataFrame(self.results_)
+        for score, value in self.best_scores_.items():
+            df[score] = value
+        self.results_ = df.to_dict()
+
     def run(self):
         self._set_lib()
         estimator_class = self._load_estimator_class()
@@ -99,8 +107,7 @@ class Benchmark:
         for dataset in self.datasets:
             n_features = dataset["n_features"]
             n_samples_train = dataset["n_samples_train"]
-            # n_samples_test = list(reversed(sorted(dataset["n_samples_test"])))
-            n_samples_test = dataset["n_samples_test"]
+            n_samples_test = list(reversed(sorted(dataset["n_samples_test"])))
             for ns_train in n_samples_train:
                 X, y = gen_data(
                     dataset["sample_generator"],
@@ -119,10 +126,14 @@ class Benchmark:
                     # Use digests to identify results later in reporting
                     hyperparams_digest = joblib.hash(params)
                     dataset_digest = joblib.hash(dataset)
-                    profiling_path = f"{PROFILING_RESULTS_PATH}/{self.lib_}_fit_{hyperparams_digest}_{dataset_digest}.{self.profiling_file_type}"
+                    profiling_output_path = f"{PROFILING_RESULTS_PATH}/{self.lib_}_fit_{hyperparams_digest}_{dataset_digest}"
 
                     _, mean, stdev = BenchFuncExecutor.run(
-                        bench_func, profiling_path, X_train, y_train
+                        bench_func,
+                        profiling_output_path,
+                        self.profiling_output_extensions,
+                        X_train,
+                        y_train,
                     )
 
                     row = dict(
@@ -164,17 +175,18 @@ class Benchmark:
                         ns_test = n_samples_test[i]
                         X_test_, y_test_ = X_test[:ns_test], y_test[:ns_test]
                         bench_func = predict_or_transform(estimator)
-                        profiling_path = f"{PROFILING_RESULTS_PATH}/{self.lib_}_{bench_func.__name__}_{hyperparams_digest}_{dataset_digest}.{self.profiling_file_type}"
+                        profiling_path = f"{PROFILING_RESULTS_PATH}/{self.lib_}_{bench_func.__name__}_{hyperparams_digest}_{dataset_digest}"
 
-                        (
-                            y_pred,
-                            mean,
-                            stdev,
-                        ) = BenchFuncExecutor.run(bench_func, profiling_path, X_test_)
+                        (y_pred, mean, stdev,) = BenchFuncExecutor.run(
+                            bench_func,
+                            profiling_output_path,
+                            self.profiling_output_extensions,
+                            X_test_,
+                        )
 
                         # Store the scores computed on the biggest dataset
                         if i == 0:
-                            scores = {
+                            self.best_scores_ = {
                                 func.__name__: func(y_test_, y_pred)
                                 for func in metrics_functions
                             }
@@ -189,12 +201,13 @@ class Benchmark:
                             n_features=n_features,
                             hyperparams_digest=hyperparams_digest,
                             dataset_digest=dataset_digest,
-                            **scores,
                             **params,
                         )
 
                         row["throughput"] = X_test.nbytes / mean / 1e9
                         row["latency"] = mean / X_test.shape[0]
+                        if hasattr(estimator, "n_iter_"):
+                            row["n_iter"] = estimator.n_iter_
 
                         print(
                             "%s - %s - %s - n_samples: %i - n_features: %i - mean: %6.7f - stdev: %6.7f"
@@ -209,6 +222,7 @@ class Benchmark:
                             )
                         )
                         self.results_.append(row)
+        self._update_all_scores()
         return self
 
     def to_csv(self):

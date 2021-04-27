@@ -137,21 +137,22 @@ class Report:
         )
 
         merged_df["speedup"] = base_lib_time / against_lib_time
-        merged_df["stdev_speedup"] = (base_lib_std / base_lib_time) ** 2 + (
-            against_lib_std / against_lib_time
-        ) ** 2
+        merged_df["stdev_speedup"] = merged_df["speedup"] * (np.sqrt(
+            (base_lib_std / base_lib_time) ** 2 +
+            (against_lib_std / against_lib_time) ** 2
+        ))
 
         return merged_df
 
     def _make_profiling_link(self, components):
         function, hyperparams_digest, dataset_digest = components
-        # path = f"{PROFILING_RESULTS_PATH}/sklearn_{function}_{hyperparams_digest}_{dataset_digest}.html"
-        path = f"results/profiling/sklearn_{function}_{hyperparams_digest}_{dataset_digest}.html"
+        path = (
+            f"profiling/sklearn_{function}_{hyperparams_digest}_{dataset_digest}.html"
+        )
         if os.environ.get("SKLEARN_RESULTS_BASE_URL") is not None:
             base_url = os.environ.get("SKLEARN_RESULTS_BASE_URL")
         else:
-            base_url = "http://localhost:8000/"
-            # path = os.path.abspath(path)
+            base_url = "http://localhost:8000/results/"
         return f"<a href='{base_url}{path}' target='_blank'>See</a>"
 
     def _make_plot_title(self, df):

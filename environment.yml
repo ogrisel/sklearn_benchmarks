@@ -6,7 +6,9 @@ dependencies:
   - pandas
   - pyyaml
   - plotly
-  - scikit-learn
+  - pip
+  - pip:
+      - --pre --extra-index https://pypi.anaconda.org/scipy-wheels-nightly/simple scikit-learn
   - scikit-learn-intelex
   - jupyter
   - qgrid

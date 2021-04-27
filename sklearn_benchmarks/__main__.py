@@ -43,10 +43,18 @@ from sklearn_benchmarks.utils.misc import clean_results, convert
     "--profiling",
     "--p",
     type=click.Choice(["html", "json.gz"], case_sensitive=True),
-    default="html",
-    help="Profiling files type.",
+    default=["html", "json.gz"],
+    multiple=True,
+    help="Profiling output formats.",
 )
-def main(append, config, profiling):
+@click.option(
+    "--estimator",
+    "--e",
+    type=str,
+    multiple=True,
+    help="Estimator to benchmark.",
+)
+def main(append, config, profiling, estimator):
     if not append:
         clean_results()
     config = get_full_config(config)
@@ -55,6 +63,8 @@ def main(append, config, profiling):
         return
 
     estimators = benchmarking_config["estimators"]
+    if estimator:
+        estimators = {k: estimators[k] for k in estimator}
 
     time_report = pd.DataFrame(columns=["algo", "hour", "min", "sec"])
     t0 = time.perf_counter()
@@ -68,7 +78,7 @@ def main(append, config, profiling):
         params = prepare_params(params)
         if "random_state" in config:
             params["random_state"] = config["random_state"]
-        params["profiling_file_type"] = profiling
+        params["profiling_output_extensions"] = profiling
         benchmark_estimator = Benchmark(**params)
         t0_ = time.perf_counter()
         benchmark_estimator.run()
