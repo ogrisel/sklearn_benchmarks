@@ -38,7 +38,7 @@ def predict_or_transform(estimator):
 
 
 def clean_results():
-    extensions = [".csv", ".html", ".json.gz"]
+    extensions = [".csv", ".html", ".json.gz", ".txt"]
     files = []
     for extension in extensions:
         files_path = str(RESULTS_PATH / "**/*") + extension

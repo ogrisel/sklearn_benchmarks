@@ -43,8 +43,9 @@ from sklearn_benchmarks.utils.misc import clean_results, convert
     "--profiling",
     "--p",
     type=click.Choice(["html", "json.gz"], case_sensitive=True),
-    default="html",
-    help="Profiling files type.",
+    default=["html", "json.gz"],
+    multiple=True,
+    help="Profiling output formats.",
 )
 @click.option(
     "--estimator",
@@ -77,7 +78,7 @@ def main(append, config, profiling, estimator):
         params = prepare_params(params)
         if "random_state" in config:
             params["random_state"] = config["random_state"]
-        params["profiling_file_type"] = profiling
+        params["profiling_output_extensions"] = profiling
         benchmark_estimator = Benchmark(**params)
         t0_ = time.perf_counter()
         benchmark_estimator.run()
