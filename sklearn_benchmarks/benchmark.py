@@ -90,6 +90,12 @@ class Benchmark:
         module = importlib.import_module("sklearn.metrics")
         return [getattr(module, m) for m in self.metrics]
 
+    def _update_all_scores(self):
+        df = pd.DataFrame(self.results_)
+        for score, value in self.best_scores_.items():
+            df[score] = value
+        self.results_ = df.to_dict()
+
     def run(self):
         self._set_lib()
         estimator_class = self._load_estimator_class()
@@ -99,8 +105,7 @@ class Benchmark:
         for dataset in self.datasets:
             n_features = dataset["n_features"]
             n_samples_train = dataset["n_samples_train"]
-            # n_samples_test = list(reversed(sorted(dataset["n_samples_test"])))
-            n_samples_test = dataset["n_samples_test"]
+            n_samples_test = list(reversed(sorted(dataset["n_samples_test"])))
             for ns_train in n_samples_train:
                 X, y = gen_data(
                     dataset["sample_generator"],
@@ -170,7 +175,7 @@ class Benchmark:
 
                         # Store the scores computed on the biggest dataset
                         if i == 0:
-                            scores = {
+                            self.best_scores_ = {
                                 func.__name__: func(y_test_, y_pred)
                                 for func in metrics_functions
                             }
@@ -185,9 +190,11 @@ class Benchmark:
                             n_features=n_features,
                             hyperparams_digest=hyperparams_digest,
                             dataset_digest=dataset_digest,
-                            **scores,
                             **params,
                         )
+
+                        if hasattr(estimator, "n_iter_"):
+                            row["n_iter"] = estimator.n_iter_
 
                         print(
                             "%s - %s - %s - n_samples: %i - n_features: %i - mean: %6.7f - stdev: %6.7f"
@@ -202,6 +209,7 @@ class Benchmark:
                             )
                         )
                         self.results_.append(row)
+        self._update_all_scores()
         return self
 
     def to_csv(self):
