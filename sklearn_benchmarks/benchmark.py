@@ -171,7 +171,7 @@ class Benchmark:
                         ns_test = n_samples_test[i]
                         X_test_, y_test_ = X_test[:ns_test], y_test[:ns_test]
                         bench_func = predict_or_transform(estimator)
-                        profiling_path = f"{PROFILING_RESULTS_PATH}/{self.lib_}_{bench_func.__name__}_{hyperparams_digest}_{dataset_digest}"
+                        profiling_output_path = f"{PROFILING_RESULTS_PATH}/{self.lib_}_{bench_func.__name__}_{hyperparams_digest}_{dataset_digest}"
 
                         (y_pred, mean, stdev,) = BenchFuncExecutor.run(
                             bench_func,
