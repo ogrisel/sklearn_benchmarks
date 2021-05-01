@@ -137,10 +137,12 @@ class Report:
         )
 
         merged_df["speedup"] = base_lib_time / against_lib_time
-        merged_df["stdev_speedup"] = merged_df["speedup"] * (np.sqrt(
-            (base_lib_std / base_lib_time) ** 2 +
-            (against_lib_std / against_lib_time) ** 2
-        ))
+        merged_df["stdev_speedup"] = merged_df["speedup"] * (
+            np.sqrt(
+                (base_lib_std / base_lib_time) ** 2
+                + (against_lib_std / against_lib_time) ** 2
+            )
+        )
 
         return merged_df
 
@@ -287,7 +289,7 @@ class Report:
         fig.update_layout(
             height=n_rows * PLOT_HEIGHT_IN_PX, barmode="group", showlegend=True
         )
-        display(Markdown(f"**Shared hyperparameters**:"))
+        display(Markdown(f"All estimators share the following hyperparameters:"))
         df_shared_hyperparameters = pd.DataFrame.from_dict(
             self._get_shared_hyperpameters(), orient="index", columns=["value"]
         )
@@ -296,7 +298,5 @@ class Report:
         fig.show()
 
     def run(self):
-        display(Markdown(f"### Results"))
-        self._print_table()
-        display(Markdown(f"### Plots"))
         self._plot()
+        self._print_table()
