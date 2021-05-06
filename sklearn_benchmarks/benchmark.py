@@ -149,11 +149,11 @@ class Benchmark:
                         **params,
                     )
 
-                    n_iter = 1
+                    n_iter = None
                     if hasattr(estimator, "n_iter_"):
                         row["n_iter"] = estimator.n_iter_
                         n_iter = estimator.n_iter_
-
+                    n_iter = 1 if n_iter is None else n_iter
                     row["throughput"] = X_train.nbytes * n_iter / mean / 1e9
 
                     self.results_.append(row)
