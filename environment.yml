@@ -3,6 +3,7 @@ channels:
   - conda-forge
   - intel
 dependencies:
+  - black
   - pandas
   - pyyaml
   - plotly
@@ -14,8 +15,6 @@ dependencies:
   - click
   - pip
   - pip:
-      # Global options might have to be specified one by one
-      # See: https://github.com/conda/conda/blob/54e4a91d0da4d659a67e3097040764d3a2f6aa16/tests/conda_env/support/advanced-pip/environment.yml
       - --pre
       - --index-url https://pypi.anaconda.org/scipy-wheels-nightly/simple
       - scikit-learn
