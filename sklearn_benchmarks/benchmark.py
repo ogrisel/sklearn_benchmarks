@@ -18,6 +18,41 @@ from sklearn_benchmarks.utils.misc import gen_data, predict_or_transform
 from pprint import pprint
 
 
+class BenchFuncExecutor:
+    """
+    Executes a benchmark function (fit, predict or transform)
+    """
+
+    def run(self, func, profiling_output_file, X, y=None, **kwargs):
+        # First run with a profiler (not timed)
+        with VizTracer(output_file=profiling_output_file, verbose=0) as tracer:
+            tracer.start()
+            if not y:
+                func(X, **kwargs)
+            else:
+                func(X, y, **kwargs)
+            tracer.stop()
+            tracer.save()
+
+        # Next runs: at most 10 runs or 30 sec
+        times = []
+        bench_res = {}
+        start = time.perf_counter()
+        for _ in range(BENCHMARK_MAX_ITER):
+            start_ = time.perf_counter()
+            if not y:
+                self.func_res = func(X, **kwargs)
+            else:
+                self.func_res = func(X, y, **kwargs)
+            end_ = time.perf_counter()
+            times.append(end_ - start_)
+            if end_ - start > BENCHMARK_SECONDS_BUDGET:
+                break
+        bench_res["mean_time"] = np.mean(times)
+        bench_res["stdev_time"] = np.std(times)
+        return bench_res
+
+
 class Benchmark:
     def __init__(
         self,
@@ -173,38 +208,3 @@ class Benchmark:
             mode="w+",
             index=False,
         )
-
-
-class BenchFuncExecutor:
-    """
-    Executes a benchmark function (fit, predict or transform)
-    """
-
-    def run(self, func, profiling_output_file, X, y=None, **kwargs):
-        # First run with a profiler (not timed)
-        with VizTracer(output_file=profiling_output_file, verbose=0) as tracer:
-            tracer.start()
-            if not y:
-                func(X, **kwargs)
-            else:
-                func(X, y, **kwargs)
-            tracer.stop()
-            tracer.save()
-
-        # Next runs: at most 10 runs or 30 sec
-        times = []
-        bench_res = {}
-        start = time.perf_counter()
-        for _ in range(BENCHMARK_MAX_ITER):
-            start_ = time.perf_counter()
-            if not y:
-                self.func_res = func(X, **kwargs)
-            else:
-                self.func_res = func(X, y, **kwargs)
-            end_ = time.perf_counter()
-            times.append(end_ - start_)
-            if end_ - start > BENCHMARK_SECONDS_BUDGET:
-                break
-        bench_res["mean_time"] = np.mean(times)
-        bench_res["stdev_time"] = np.std(times)
-        return bench_res
