@@ -188,6 +188,8 @@ benchmarking:
     LogisticRegression:
       name: LogisticRegression
       estimator: sklearn.linear_model.LogisticRegression
+      metrics:
+        - accuracy_score
       datasets:
         - sample_generator: sklearn.datasets.make_classification
           params:
@@ -221,6 +223,8 @@ benchmarking:
     Ridge:
       name: Ridge
       estimator: sklearn.linear_model.Ridge
+      metrics:
+        - r2_score
       datasets:
         - sample_generator: sklearn.datasets.make_regression
           params:
@@ -228,17 +232,17 @@ benchmarking:
             random_state: 42
           n_features: 1e3
           n_samples_train:
-            - 1e3
+            - 1e5
           n_samples_test:
             - 1
-            - 1e2
+            - 1e3
         - sample_generator: sklearn.datasets.make_regression
           params:
             n_informative: 10
             random_state: 42
           n_features: 1e2
           n_samples_train:
-            - 1e4
+            - 1e6
           n_samples_test:
             - 1
             - 1e3

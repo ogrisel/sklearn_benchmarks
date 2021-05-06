@@ -21,9 +21,9 @@
 
 ## About
 
-`sklearn_benchmarks` is a framework to benchmark `scikit-learn`'s estimators against concurrent implementations. `sklearn_benchmarks` is written in Python.
+`sklearn_benchmarks` is a framework to benchmark `scikit-learn`'s estimators against concurrent implementations. It is written in Python.
 
-Benchmarking results can be visualized in the `reporting.ipynb` notebook. These results are automatically deployed to `github-pages`.
+Benchmarking results can be visualized in the `reporting.ipynb` notebook. They are automatically deployed to `github-pages`.
 
 `sklearn_benchmarks` is used through a command line as described below.
 
@@ -38,7 +38,9 @@ The estimators available are:
 - [LogisticRegression](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html)
 - [Ridge](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Ridge.html)
 
-Benchmark and profiling results can be consulted [here](https://mbatoul.github.io/sklearn_benchmarks/).
+Benchmark and profiling results can be consulted [here](https://mbatoul.github.io/sklearn_benchmarks/) or on Binder:
+
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/mbatoul/sklearn_benchmarks/master?filepath=reporting.ipynb)
 
 ## Getting Started
 
@@ -63,10 +65,16 @@ $ sklbench
 Usage: sklbench [OPTIONS]
 
 Options:
-  --append, --a                   Append benchmark results to existing ones.
-  --config, --c TEXT              Path to config file.
+  --append, --a                   Append benchmark results to existing ones. By default, all
+                                  existing results will be erased before new ones are made.
+
+  --config, --c TEXT              Path to config file. Default is config.yml.
+
   --profiling, --p [html|json.gz]
-                                  Profiling files type.
-  --estimator, --e TEXT           Estimator to benchmark.
+                                  Profiling files type. Default is html.
+
+  --estimator, --e TEXT           Estimator to benchmark. By default, all estimators in config
+                                  file will be benchmarked.
+
   --help                          Show this message and exit.
 ```
