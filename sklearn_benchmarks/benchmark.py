@@ -27,10 +27,10 @@ class BenchFuncExecutor:
         # First run with a profiler (not timed)
         with VizTracer(output_file=profiling_output_file, verbose=0) as tracer:
             tracer.start()
-            if not y:
-                func(X, **kwargs)
-            else:
+            if y is not None:
                 func(X, y, **kwargs)
+            else:
+                func(X, **kwargs)
             tracer.stop()
             tracer.save()
 
@@ -40,10 +40,10 @@ class BenchFuncExecutor:
         start = time.perf_counter()
         for _ in range(BENCHMARK_MAX_ITER):
             start_ = time.perf_counter()
-            if not y:
-                self.func_res = func(X, **kwargs)
-            else:
+            if y is not None:
                 self.func_res = func(X, y, **kwargs)
+            else:
+                self.func_res = func(X, **kwargs)
             end_ = time.perf_counter()
             times.append(end_ - start_)
             if end_ - start > BENCHMARK_SECONDS_BUDGET:
@@ -82,20 +82,15 @@ class Benchmark:
 
     def _make_params_grid(self):
         params = self.hyperparameters["init"]
-        # print(params)
         if not params:
             estimator_class = self._load_estimator_class()
             estimator = estimator_class()
             # Parameters grid should have list values
             params = {k: [v] for k, v in estimator.__dict__.items()}
-        # print(ParameterGrid(params))
         grid = list(ParameterGrid(params))
-        # print(grid)
         np.random.shuffle(grid)
         max_index = min(self.max_nb_fits, len(grid) - 1)
-        # print(max_index)
         grid = grid[:max_index]
-        # print(grid)
         return grid
 
     def _set_lib(self):
@@ -141,11 +136,22 @@ class Benchmark:
                     hyperparams_digest = joblib.hash(params)
                     dataset_digest = joblib.hash(dataset)
                     profiling_output_path = f"{PROFILING_RESULTS_PATH}/{self.lib_}_{bench_func.__name__}_{hyperparams_digest}_{dataset_digest}.{self.profiling_file_type}"
+                    if "n_samples_valid" in dataset:
+                        X_train, X_valid, y_train, y_valid = train_test_split(
+                            X_train,
+                            y_train,
+                            test_size=dataset["n_samples_valid"],
+                            random_state=self.random_state,
+                        )
+                    fit_params = {}
+                    for k, v in self.hyperparameters["fit"].items():
+                        fit_params[k] = eval(v)
                     bench_res = BenchFuncExecutor().run(
                         bench_func,
                         profiling_output_path,
                         X_train,
                         y=y_train,
+                        **fit_params,
                     )
 
                     row = dict(
@@ -170,10 +176,16 @@ class Benchmark:
                         bench_func = predict_or_transform(estimator)
                         profiling_output_path = f"{PROFILING_RESULTS_PATH}/{self.lib_}_{bench_func.__name__}_{hyperparams_digest}_{dataset_digest}.{self.profiling_file_type}"
                         bench_func_exec = BenchFuncExecutor()
+                        bench_func_params = (
+                            self.hyperparameters[bench_func.__name__]
+                            if bench_func.__name__ in self.hyperparameters
+                            else {}
+                        )
                         bench_res = bench_func_exec.run(
                             bench_func,
                             profiling_output_path,
                             X_test_,
+                            **bench_func_params,
                         )
                         # Store the scores computed on the biggest dataset
                         if i == 0:
@@ -197,9 +209,10 @@ class Benchmark:
                         pprint(row)
                         self.results_.append(row)
 
-                        now_ = time.perf_counter()
-                        if now_ - start_ > self.time_budget:
-                            return
+                        if self.time_budget is not None:
+                            now_ = time.perf_counter()
+                            if now_ - start_ > self.time_budget:
+                                return
 
     def to_csv(self):
         csv_path = f"{BENCHMARKING_RESULTS_PATH}/{self.lib_}_{self.name}.csv"

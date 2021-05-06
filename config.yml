@@ -307,7 +307,7 @@ benchmarking:
             - 1e3
 
     lightgbm:
-      name: lightgbm
+      name: LGBMClassifier
       estimator: lightgbm.LGBMClassifier
       hyperparameters:
         init:
@@ -344,6 +344,7 @@ benchmarking:
             - 200
             - 1000
         fit:
+          eval_set: (X_valid, y_valid)
       datasets:
         - sample_generator: sklearn.datasets.make_classification
           params:
@@ -352,6 +353,7 @@ benchmarking:
             n_redundant: 0
             random_state: 42
           n_features: 1e2
+          n_samples_valid: 50000
           n_samples_train:
             - 1e6
           n_samples_test:
