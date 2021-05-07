@@ -29,7 +29,8 @@ Benchmarking results can be visualized in the `reporting.ipynb` notebook. They a
 
 So far, the concurrent libraries available are:
 
-- [daal4py](https://github.com/intel/scikit-learn-intelex) from Intel
+- [Intel® oneAPI Data Analytics Library](https://github.com/oneapi-src/oneDAL)
+- [lightgbm](https://lightgbm.readthedocs.io/en/latest/index.html) (gradient boosting framework)
 
 The estimators available are:
 
@@ -37,6 +38,7 @@ The estimators available are:
 - [KMeans](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html)
 - [LogisticRegression](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html)
 - [Ridge](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Ridge.html)
+- [HistGradientBoostingClassifier](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.HistGradientBoostingClassifier.html)
 
 Benchmark and profiling results can be consulted [here](https://mbatoul.github.io/sklearn_benchmarks/) or on Binder:
 
