@@ -175,6 +175,12 @@ class Report:
     def _print_table(self):
         df = self._make_reporting_df()
         df = df.round(3)
+        nunique = df.apply(pd.Series.nunique)
+        cols_to_drop = nunique[nunique == 1].index
+        cols_to_drop = [
+            col for col in cols_to_drop if col in self.estimator_hyperparameters
+        ]
+        df = df.drop(cols_to_drop, axis=1)
         df["profiling"] = df[
             ["function", "hyperparams_digest", "dataset_digest"]
         ].apply(self._make_profiling_link, axis=1)
