@@ -258,6 +258,10 @@ benchmarking:
       max_nb_fits: 20
       hyperparameters:
         init:
+          early_stopping:
+            - True
+          validation_fraction:
+            - 0.05
           learning_rate:
             - 0.01
             - 0.05
