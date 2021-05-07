@@ -9,7 +9,7 @@ benchmarking:
           n_neighbors:
             - 1
             - 5
-            - 1e2
+            - 100
           algorithm:
             - brute
           n_jobs:
@@ -53,7 +53,7 @@ benchmarking:
           n_neighbors:
             - 1
             - 5
-            - 1e2
+            - 100
           algorithm:
             - kd_tree
           n_jobs:
@@ -254,7 +254,6 @@ benchmarking:
     HistGradientBoostingClassifier:
       name: HistGradientBoostingClassifier
       estimator: sklearn.ensemble.HistGradientBoostingClassifier
-      experimental: sklearn.experimental.enable_hist_gradient_boosting
       time_budget: 300
       max_nb_fits: 20
       hyperparameters:

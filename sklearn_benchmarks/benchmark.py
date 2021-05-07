@@ -4,6 +4,7 @@ import joblib
 import importlib
 import time
 import random
+from scipy.sparse import data
 from viztracer import VizTracer
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import train_test_split
@@ -80,7 +81,6 @@ class Benchmark:
         name="",
         estimator="",
         inherit=False,
-        experimental="",
         metrics=[],
         hyperparameters={},
         datasets=[],
@@ -93,7 +93,6 @@ class Benchmark:
         self.name = name
         self.estimator = estimator
         self.inherit = inherit
-        self.experimental = experimental
         self.metrics = metrics
         self.hyperparameters = hyperparameters
         self.datasets = datasets
@@ -120,8 +119,6 @@ class Benchmark:
         self.lib_ = self.estimator.split(".")[0]
 
     def _load_estimator_class(self):
-        if self.experimental:
-            importlib.import_module(self.experimental)
         split_path = self.estimator.split(".")
         mod, class_name = ".".join(split_path[:-1]), split_path[-1]
         return getattr(importlib.import_module(mod), class_name)
@@ -147,6 +144,7 @@ class Benchmark:
             n_features = dataset["n_features"]
             n_samples_train = dataset["n_samples_train"]
             n_samples_test = list(reversed(sorted(dataset["n_samples_test"])))
+            n_samples_valid = dataset.get("n_samples_valid", None)
             for ns_train in n_samples_train:
                 X, y = gen_data(
                     dataset["sample_generator"],
@@ -157,6 +155,16 @@ class Benchmark:
                 X_train, X_test, y_train, y_test = train_test_split(
                     X, y, train_size=ns_train, random_state=self.random_state
                 )
+                if n_samples_valid is not None:
+                    X_train, X_valid, y_train, y_valid = train_test_split(
+                        X_train,
+                        y_train,
+                        test_size=n_samples_valid,
+                        random_state=self.random_state,
+                    )
+                fit_params = {}
+                for k, v in self.hyperparameters.get("fit", {}).items():
+                    fit_params[k] = eval(v)
                 for params in params_grid:
                     estimator = estimator_class(**params)
                     set_random_state(estimator, random_state=self.random_state)
@@ -165,17 +173,6 @@ class Benchmark:
                     hyperparams_digest = joblib.hash(params)
                     dataset_digest = joblib.hash(dataset)
                     profiling_output_path = f"{PROFILING_RESULTS_PATH}/{self.lib_}_fit_{hyperparams_digest}_{dataset_digest}"
-
-                    if "n_samples_valid" in dataset:
-                        X_train, X_valid, y_train, y_valid = train_test_split(
-                            X_train,
-                            y_train,
-                            test_size=dataset["n_samples_valid"],
-                            random_state=self.random_state,
-                        )
-                    fit_params = {}
-                    for k, v in self.hyperparameters["fit"].items():
-                        fit_params[k] = eval(v)
 
                     bench_res = BenchFuncExecutor().run(
                         bench_func,
@@ -246,7 +243,7 @@ class Benchmark:
                             now_ = time.perf_counter()
                             if now_ - start_ > self.time_budget:
                                 return
-        self._update_all_scores()
+        # self._update_all_scores()
         return self
 
     def to_csv(self):
