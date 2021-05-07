@@ -150,7 +150,7 @@ class Benchmark:
                     )
 
                     n_iter = None
-                    if hasattr(estimator, "n_iter_"):
+                    if getattr(estimator, "n_iter_", None) is not None:
                         row["n_iter"] = estimator.n_iter_
                         n_iter = estimator.n_iter_
                     n_iter = 1 if n_iter is None else n_iter
@@ -206,7 +206,7 @@ class Benchmark:
 
                         row["throughput"] = X_test.nbytes / mean / 1e9
                         row["latency"] = mean / X_test.shape[0]
-                        if hasattr(estimator, "n_iter_"):
+                        if getattr(estimator, "n_iter_", None) is not None:
                             row["n_iter"] = estimator.n_iter_
 
                         print(
