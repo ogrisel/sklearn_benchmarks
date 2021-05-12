@@ -240,6 +240,7 @@ class Benchmark:
                         )
                         pprint(row)
                         self.results_.append(row)
+                        self.to_csv()
 
                         if self.time_budget is not None:
                             now_ = time.perf_counter()
