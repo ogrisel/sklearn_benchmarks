@@ -311,6 +311,8 @@ benchmarking:
     lightgbm:
       name: LGBMClassifier
       estimator: lightgbm.LGBMClassifier
+      time_budget: 300
+      max_nb_fits: 20
       hyperparameters:
         init:
           learning_rate:
