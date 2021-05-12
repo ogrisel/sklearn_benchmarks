@@ -146,11 +146,9 @@ class Report:
 
         return merged_df
 
-    def _make_profiling_link(self, components):
+    def _make_profiling_link(self, components, lib=BASE_LIB):
         function, hyperparams_digest, dataset_digest = components
-        path = (
-            f"profiling/sklearn_{function}_{hyperparams_digest}_{dataset_digest}.html"
-        )
+        path = f"profiling/{lib}_{function}_{hyperparams_digest}_{dataset_digest}.html"
         if os.environ.get("RESULTS_BASE_URL") is not None:
             base_url = os.environ.get("RESULTS_BASE_URL")
         else:
@@ -181,9 +179,10 @@ class Report:
             col for col in cols_to_drop if col in self.estimator_hyperparameters
         ]
         df = df.drop(cols_to_drop, axis=1)
-        df["profiling"] = df[
-            ["function", "hyperparams_digest", "dataset_digest"]
-        ].apply(self._make_profiling_link, axis=1)
+        for lib in [BASE_LIB, self.against_lib]:
+            df[f"{lib}_profiling"] = df[
+                ["function", "hyperparams_digest", "dataset_digest"]
+            ].apply(self._make_profiling_link, lib=lib, axis=1)
         df = df.drop(["hyperparams_digest", "dataset_digest"], axis=1)
         display(HTML(df.to_html(escape=False)))
 
