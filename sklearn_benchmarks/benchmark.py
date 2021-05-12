@@ -194,6 +194,7 @@ class Benchmark:
                         dataset_digest=dataset_digest,
                         **bench_res,
                         **params,
+                        **fit_params,
                     )
 
                     self.results_.append(row)
@@ -235,6 +236,7 @@ class Benchmark:
                             dataset_digest=dataset_digest,
                             **bench_res,
                             **params,
+                            **fit_params,
                         )
                         pprint(row)
                         self.results_.append(row)
