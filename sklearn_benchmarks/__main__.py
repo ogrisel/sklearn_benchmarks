@@ -62,17 +62,17 @@ def main(append, config, profiling, estimator):
     if not "estimators" in benchmarking_config:
         return
 
-    estimators = benchmarking_config["estimators"]
+    all_estimators = benchmarking_config["estimators"]
     if estimator:
-        estimators = {k: estimators[k] for k in estimator}
+        selected_estimators = {k: all_estimators[k] for k in estimator}
 
     time_report = pd.DataFrame(columns=["algo", "hour", "min", "sec"])
     t0 = time.perf_counter()
-    for name, params in estimators.items():
+    for name, params in selected_estimators.items():
         # When inherit is set, we fetch params from parent estimator
         if "inherit" in params:
             curr_estimator = params["estimator"]
-            params = estimators[params["inherit"]]
+            params = all_estimators[params["inherit"]]
             params["estimator"] = curr_estimator
 
         params = prepare_params(params)
