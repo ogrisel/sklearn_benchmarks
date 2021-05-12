@@ -164,7 +164,7 @@ class Benchmark:
                     )
                 fit_params = {}
                 for k, v in self.hyperparameters.get("fit", {}).items():
-                    fit_params[k] = eval(v)
+                    fit_params[k] = eval(str(v))
                 for params in params_grid:
                     estimator = estimator_class(**params)
                     set_random_state(estimator, random_state=self.random_state)
