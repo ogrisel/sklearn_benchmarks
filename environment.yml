@@ -9,6 +9,7 @@ dependencies:
   - plotly
   - scikit-learn-intelex
   - jupyter
+  - matplotlib
   - qgrid
   - viztracer
   - joblib
