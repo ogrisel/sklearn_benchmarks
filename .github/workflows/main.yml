@@ -2,9 +2,7 @@ name: scikit-learn benchmark suite
 
 on:
   push:
-    branches: [master]
-  pull_request:
-    types: [closed]
+    branches: [implement_gradient_boosting_benchmark]
 
 jobs:
   build:
@@ -45,26 +43,14 @@ jobs:
           export OPENBLAS_NUM_THREADS=$NUM_CORES
 
       - name: Run benchmark suite
-        run: python -m sklearn_benchmarks --config config.yml
+        run: python -m sklearn_benchmarks --e HistGradientBoostingClassifier --e lightgbm
 
       - name: Convert notebook to html
         run: |
-          jupyter nbconvert --to html --execute --output results/index.html reporting.ipynb
+          jupyter nbconvert --to html --execute --output results/index.html reporting_randomized_search.ipynb
 
       - name: Upload benchmark results
         uses: actions/upload-artifact@v2
         with:
           name: results
           path: results
-
-      - name: Download docs folder
-        uses: actions/download-artifact@v2
-        with:
-          name: results
-          path: results
-
-      - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@4.1.1
-        with:
-          branch: gh-pages
-          folder: results

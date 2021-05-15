@@ -32,25 +32,26 @@ class BenchFuncExecutor:
         profiling_output_extensions,
         X,
         y=None,
+        max_iter=BENCHMARK_MAX_ITER,
         **kwargs,
     ):
         # First run with a profiler (not timed)
-        with VizTracer(verbose=0) as tracer:
-            tracer.start()
-            if y is not None:
-                func(X, y, **kwargs)
-            else:
-                func(X, **kwargs)
-            tracer.stop()
-            for extension in profiling_output_extensions:
-                output_file = f"{profiling_output_path}.{extension}"
-                tracer.save(output_file=output_file)
+        # with VizTracer(verbose=0) as tracer:
+        #     tracer.start()
+        #     if y is not None:
+        #         func(X, y, **kwargs)
+        #     else:
+        #         func(X, **kwargs)
+        #     tracer.stop()
+        #     for extension in profiling_output_extensions:
+        #         output_file = f"{profiling_output_path}.{extension}"
+        #         tracer.save(output_file=output_file)
 
         # Next runs: at most 10 runs or 30 sec
         times = []
         bench_res = {}
         start = time.perf_counter()
-        for _ in range(BENCHMARK_MAX_ITER):
+        for _ in range(max_iter):
             start_ = time.perf_counter()
             if y is not None:
                 self.func_res = func(X, y, **kwargs)
@@ -111,7 +112,7 @@ class Benchmark:
             params = {k: [v] for k, v in estimator.__dict__.items()}
         grid = list(ParameterGrid(params))
         np.random.shuffle(grid)
-        max_index = min(self.max_nb_fits, len(grid) - 1)
+        max_index = min(self.max_nb_fits, len(grid))
         grid = grid[:max_index]
         return grid
 
@@ -126,12 +127,6 @@ class Benchmark:
     def _load_metrics_funcs(self):
         module = importlib.import_module("sklearn.metrics")
         return [getattr(module, m) for m in self.metrics]
-
-    def _update_all_scores(self):
-        df = pd.DataFrame(self.results_)
-        for score, value in self.best_scores_.items():
-            df[score] = value
-        self.results_ = df.to_dict()
 
     def run(self):
         self._set_lib()
@@ -165,6 +160,7 @@ class Benchmark:
                 fit_params = {}
                 for k, v in self.hyperparameters.get("fit", {}).items():
                     fit_params[k] = eval(str(v))
+
                 for params in params_grid:
                     estimator = estimator_class(**params)
                     set_random_state(estimator, random_state=self.random_state)
@@ -181,6 +177,7 @@ class Benchmark:
                         self.profiling_output_extensions,
                         X_train,
                         y=y_train,
+                        max_iter=1,
                         **fit_params,
                     )
 
@@ -194,7 +191,6 @@ class Benchmark:
                         dataset_digest=dataset_digest,
                         **bench_res,
                         **params,
-                        **fit_params,
                     )
 
                     self.results_.append(row)
@@ -217,15 +213,9 @@ class Benchmark:
                             profiling_output_path,
                             self.profiling_output_extensions,
                             X_test_,
+                            max_iter=1,
                             **bench_func_params,
                         )
-                        # Store the scores computed on the biggest dataset
-                        if i == 0:
-                            y_pred = bench_func_exec.func_res
-                            self.best_scores_ = {
-                                func.__name__: func(y_test_, y_pred)
-                                for func in metrics_funcs
-                            }
                         row = dict(
                             estimator=self.name,
                             function=bench_func.__name__,
@@ -236,8 +226,12 @@ class Benchmark:
                             dataset_digest=dataset_digest,
                             **bench_res,
                             **params,
-                            **fit_params,
                         )
+                        for metric_func in metrics_funcs:
+                            y_pred = bench_func_exec.func_res
+                            score = metric_func(y_test_, y_pred)
+                            row[metric_func.__name__] = score
+
                         pprint(row)
                         self.results_.append(row)
                         self.to_csv()
@@ -246,7 +240,6 @@ class Benchmark:
                             now_ = time.perf_counter()
                             if now_ - start_ > self.time_budget:
                                 return
-        # self._update_all_scores()
         return self
 
     def to_csv(self):

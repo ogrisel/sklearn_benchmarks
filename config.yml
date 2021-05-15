@@ -255,7 +255,9 @@ benchmarking:
       name: HistGradientBoostingClassifier
       estimator: sklearn.ensemble.HistGradientBoostingClassifier
       time_budget: 300
-      max_nb_fits: 20
+      # max_nb_fits: 20
+      metrics:
+        - accuracy_score
       hyperparameters:
         init:
           early_stopping:
@@ -305,14 +307,15 @@ benchmarking:
           n_samples_train:
             - 1e5
           n_samples_test:
-            - 1
             - 1e3
 
     lightgbm:
       name: LGBMClassifier
       estimator: lightgbm.LGBMClassifier
       time_budget: 300
-      max_nb_fits: 20
+      # max_nb_fits: 20
+      metrics:
+        - accuracy_score
       hyperparameters:
         init:
           learning_rate:
@@ -360,7 +363,6 @@ benchmarking:
           n_samples_train:
             - 1e5
           n_samples_test:
-            - 1
             - 1e3
 
 reporting:
