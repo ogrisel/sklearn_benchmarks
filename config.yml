@@ -146,7 +146,7 @@ benchmarking:
         n_clusters:
           - 300
         max_iter:
-          - 30
+          - 20
         n_init:
           - 1
         tol:
