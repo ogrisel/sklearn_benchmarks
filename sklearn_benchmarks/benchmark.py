@@ -1,22 +1,24 @@
+import importlib
+import random
+import time
+from pprint import pprint
+
+import joblib
 import numpy as np
 import pandas as pd
-import joblib
-import importlib
-import time
-import random
 from scipy.sparse import data
-from viztracer import VizTracer
-from sklearn.model_selection import ParameterGrid
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import ParameterGrid, train_test_split
 from sklearn.utils._testing import set_random_state
+from viztracer import VizTracer
+
 from sklearn_benchmarks.config import (
+    BENCHMARK_MAX_ITER,
+    BENCHMARK_SECONDS_BUDGET,
     BENCHMARKING_RESULTS_PATH,
     PROFILING_RESULTS_PATH,
-    BENCHMARK_SECONDS_BUDGET,
-    BENCHMARK_MAX_ITER,
+    TIME_BUDGET,
 )
 from sklearn_benchmarks.utils.misc import gen_data, predict_or_transform
-from pprint import pprint
 
 
 class BenchFuncExecutor:
@@ -87,7 +89,6 @@ class Benchmark:
         datasets=[],
         random_state=None,
         profiling_file_type="",
-        time_budget=None,
         profiling_output_extensions=[],
     ):
         self.name = name
@@ -98,7 +99,6 @@ class Benchmark:
         self.datasets = datasets
         self.random_state = random_state
         self.profiling_file_type = profiling_file_type
-        self.time_budget = time_budget
         self.profiling_output_extensions = profiling_output_extensions
 
     def _make_params_grid(self):
@@ -232,10 +232,9 @@ class Benchmark:
                         self.results_.append(row)
                         self.to_csv()
 
-                        if self.time_budget is not None:
-                            now = time.perf_counter()
-                            if now - start > self.time_budget:
-                                return
+                        now = time.perf_counter()
+                        if now - start > TIME_BUDGET:
+                            return
         return self
 
     def to_csv(self):

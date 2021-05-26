@@ -254,7 +254,6 @@ benchmarking:
     HistGradientBoostingClassifier:
       name: HistGradientBoostingClassifier
       estimator: sklearn.ensemble.HistGradientBoostingClassifier
-      time_budget: 300
       metrics:
         - accuracy_score
       hyperparameters:
@@ -311,7 +310,6 @@ benchmarking:
     lightgbm:
       name: LGBMClassifier
       estimator: lightgbm.LGBMClassifier
-      time_budget: 300
       metrics:
         - accuracy_score
       hyperparameters:
@@ -366,7 +364,6 @@ benchmarking:
     xgboost:
       name: XGBClassifier
       estimator: xgboost.XGBClassifier
-      time_budget: 300
       metrics:
         - accuracy_score
       hyperparameters:
