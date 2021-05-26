@@ -63,6 +63,7 @@ def main(append, config, profiling, estimator):
         return
 
     all_estimators = benchmarking_config["estimators"]
+    selected_estimators = all_estimators
     if estimator:
         selected_estimators = {k: all_estimators[k] for k in estimator}
 
