@@ -88,7 +88,6 @@ class Benchmark:
         random_state=None,
         profiling_file_type="",
         time_budget=None,
-        max_nb_fits=float("inf"),
         profiling_output_extensions=[],
     ):
         self.name = name
@@ -100,7 +99,6 @@ class Benchmark:
         self.random_state = random_state
         self.profiling_file_type = profiling_file_type
         self.time_budget = time_budget
-        self.max_nb_fits = max_nb_fits
         self.profiling_output_extensions = profiling_output_extensions
 
     def _make_params_grid(self):
@@ -112,8 +110,6 @@ class Benchmark:
             params = {k: [v] for k, v in estimator.__dict__.items()}
         grid = list(ParameterGrid(params))
         np.random.shuffle(grid)
-        max_index = min(self.max_nb_fits, len(grid))
-        grid = grid[:max_index]
         return grid
 
     def _set_lib(self):
