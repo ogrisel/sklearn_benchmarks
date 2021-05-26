@@ -52,14 +52,14 @@ class BenchFuncExecutor:
         bench_res = {}
         start = time.perf_counter()
         for _ in range(max_iter):
-            start_ = time.perf_counter()
+            start = time.perf_counter()
             if y is not None:
                 self.func_res = func(X, y, **kwargs)
             else:
                 self.func_res = func(X, **kwargs)
-            end_ = time.perf_counter()
-            times.append(end_ - start_)
-            if end_ - start > BENCHMARK_SECONDS_BUDGET:
+            end = time.perf_counter()
+            times.append(end - start)
+            if end - start > BENCHMARK_SECONDS_BUDGET:
                 break
         mean = np.mean(times)
         bench_res["mean_time"] = mean
@@ -130,7 +130,7 @@ class Benchmark:
         metrics_funcs = self._load_metrics_funcs()
         params_grid = self._make_params_grid()
         self.results_ = []
-        start_ = time.perf_counter()
+        start = time.perf_counter()
         for dataset in self.datasets:
             n_features = dataset["n_features"]
             n_samples_train = dataset["n_samples_train"]
@@ -233,8 +233,8 @@ class Benchmark:
                         self.to_csv()
 
                         if self.time_budget is not None:
-                            now_ = time.perf_counter()
-                            if now_ - start_ > self.time_budget:
+                            now = time.perf_counter()
+                            if now - start > self.time_budget:
                                 return
         return self
 
