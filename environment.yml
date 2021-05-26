@@ -15,6 +15,7 @@ dependencies:
   - joblib
   - click
   - lightgbm
+  - xgboost
   - pip
   - pip:
       - --pre
