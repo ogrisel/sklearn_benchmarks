@@ -136,6 +136,7 @@ class Benchmark:
             n_samples_train = dataset["n_samples_train"]
             n_samples_test = list(reversed(sorted(dataset["n_samples_test"])))
             n_samples_valid = dataset.get("n_samples_valid", None)
+            is_hpo_curve = dataset.get("hpo_curve", False)
             for ns_train in n_samples_train:
                 X, y = gen_data(
                     dataset["sample_generator"],
@@ -209,7 +210,7 @@ class Benchmark:
                             profiling_output_path,
                             self.profiling_output_extensions,
                             X_test_,
-                            max_iter=1,
+                            max_iter=1 if is_hpo_curve else BENCHMARK_MAX_ITER,
                             **bench_func_params,
                         )
                         row = dict(
@@ -232,9 +233,10 @@ class Benchmark:
                         self.results_.append(row)
                         self.to_csv()
 
-                        now = time.perf_counter()
-                        if now - start > BENCHMARK_TIME_BUDGET:
-                            return
+                        if is_hpo_curve:
+                            now = time.perf_counter()
+                            if now - start > BENCHMARK_TIME_BUDGET:
+                                return
         return self
 
     def to_csv(self):
