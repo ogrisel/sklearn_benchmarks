@@ -51,31 +51,33 @@ class BenchFuncExecutor:
 
         # Next runs: at most 10 runs or 30 sec
         times = []
-        bench_res = {}
         start = time.perf_counter()
         for _ in range(max_iter):
             start = time.perf_counter()
             if y is not None:
-                self.func_res = func(X, y, **kwargs)
+                self.func_result_ = func(X, y, **kwargs)
             else:
-                self.func_res = func(X, **kwargs)
+                self.func_result_ = func(X, **kwargs)
             end = time.perf_counter()
             times.append(end - start)
             if end - start > FUNC_TIME_BUDGET:
                 break
+
+        benchmark_info = {}
         mean = np.mean(times)
-        bench_res["mean_time"] = mean
-        bench_res["stdev_time"] = np.std(times)
 
         n_iter = None
         if hasattr(estimator, "n_iter_"):
-            bench_res["n_iter"] = estimator.n_iter_
+            benchmark_info["n_iter"] = estimator.n_iter_
             n_iter = estimator.n_iter_
         n_iter = 1 if n_iter is None else n_iter
 
-        bench_res["throughput"] = X.nbytes * n_iter / mean / 1e9
-        bench_res["latency"] = mean / X.shape[0]
-        return bench_res
+        benchmark_info["mean_time"] = mean
+        benchmark_info["stdev_time"] = np.std(times)
+        benchmark_info["throughput"] = X.nbytes * n_iter / mean / 1e9
+        benchmark_info["latency"] = mean / X.shape[0]
+
+        return benchmark_info
 
 
 class Benchmark:
@@ -167,7 +169,7 @@ class Benchmark:
                     dataset_digest = joblib.hash(dataset)
                     profiling_output_path = f"{PROFILING_RESULTS_PATH}/{self.lib_}_fit_{hyperparams_digest}_{dataset_digest}"
 
-                    bench_res = BenchFuncExecutor().run(
+                    benchmark_info = BenchFuncExecutor().run(
                         bench_func,
                         estimator,
                         profiling_output_path,
@@ -186,7 +188,7 @@ class Benchmark:
                         n_features=n_features,
                         hyperparams_digest=hyperparams_digest,
                         dataset_digest=dataset_digest,
-                        **bench_res,
+                        **benchmark_info,
                         **params,
                     )
 
@@ -198,13 +200,13 @@ class Benchmark:
                         bench_func = predict_or_transform(estimator)
 
                         profiling_output_path = f"{PROFILING_RESULTS_PATH}/{self.lib_}_{bench_func.__name__}_{hyperparams_digest}_{dataset_digest}"
-                        bench_func_exec = BenchFuncExecutor()
+                        executor = BenchFuncExecutor()
                         bench_func_params = (
                             self.hyperparameters[bench_func.__name__]
                             if bench_func.__name__ in self.hyperparameters
                             else {}
                         )
-                        bench_res = bench_func_exec.run(
+                        benchmark_info = executor.run(
                             bench_func,
                             estimator,
                             profiling_output_path,
@@ -221,11 +223,12 @@ class Benchmark:
                             n_features=n_features,
                             hyperparams_digest=hyperparams_digest,
                             dataset_digest=dataset_digest,
-                            **bench_res,
+                            **benchmark_info,
                             **params,
                         )
+
                         for metric_func in metrics_funcs:
-                            y_pred = bench_func_exec.func_res
+                            y_pred = executor.func_result_
                             score = metric_func(y_test_, y_pred)
                             row[metric_func.__name__] = score
 
