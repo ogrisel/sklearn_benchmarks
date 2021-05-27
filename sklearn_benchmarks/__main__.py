@@ -76,13 +76,15 @@ def main(append, config, profiling, estimator):
             params["estimator"] = curr_estimator
 
         params = prepare_params(params)
-        if "random_state" in config:
-            params["random_state"] = config["random_state"]
+
+        params["random_state"] = config.get("random_state", None)
         params["profiling_output_extensions"] = profiling
+
         benchmark_estimator = Benchmark(**params)
         t0_ = time.perf_counter()
         benchmark_estimator.run()
         t1_ = time.perf_counter()
+
         time_report.loc[len(time_report)] = [name, *convert(t1_ - t0_)]
         benchmark_estimator.to_csv()
 

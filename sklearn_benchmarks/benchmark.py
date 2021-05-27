@@ -54,12 +54,15 @@ class BenchFuncExecutor:
         start = time.perf_counter()
         for _ in range(max_iter):
             start = time.perf_counter()
+
             if y is not None:
                 self.func_result_ = func(X, y, **kwargs)
             else:
                 self.func_result_ = func(X, **kwargs)
+
             end = time.perf_counter()
             times.append(end - start)
+
             if end - start > FUNC_TIME_BUDGET:
                 break
 
