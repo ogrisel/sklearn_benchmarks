@@ -13,10 +13,10 @@ from viztracer import VizTracer
 
 from sklearn_benchmarks.config import (
     BENCHMARK_MAX_ITER,
-    BENCHMARK_SECONDS_BUDGET,
+    FUNC_TIME_BUDGET,
     BENCHMARKING_RESULTS_PATH,
     PROFILING_RESULTS_PATH,
-    TIME_BUDGET,
+    BENCHMARK_TIME_BUDGET,
 )
 from sklearn_benchmarks.utils.misc import gen_data, predict_or_transform
 
@@ -61,7 +61,7 @@ class BenchFuncExecutor:
                 self.func_res = func(X, **kwargs)
             end = time.perf_counter()
             times.append(end - start)
-            if end - start > BENCHMARK_SECONDS_BUDGET:
+            if end - start > FUNC_TIME_BUDGET:
                 break
         mean = np.mean(times)
         bench_res["mean_time"] = mean
@@ -233,7 +233,7 @@ class Benchmark:
                         self.to_csv()
 
                         now = time.perf_counter()
-                        if now - start > TIME_BUDGET:
+                        if now - start > BENCHMARK_TIME_BUDGET:
                             return
         return self
 
