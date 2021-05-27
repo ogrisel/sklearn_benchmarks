@@ -3,12 +3,14 @@ name: scikit-learn benchmark suite
 on:
   push:
     branches: [implement_gradient_boosting_benchmark]
+  pull_request:
+    types: [closed]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      SKLEARN_RESULTS_BASE_URL: https://mbatoul.github.io/sklearn_benchmarks/
+      RESULTS_BASE_URL: https://mbatoul.github.io/sklearn_benchmarks/
     defaults:
       run:
         shell: bash -l {0}
@@ -43,7 +45,7 @@ jobs:
           export OPENBLAS_NUM_THREADS=$NUM_CORES
 
       - name: Run benchmark suite
-        run: python -m sklearn_benchmarks --e HistGradientBoostingClassifier --e lightgbm --e xgboost
+        run: python -m sklearn_benchmarks --config config.yml
 
       - name: Convert notebook to html
         run: |
@@ -54,3 +56,15 @@ jobs:
         with:
           name: results
           path: results
+
+      - name: Download docs folder
+        uses: actions/download-artifact@v2
+        with:
+          name: results
+          path: results
+
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@4.1.1
+        with:
+          branch: gh-pages
+          folder: results
