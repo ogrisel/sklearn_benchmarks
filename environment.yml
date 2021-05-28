@@ -3,6 +3,7 @@ channels:
   - conda-forge
   - intel
 dependencies:
+  - python=3.8
   - black
   - pandas
   - pyyaml
@@ -20,5 +21,3 @@ dependencies:
       - --pre
       - --index-url https://pypi.anaconda.org/scipy-wheels-nightly/simple
       - scikit-learn
-  - pip:
-      - scikit-learn-intelex==2021.2.3

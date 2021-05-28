@@ -37,6 +37,10 @@ jobs:
           channel-priority: flexible
           use-only-tar-bz2: true
 
+      - name: Install daal4py
+        run: |
+          pip install scikit-learn-intelex==2021.2.3
+
       - name: Set config vars for parallelism
         run: |
           export NUM_CORES=`python -c "import joblib; print(joblib.cpu_count())"`
