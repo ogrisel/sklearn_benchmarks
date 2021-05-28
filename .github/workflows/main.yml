@@ -41,6 +41,12 @@ jobs:
         run: |
           pip install scikit-learn-intelex==2021.2.3
 
+      - name: Show versions
+        run: |
+          conda list | grep scikit-learn
+          which python
+          python --version
+
       - name: Set config vars for parallelism
         run: |
           export NUM_CORES=`python -c "import joblib; print(joblib.cpu_count())"`
