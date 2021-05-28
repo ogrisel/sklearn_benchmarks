@@ -1,93 +1,93 @@
 benchmarking:
   random_state: 42
   estimators:
-    # KNeighborsClassifier:
-    #   name: KNeighborsClassifier
-    #   estimator: sklearn.neighbors.KNeighborsClassifier
-    #   hyperparameters:
-    #     init:
-    #       n_neighbors:
-    #         - 1
-    #         - 5
-    #         - 100
-    #       algorithm:
-    #         - brute
-    #       n_jobs:
-    #         - -1
-    #         - 1
-    #   metrics:
-    #     - accuracy_score
-    #   datasets:
-    #     - sample_generator: sklearn.datasets.make_classification
-    #       params:
-    #         n_classes: 2
-    #         n_redundant: 0
-    #         random_state: 42
-    #       n_features: 1e2
-    #       n_samples_train:
-    #         - 1e6
-    #       n_samples_test:
-    #         - 1
-    #         - 1e3
-    #     - sample_generator: sklearn.datasets.make_classification
-    #       params:
-    #         n_classes: 2
-    #         n_redundant: 0
-    #         random_state: 42
-    #       n_features: 2
-    #       n_samples_train:
-    #         - 1e6
-    #       n_samples_test:
-    #         - 1
-    #         - 1e3
+    KNeighborsClassifier:
+      name: KNeighborsClassifier
+      estimator: sklearn.neighbors.KNeighborsClassifier
+      hyperparameters:
+        init:
+          n_neighbors:
+            - 1
+            - 5
+            - 100
+          algorithm:
+            - brute
+          n_jobs:
+            - -1
+            - 1
+      metrics:
+        - accuracy_score
+      datasets:
+        - sample_generator: sklearn.datasets.make_classification
+          params:
+            n_classes: 2
+            n_redundant: 0
+            random_state: 42
+          n_features: 1e2
+          n_samples_train:
+            - 1e6
+          n_samples_test:
+            - 1
+            - 1e3
+        - sample_generator: sklearn.datasets.make_classification
+          params:
+            n_classes: 2
+            n_redundant: 0
+            random_state: 42
+          n_features: 2
+          n_samples_train:
+            - 1e6
+          n_samples_test:
+            - 1
+            - 1e3
 
-    # daal4py_KNeighborsClassifier:
-    #   inherit: KNeighborsClassifier
-    #   estimator: daal4py.sklearn.neighbors.KNeighborsClassifier
+    daal4py_KNeighborsClassifier:
+      inherit: KNeighborsClassifier
+      estimator: daal4py.sklearn.neighbors.KNeighborsClassifier
 
-    # KNeighborsClassifier_kd_tree:
-    #   name: KNeighborsClassifier_kd_tree
-    #   estimator: sklearn.neighbors.KNeighborsClassifier
-    #   hyperparameters:
-    #     init:
-    #       n_neighbors:
-    #         - 1
-    #         - 5
-    #         - 100
-    #       algorithm:
-    #         - kd_tree
-    #       n_jobs:
-    #         - -1
-    #         - 1
-    #   metrics:
-    #     - accuracy_score
-    #   datasets:
-    #     - sample_generator: sklearn.datasets.make_classification
-    #       params:
-    #         n_classes: 2
-    #         n_redundant: 0
-    #         random_state: 42
-    #       n_features: 10
-    #       n_samples_train:
-    #         - 1e6
-    #       n_samples_test:
-    #         - 1
-    #         - 1e3
-    #     - sample_generator: sklearn.datasets.make_classification
-    #       params:
-    #         n_classes: 2
-    #         n_redundant: 0
-    #         random_state: 42
-    #       n_features: 2
-    #       n_samples_train:
-    #         - 1e6
-    #       n_samples_test:
-    #         - 1
-    #         - 1e3
+    KNeighborsClassifier_kd_tree:
+      name: KNeighborsClassifier_kd_tree
+      estimator: sklearn.neighbors.KNeighborsClassifier
+      hyperparameters:
+        init:
+          n_neighbors:
+            - 1
+            - 5
+            - 100
+          algorithm:
+            - kd_tree
+          n_jobs:
+            - -1
+            - 1
+      metrics:
+        - accuracy_score
+      datasets:
+        - sample_generator: sklearn.datasets.make_classification
+          params:
+            n_classes: 2
+            n_redundant: 0
+            random_state: 42
+          n_features: 10
+          n_samples_train:
+            - 1e6
+          n_samples_test:
+            - 1
+            - 1e3
+        - sample_generator: sklearn.datasets.make_classification
+          params:
+            n_classes: 2
+            n_redundant: 0
+            random_state: 42
+          n_features: 2
+          n_samples_train:
+            - 1e6
+          n_samples_test:
+            - 1
+            - 1e3
 
-    # daal4py_KNeighborsClassifier_kd_tree:
-    #   inherit: KNeighborsClassifier_kd_tree
-    #   estimator: daal4py.sklearn.neighbors.KNeighborsClassifier
+    daal4py_KNeighborsClassifier_kd_tree:
+      inherit: KNeighborsClassifier_kd_tree
+      estimator: daal4py.sklearn.neighbors.KNeighborsClassifier
 
     KMeans_tall:
       name: KMeans_tall
@@ -137,119 +137,119 @@ benchmarking:
       inherit: KMeans_tall
       estimator: daal4py.sklearn.cluster.KMeans
 
-    # KMeans_short:
-    #   name: KMeans_short
-    #   estimator: sklearn.cluster.KMeans
-    #   hyperparameters:
-    #     init:
-    #       init:
-    #         - k-means++
-    #         - random
-    #       algorithm:
-    #         - full
-    #       n_clusters:
-    #         - 300
-    #       max_iter:
-    #         - 30
-    #       n_init:
-    #         - 1
-    #       tol:
-    #         - 1e-16
-    #   metrics:
-    #     - adjusted_rand_score
-    #   datasets:
-    #     - sample_generator: sklearn.datasets.make_blobs
-    #       params:
-    #         random_state: 42
-    #         cluster_std: 20.0
-    #         centers: 200
-    #       n_features: 2
-    #       n_samples_train:
-    #         - 1e4
-    #       n_samples_test:
-    #         - 1
-    #         - 1e3
-    #     - sample_generator: sklearn.datasets.make_blobs
-    #       params:
-    #         random_state: 42
-    #         cluster_std: 20.0
-    #         centers: 200
-    #       n_features: 1e2
-    #       n_samples_train:
-    #         - 1e4
-    #       n_samples_test:
-    #         - 1
-    #         - 1e3
+    KMeans_short:
+      name: KMeans_short
+      estimator: sklearn.cluster.KMeans
+      hyperparameters:
+        init:
+          init:
+            - k-means++
+            - random
+          algorithm:
+            - full
+          n_clusters:
+            - 300
+          max_iter:
+            - 30
+          n_init:
+            - 1
+          tol:
+            - 1e-16
+      metrics:
+        - adjusted_rand_score
+      datasets:
+        - sample_generator: sklearn.datasets.make_blobs
+          params:
+            random_state: 42
+            cluster_std: 20.0
+            centers: 200
+          n_features: 2
+          n_samples_train:
+            - 1e4
+          n_samples_test:
+            - 1
+            - 1e3
+        - sample_generator: sklearn.datasets.make_blobs
+          params:
+            random_state: 42
+            cluster_std: 20.0
+            centers: 200
+          n_features: 1e2
+          n_samples_train:
+            - 1e4
+          n_samples_test:
+            - 1
+            - 1e3
 
-    # daal4py_KMeans_short:
-    #   inherit: KMeans_short
-    #   estimator: daal4py.sklearn.cluster.KMeans
+    daal4py_KMeans_short:
+      inherit: KMeans_short
+      estimator: daal4py.sklearn.cluster.KMeans
 
-    # LogisticRegression:
-    #   name: LogisticRegression
-    #   estimator: sklearn.linear_model.LogisticRegression
-    #   metrics:
-    #     - accuracy_score
-    #   datasets:
-    #     - sample_generator: sklearn.datasets.make_classification
-    #       params:
-    #         n_classes: 5
-    #         n_informative: 5
-    #         n_redundant: 0
-    #         random_state: 42
-    #       n_features: 1e2
-    #       n_samples_train:
-    #         - 1e6
-    #       n_samples_test:
-    #         - 1
-    #         - 1e3
-    #     - sample_generator: sklearn.datasets.make_classification
-    #       params:
-    #         n_classes: 5
-    #         n_informative: 5
-    #         n_redundant: 0
-    #         random_state: 42
-    #       n_features: 1e4
-    #       n_samples_train:
-    #         - 1e3
-    #       n_samples_test:
-    #         - 1
-    #         - 1e2
+    LogisticRegression:
+      name: LogisticRegression
+      estimator: sklearn.linear_model.LogisticRegression
+      metrics:
+        - accuracy_score
+      datasets:
+        - sample_generator: sklearn.datasets.make_classification
+          params:
+            n_classes: 5
+            n_informative: 5
+            n_redundant: 0
+            random_state: 42
+          n_features: 1e2
+          n_samples_train:
+            - 1e6
+          n_samples_test:
+            - 1
+            - 1e3
+        - sample_generator: sklearn.datasets.make_classification
+          params:
+            n_classes: 5
+            n_informative: 5
+            n_redundant: 0
+            random_state: 42
+          n_features: 1e4
+          n_samples_train:
+            - 1e3
+          n_samples_test:
+            - 1
+            - 1e2
 
-    # daal4py_LogisticRegression:
-    #   inherit: LogisticRegression
-    #   estimator: daal4py.sklearn.linear_model.LogisticRegression
+    daal4py_LogisticRegression:
+      inherit: LogisticRegression
+      estimator: daal4py.sklearn.linear_model.LogisticRegression
 
-    # Ridge:
-    #   name: Ridge
-    #   estimator: sklearn.linear_model.Ridge
-    #   metrics:
-    #     - r2_score
-    #   datasets:
-    #     - sample_generator: sklearn.datasets.make_regression
-    #       params:
-    #         n_informative: 10
-    #         random_state: 42
-    #       n_features: 1e3
-    #       n_samples_train:
-    #         - 1e5
-    #       n_samples_test:
-    #         - 1
-    #         - 1e3
-    #     - sample_generator: sklearn.datasets.make_regression
-    #       params:
-    #         n_informative: 10
-    #         random_state: 42
-    #       n_features: 1e2
-    #       n_samples_train:
-    #         - 1e6
-    #       n_samples_test:
-    #         - 1
-    #         - 1e3
+    Ridge:
+      name: Ridge
+      estimator: sklearn.linear_model.Ridge
+      metrics:
+        - r2_score
+      datasets:
+        - sample_generator: sklearn.datasets.make_regression
+          params:
+            n_informative: 10
+            random_state: 42
+          n_features: 1e3
+          n_samples_train:
+            - 1e5
+          n_samples_test:
+            - 1
+            - 1e3
+        - sample_generator: sklearn.datasets.make_regression
+          params:
+            n_informative: 10
+            random_state: 42
+          n_features: 1e2
+          n_samples_train:
+            - 1e6
+          n_samples_test:
+            - 1
+            - 1e3
 
-    # daal4py_Ridge:
-    #   inherit: Ridge
-    #   estimator: daal4py.sklearn.linear_model.Ridge
+    daal4py_Ridge:
+      inherit: Ridge
+      estimator: daal4py.sklearn.linear_model.Ridge
 
     HistGradientBoostingClassifier:
       name: HistGradientBoostingClassifier
@@ -308,121 +308,121 @@ benchmarking:
           n_samples_test:
             - 1e3
 
-    # lightgbm:
-    #   name: LGBMClassifier
-    #   estimator: lightgbm.LGBMClassifier
-    #   metrics:
-    #     - accuracy_score
-    #   hyperparameters:
-    #     init:
-    #       learning_rate:
-    #         - 0.01
-    #         - 0.05
-    #         - 0.1
-    #         - 0.5
-    #         - 1.
-    #       num_leaves:
-    #         - 2
-    #         - 3
-    #         - 5
-    #         - 20
-    #         - 30
-    #         - 50
-    #       n_estimators:
-    #         - 30
-    #         - 100
-    #         - 300
-    #         - 1000
-    #       max_bin:
-    #         - 32
-    #         - 64
-    #         - 128
-    #         - 255
-    #       min_data_in_leaf:
-    #         - 2
-    #         - 10
-    #         - 20
-    #         - 100
-    #         - 200
-    #         - 1000
-    #     fit:
-    #       eval_set: (X_valid, y_valid)
-    #       early_stopping_rounds: 10
-    #   datasets:
-    #     - sample_generator: sklearn.datasets.make_classification
-    #       hpo_curve: True
-    #       params:
-    #         n_classes: 5
-    #         n_informative: 5
-    #         n_redundant: 0
-    #         random_state: 42
-    #       n_features: 1e2
-    #       n_samples_valid: 50000
-    #       n_samples_train:
-    #         - 1e5
-    #       n_samples_test:
-    #         - 1e3
+    lightgbm:
+      name: LGBMClassifier
+      estimator: lightgbm.LGBMClassifier
+      metrics:
+        - accuracy_score
+      hyperparameters:
+        init:
+          learning_rate:
+            - 0.01
+            - 0.05
+            - 0.1
+            - 0.5
+            - 1.
+          num_leaves:
+            - 2
+            - 3
+            - 5
+            - 20
+            - 30
+            - 50
+          n_estimators:
+            - 30
+            - 100
+            - 300
+            - 1000
+          max_bin:
+            - 32
+            - 64
+            - 128
+            - 255
+          min_data_in_leaf:
+            - 2
+            - 10
+            - 20
+            - 100
+            - 200
+            - 1000
+        fit:
+          eval_set: (X_valid, y_valid)
+          early_stopping_rounds: 10
+      datasets:
+        - sample_generator: sklearn.datasets.make_classification
+          hpo_curve: True
+          params:
+            n_classes: 5
+            n_informative: 5
+            n_redundant: 0
+            random_state: 42
+          n_features: 1e2
+          n_samples_valid: 50000
+          n_samples_train:
+            - 1e5
+          n_samples_test:
+            - 1e3
 
-    # xgboost:
-    #   name: XGBClassifier
-    #   estimator: xgboost.XGBClassifier
-    #   metrics:
-    #     - accuracy_score
-    #   hyperparameters:
-    #     init:
-    #       validate_parameters:
-    #         - True
-    #       tree_method:
-    #         - hist
-    #       use_label_encoder:
-    #         - False
-    #       learning_rate:
-    #         - 0.01
-    #         - 0.05
-    #         - 0.1
-    #         - 0.5
-    #         - 1.
-    #       max_leaf_nodes:
-    #         - 2
-    #         - 3
-    #         - 5
-    #         - 20
-    #         - 30
-    #         - 50
-    #       n_estimators:
-    #         - 30
-    #         - 100
-    #         - 300
-    #         - 1000
-    #       max_bin:
-    #         - 32
-    #         - 64
-    #         - 128
-    #         - 255
-    #       min_samples_leaf:
-    #         - 2
-    #         - 10
-    #         - 20
-    #         - 100
-    #         - 200
-    #         - 1000
-    #     fit:
-    #       eval_set: "[(X_valid, y_valid)]"
-    #       early_stopping_rounds: 10
-    #   datasets:
-    #     - sample_generator: sklearn.datasets.make_classification
-    #       hpo_curve: True
-    #       params:
-    #         n_classes: 5
-    #         n_informative: 5
-    #         n_redundant: 0
-    #         random_state: 42
-    #       n_features: 1e2
-    #       n_samples_valid: 50000
-    #       n_samples_train:
-    #         - 1e5
-    #       n_samples_test:
-    #         - 1e3
+    xgboost:
+      name: XGBClassifier
+      estimator: xgboost.XGBClassifier
+      metrics:
+        - accuracy_score
+      hyperparameters:
+        init:
+          validate_parameters:
+            - True
+          tree_method:
+            - hist
+          use_label_encoder:
+            - False
+          learning_rate:
+            - 0.01
+            - 0.05
+            - 0.1
+            - 0.5
+            - 1.
+          max_leaf_nodes:
+            - 2
+            - 3
+            - 5
+            - 20
+            - 30
+            - 50
+          n_estimators:
+            - 30
+            - 100
+            - 300
+            - 1000
+          max_bin:
+            - 32
+            - 64
+            - 128
+            - 255
+          min_samples_leaf:
+            - 2
+            - 10
+            - 20
+            - 100
+            - 200
+            - 1000
+        fit:
+          eval_set: "[(X_valid, y_valid)]"
+          early_stopping_rounds: 10
+      datasets:
+        - sample_generator: sklearn.datasets.make_classification
+          hpo_curve: True
+          params:
+            n_classes: 5
+            n_informative: 5
+            n_redundant: 0
+            random_state: 42
+          n_features: 1e2
+          n_samples_valid: 50000
+          n_samples_train:
+            - 1e5
+          n_samples_test:
+            - 1e3
 
 reporting:
   n_cols: 2
